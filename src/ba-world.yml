@@ -1,0 +1,9 @@
+logging:
+   blockbreak: true
+   blockplace: true
+logExtraData:
+   commandblock: true
+   flowerpot: true
+   mobspawner: true
+   signtext: true
+   skull: true

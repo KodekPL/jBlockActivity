@@ -1,0 +1,45 @@
+name: jBlockActivity
+version: 0.1.0
+author: Kodek
+website: 'https://github.com/KodekPL/jBlockActivity/'
+main: jcraft.jblockactivity.BlockActivity
+
+commands:
+   ba:
+      permission: ba.admin
+permissions:
+   ba.admin:
+      default: op
+      children:
+         ba.savequeue: true
+         ba.lookup: true
+         ba.tool.lookup: true
+         ba.toolitem.spawn: true
+         ba.toolblock.spawn: true
+         ba.clearlog: true
+         ba.teleport: true
+         ba.hide: true
+         ba.rollback: true
+   ba.user:
+      default: false
+      childern:
+         ba.tool.lookup: true
+         ba.toolitem.spawn: true
+   ba.savequeue:
+      default: false
+   ba.lookup:
+      default: false
+   ba.toolitem.spawn:
+      default: false
+   ba.toolblock.spawn:
+      default: false
+   ba.tool.lookup:
+      default: false
+   ba.clearlog:
+      default: false
+   ba.teleport:
+      default: false
+   ba.hide:
+      default: false
+   ba.rollback:
+      default: false

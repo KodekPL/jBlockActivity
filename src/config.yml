@@ -1,0 +1,33 @@
+configVersion: 1
+mysql:
+  host: localhost
+  port: '3306'
+  database: minecraft
+  username: root
+  password: ''
+loggedWorlds:
+- world
+queue:
+  maxTimePerRun: 300
+  timeBetweenRuns: 5
+  minLogsToProcess: 25
+lookup:
+  defaultDistance: 20
+  defaultTime: 30 minutes
+  linesPerPage: 15
+tools:
+  useCooldown: 3000
+  itemtool:
+    params: area 0 all sum none limit 5 desc
+    itemId: 294
+    itemData: 0
+    leftClickBehavior: TOOL
+    rightClickBehavior: BLOCK
+  blocktool:
+    params: area 0 all sum none limit 15 desc
+    itemId: 7
+    itemData: 0
+    leftClickBehavior: TOOL
+    rightClickBehavior: BLOCK
+logging:
+  hiddenPlayers: []
