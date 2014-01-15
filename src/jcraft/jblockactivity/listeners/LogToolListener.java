@@ -39,10 +39,15 @@ public class LogToolListener implements Listener {
             return;
         }
 
+        final ToolBehavior behavior = (action == Action.RIGHT_CLICK_BLOCK) ? tool.rightClickBehavior : tool.leftClickBehavior;
+        if (behavior == ToolBehavior.NONE) {
+            return;
+        }
+
         if (!player.hasPermission("ba.admin")) {
             if (BlockActivity.lastToolUse.containsKey(player.getName())) {
                 if (System.currentTimeMillis() - BlockActivity.lastToolUse.get(player.getName()) < BlockActivity.config.toolUseCooldown) {
-                    player.sendMessage(ChatColor.RED + "You can't use lookup tool that often!");
+                    player.sendMessage(BlockActivity.prefix + ChatColor.RED + "You can't use lookup tool that often!");
                     event.setCancelled(true);
                     return;
                 }
@@ -51,12 +56,11 @@ public class LogToolListener implements Listener {
         }
 
         if (!BlockActivity.isWorldLogged(player.getWorld().getName())) {
-            player.sendMessage(ChatColor.RED + "This world is not currently logged.");
+            player.sendMessage(BlockActivity.prefix + ChatColor.RED + "This world is not currently logged.");
             event.setCancelled(true);
             return;
         }
 
-        final ToolBehavior behavior = (action == Action.RIGHT_CLICK_BLOCK) ? tool.rightClickBehavior : tool.leftClickBehavior;
         final Block block = event.getClickedBlock();
         final QueryParams params = tool.params;
 

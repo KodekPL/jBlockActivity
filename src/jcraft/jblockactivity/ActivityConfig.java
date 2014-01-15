@@ -8,6 +8,7 @@ import static org.bukkit.Bukkit.getWorlds;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -42,6 +43,7 @@ public class ActivityConfig {
     public long toolUseCooldown;
 
     public Set<String> hiddenPlayers;
+    public Set<Integer> blockBlacklist, replaceAnyway;
 
     public void genConfig() {
         final Map<String, Object> configDef = new HashMap<String, Object>();
@@ -83,6 +85,9 @@ public class ActivityConfig {
         configDef.put("tools.blocktool.rightClickBehavior", "BLOCK");
 
         configDef.put("logging.hiddenPlayers", new ArrayList<String>());
+
+        configDef.put("rollback.replaceAnyway", Arrays.asList(8, 9, 10, 11, 51));
+        configDef.put("rollback.blockBlacklist", Arrays.asList(10, 11, 46, 51));
 
         for (Entry<String, Object> e : configDef.entrySet()) {
             if (!config.contains(e.getKey())) {
@@ -142,6 +147,9 @@ public class ActivityConfig {
         for (final String playerName : config.getStringList("logging.hiddenPlayers")) {
             hiddenPlayers.add(playerName.toLowerCase().trim());
         }
+
+        replaceAnyway = new HashSet<Integer>(config.getIntegerList("rollback.replaceAnyway"));
+        blockBlacklist = new HashSet<Integer>(config.getIntegerList("rollback.blockBlacklist"));
     }
 
     public void loadWorldConfig() {

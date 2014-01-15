@@ -1,5 +1,6 @@
 package jcraft.jblockactivity;
 
+import static jcraft.jblockactivity.utils.ActivityUtil.isEqualType;
 import static org.bukkit.Bukkit.getLogger;
 
 import java.sql.Connection;
@@ -113,8 +114,8 @@ public class BlockEditor extends BukkitRunnable {
             if (sender != null) {
                 float percentage = ((size - edits.size()) / size) * 100.0F;
                 if (percentage % 20 == 0) {
-                    sender.sendMessage(ChatColor.GOLD + "[jBlockActivity]" + ChatColor.YELLOW + " Rollback progress: " + percentage + "%"
-                            + " Blocks edited: " + counter);
+                    sender.sendMessage(BlockActivity.prefix + ChatColor.YELLOW + " Rollback progress: " + percentage + "%" + " Blocks edited: "
+                            + counter);
                 }
             }
         }
@@ -126,7 +127,7 @@ public class BlockEditor extends BukkitRunnable {
     }
 
     private static enum BlockEditorResult {
-        SUCCESS, NO_ACTION;
+        SUCCESS, NO_ACTION, BLACKLIST;
     }
 
     private class BlockChange extends BlockActionLog {
@@ -139,6 +140,10 @@ public class BlockEditor extends BukkitRunnable {
         BlockEditorResult perform() throws BlockEditorException {
             if (this.getLogInstance() instanceof BlockActionLog) {
                 final BlockActionLog blockLog = (BlockActionLog) this.getLogInstance();
+                if (BlockActivity.config.blockBlacklist.contains(isRedo ? blockLog.getNewBlockId() : blockLog.getOldBlockId())) {
+                    return BlockEditorResult.BLACKLIST;
+                }
+
                 final Block block = getLocation().getBlock();
                 if ((isRedo ? blockLog.getNewBlockId() : blockLog.getOldBlockId()) == 0 && block.getTypeId() == 0) {
                     return BlockEditorResult.NO_ACTION;
@@ -146,6 +151,11 @@ public class BlockEditor extends BukkitRunnable {
                 final BlockState state = block.getState();
                 if (!world.isChunkLoaded(block.getChunk())) {
                     world.loadChunk(block.getChunk());
+                }
+
+                if (!(isEqualType(block.getTypeId(), isRedo ? blockLog.getOldBlockId() : blockLog.getNewBlockId()) || BlockActivity.config.replaceAnyway
+                        .contains(block.getTypeId()))) {
+                    return BlockEditorResult.NO_ACTION;
                 }
 
                 if (state instanceof InventoryHolder) {

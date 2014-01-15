@@ -1,6 +1,6 @@
 configVersion: 1
 mysql:
-  host: localhost
+  host: '127.0.0.1'
   port: '3306'
   database: minecraft
   username: root
@@ -31,3 +31,15 @@ tools:
     rightClickBehavior: BLOCK
 logging:
   hiddenPlayers: []
+rollback:
+  replaceAnyway:
+  - 8
+  - 9
+  - 10
+  - 11
+  - 51
+  blockBlacklist:
+  - 10
+  - 11
+  - 46
+  - 51

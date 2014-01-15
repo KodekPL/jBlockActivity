@@ -83,13 +83,13 @@ public class CommandHandler implements CommandExecutor {
                 while (executor.getQueueSize() > 0) {
                     fails = (lastSize == executor.getQueueSize()) ? fails + 1 : 0;
                     if (fails > 10) {
-                        sender.sendMessage(ChatColor.RED + "Unable to save queue!");
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "Unable to save queue!");
                         return false;
                     }
                     lastSize = executor.getQueueSize();
                     executor.notifyLock();
                 }
-                sender.sendMessage(ChatColor.GREEN + "Queue saved successfully.");
+                sender.sendMessage(BlockActivity.prefix + ChatColor.GREEN + "Queue saved successfully.");
                 return true;
             } else if (args[0].equals("rollback") || args[0].equals("undo") || args[0].equals("rb")) {
                 if (!sender.hasPermission("ba.rollback")) {
@@ -140,7 +140,8 @@ public class CommandHandler implements CommandExecutor {
                     if (loc != null) {
                         player.teleport(new Location(loc.getWorld(), loc.getX() + 0.5, saveSpawnHeight(loc), loc.getZ() + 0.5, player.getLocation()
                                 .getYaw(), player.getLocation().getPitch()));
-                        player.sendMessage(ChatColor.GOLD + "Teleported to " + loc.getBlockX() + ":" + loc.getBlockY() + ":" + loc.getBlockZ());
+                        player.sendMessage(BlockActivity.prefix + ChatColor.GOLD + "Teleported to " + loc.getBlockX() + ":" + loc.getBlockY() + ":"
+                                + loc.getBlockZ());
                         return true;
                     } else {
                         sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "There is no location! Add 'coords' parameter to lookup.");

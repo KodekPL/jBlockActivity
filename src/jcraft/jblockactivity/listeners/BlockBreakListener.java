@@ -86,12 +86,14 @@ public class BlockBreakListener implements Listener {
                     block.getState(), null, extraData);
             BlockActivity.sendActionLog(action);
         } else if (config.isExtraLogging(ExtraLoggingType.flowerpot) && material == Material.FLOWER_POT) {
+            /** FLOWER POT **/
             final FlowerPot pot = (FlowerPot) block.getState().getData();
             final FlowerPotExtraData extraData = new FlowerPotExtraData(pot.getContents().getItemTypeId(), pot.getContents().getData());
             final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, block.getWorld(), block.getLocation().toVector(),
                     block.getState(), null, extraData);
             BlockActivity.sendActionLog(action);
         } else if (config.isExtraLogging(ExtraLoggingType.commandblock) && material == Material.COMMAND) {
+            /** COMMAND BLOCK **/
             final CommandBlock cmd = (CommandBlock) block.getState();
             final CommandBlockExtraData extraData = new CommandBlockExtraData(cmd.getName(), cmd.getCommand());
             final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, block.getWorld(), block.getLocation().toVector(),
@@ -162,11 +164,13 @@ public class BlockBreakListener implements Listener {
                         }
                     }
                 } else if (aboveBlock.getType() == Material.SIGN_POST || aboveBlock.getType() == Material.WALL_SIGN) {
+                    /** SIGN **/
                     final SignExtraData extraData = new SignExtraData(((org.bukkit.block.Sign) aboveBlock.getState()).getLines());
                     final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, aboveBlock.getWorld(), aboveBlock
                             .getLocation().toVector(), aboveBlock.getState(), null, extraData);
                     BlockActivity.sendActionLog(action);
                 } else if (aboveBlock.getType() == Material.FLOWER_POT) {
+                    /** FLOWER POT **/
                     final FlowerPot pot = (FlowerPot) block.getState().getData();
                     final FlowerPotExtraData extraData = new FlowerPotExtraData(pot.getContents().getItemTypeId(), pot.getContents().getData());
                     final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, aboveBlock.getWorld(), aboveBlock

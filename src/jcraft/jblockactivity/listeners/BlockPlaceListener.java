@@ -51,7 +51,7 @@ public class BlockPlaceListener implements Listener {
             return;
         }
 
-        // Falling Block
+        /** FALLING BLOCK **/
         if (isFallingBlock(material)) {
             if (beforeState.getType() != Material.AIR) {
                 final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, afterState.getWorld(), afterState.getLocation()

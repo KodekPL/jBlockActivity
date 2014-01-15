@@ -1,5 +1,6 @@
 package jcraft.jblockactivity.tool;
 
+import jcraft.jblockactivity.BlockActivity;
 import jcraft.jblockactivity.utils.QueryParams;
 
 import org.bukkit.ChatColor;
@@ -27,13 +28,13 @@ public class LogTool {
                 inventory.setItem(freeSlot, player.getItemInHand());
             }
             player.setItemInHand(itemMaterial.toItemStack());
-            player.sendMessage(ChatColor.GREEN + "Tool was added to your inventory!");
+            player.sendMessage(BlockActivity.prefix + ChatColor.GREEN + "Tool was added to your inventory!");
         } else {
-            player.sendMessage(ChatColor.RED + "You have no empty slot in your inventory!");
+            player.sendMessage(BlockActivity.prefix + ChatColor.RED + "You have no empty slot in your inventory!");
         }
     }
 
     public static enum ToolBehavior {
-        TOOL, BLOCK;
+        TOOL, BLOCK, NONE;
     }
 }

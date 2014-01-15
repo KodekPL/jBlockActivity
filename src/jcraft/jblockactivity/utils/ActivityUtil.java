@@ -3,7 +3,10 @@ package jcraft.jblockactivity.utils;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import jcraft.jblockactivity.BlockActivity;
 
@@ -16,6 +19,33 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.util.Vector;
 
 public class ActivityUtil {
+
+    private static final Set<Set<Integer>> blockEquivalents;
+
+    static {
+        blockEquivalents = new HashSet<Set<Integer>>(9);
+        blockEquivalents.add(new HashSet<Integer>(Arrays.asList(2, 3, 60)));
+        blockEquivalents.add(new HashSet<Integer>(Arrays.asList(8, 9, 79)));
+        blockEquivalents.add(new HashSet<Integer>(Arrays.asList(10, 11)));
+        blockEquivalents.add(new HashSet<Integer>(Arrays.asList(61, 62)));
+        blockEquivalents.add(new HashSet<Integer>(Arrays.asList(73, 74)));
+        blockEquivalents.add(new HashSet<Integer>(Arrays.asList(75, 76)));
+        blockEquivalents.add(new HashSet<Integer>(Arrays.asList(93, 94)));
+        blockEquivalents.add(new HashSet<Integer>(Arrays.asList(123, 124)));
+        blockEquivalents.add(new HashSet<Integer>(Arrays.asList(149, 150)));
+    }
+
+    public static boolean isEqualType(int type1, int type2) {
+        if (type1 == type2) {
+            return true;
+        }
+        for (final Set<Integer> equivalent : blockEquivalents) {
+            if (equivalent.contains(type1) && equivalent.contains(type2)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public static int saveSpawnHeight(Location location) {
         final World world = location.getWorld();

@@ -76,7 +76,7 @@ public abstract class BlockExtraData implements ExtraData {
     }
 
     public static class MobSpawnerExtraData extends BlockExtraData {
-        // Brane pod uwagę są tylko naturalnie wygenerowane Mob Spawnery
+        // Only naturally generated Mob Spawners
         private EntityType entityType;
 
         public MobSpawnerExtraData(EntityType entityType) {
