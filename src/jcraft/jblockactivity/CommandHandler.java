@@ -21,6 +21,10 @@ import jcraft.jblockactivity.sql.SQLConnection;
 import jcraft.jblockactivity.utils.QueryParams;
 import jcraft.jblockactivity.utils.QueryParams.Order;
 import jcraft.jblockactivity.utils.QueryParams.SummarizationMode;
+import jcraft.jblockactivity.utils.question.ClearlogQuestion;
+import jcraft.jblockactivity.utils.question.QuestionData;
+import jcraft.jblockactivity.utils.question.RedoQuestion;
+import jcraft.jblockactivity.utils.question.RollbackQuestion;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -151,6 +155,23 @@ public class CommandHandler implements CommandExecutor {
                     sender.sendMessage(ChatColor.RED + "'" + args[1] + " is out of range");
                     return false;
                 }
+            } else if (args[0].equalsIgnoreCase("yes") || args[0].equalsIgnoreCase("no")) {
+                if (!sender.hasPermission("ba.answer")) {
+                    sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You don't have required permission - ba.answer");
+                    return false;
+                }
+                final ActiveSession session = ActiveSession.getSession(sender);
+                if (session.question == null) {
+                    sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You are not asked for anything!");
+                    return false;
+                }
+                final boolean answer = args[0].equalsIgnoreCase("yes");
+                if (answer) {
+                    preExecuteCommand(new ActionRequest(ActionType.CMD_CONFIRM, sender, new String[0]), true);
+                } else {
+                    answerQuestion(sender, answer);
+                }
+                return true;
             } else if (args[0].equalsIgnoreCase("lookup") && sender.hasPermission("ba.lookup")) {
                 preExecuteCommand(new ActionRequest(ActionType.CMD_LOOKUP, sender, args), true);
                 return true;
@@ -184,6 +205,9 @@ public class CommandHandler implements CommandExecutor {
             break;
         case CMD_REDO:
             redoCmd(request.getSender(), request.getParams());
+            break;
+        case CMD_CONFIRM:
+            answerQuestion(request.getSender(), true);
             break;
         default:
             break;
@@ -286,19 +310,22 @@ public class CommandHandler implements CommandExecutor {
 
             result = state.executeQuery("SELECT count(*) FROM " + params.getTable() + join + params.getWhere(LoggingType.all));
             result.next();
-            if ((deleted = result.getInt(1)) > 0) {
+            deleted = result.getInt(1);
+            if (deleted > 0) {
                 sender.sendMessage(ChatColor.GOLD.toString() + deleted + " changes found.");
-                state.execute("DELETE " + params.getTable() + " FROM " + params.getTable() + join + params.getWhere(LoggingType.all));
-                sender.sendMessage(ChatColor.GREEN + "Cleared out table " + params.getTable() + ". Deleted " + deleted + " entries.");
-            }
+                final ActiveSession session = ActiveSession.getSession(sender);
 
-            result = state.executeQuery("SELECT COUNT(*) FROM " + params.getTable("-extra") + " LEFT JOIN " + params.getTable()
-                    + " USING (id) WHERE " + params.getTable() + ".id IS NULL");
-            result.next();
-            if ((deleted = result.getInt(1)) > 0) {
-                state.execute("DELETE " + params.getTable("-extra") + " FROM " + params.getTable("-extra") + " LEFT JOIN " + params.getTable()
-                        + " USING (id) WHERE " + params.getTable() + ".id IS NULL;");
-                sender.sendMessage(ChatColor.GREEN + "Cleared out table " + params.getTable("-extra") + ". Deleted " + deleted + " entries.");
+                final ClearlogQuestion question = new ClearlogQuestion();
+                question.params = params;
+                session.question = question;
+
+                if (BlockActivity.config.askClearlogs) {
+                    askQuestion(sender);
+                } else {
+                    answerQuestion(sender, true);
+                }
+            } else {
+                sender.sendMessage(ChatColor.GOLD + "No changes found.");
             }
         } catch (Exception e) {
             sender.sendMessage(ChatColor.RED + "Exception, check error log!");
@@ -375,15 +402,17 @@ public class CommandHandler implements CommandExecutor {
                 sender.sendMessage(ChatColor.RED + "Rollback aborted!");
                 return;
             }
-
-            editor.start();
             final ActiveSession session = ActiveSession.getSession(sender);
-            session.lookupCache = editor.errors;
-            sender.sendMessage(ChatColor.GREEN + "Rollback finished successfully (" + editor.getElapsedTime() + " ms, " + editor.getSuccesses() + "/"
-                    + changes + " blocks" + ((editor.getErrors() > 0) ? ", " + ChatColor.RED + editor.getErrors() + " errors" + ChatColor.GREEN : "")
-                    + ")");
 
-        } catch (InterruptedException | SQLException | Error e) {
+            final RollbackQuestion question = new RollbackQuestion();
+            question.editor = editor;
+            session.question = question;
+            if (BlockActivity.config.askRollbacks) {
+                askQuestion(sender);
+            } else {
+                answerQuestion(sender, true);
+            }
+        } catch (SQLException | Error e) {
             sender.sendMessage(ChatColor.RED + "Exception, check error log!");
             getLogger().log(Level.SEVERE, "[Rollback] " + params.getQuery() + ": ", e);
             e.printStackTrace();
@@ -458,18 +487,21 @@ public class CommandHandler implements CommandExecutor {
             }
             sender.sendMessage(ChatColor.GOLD.toString() + changes + " changes found.");
             if (changes == 0) {
-                sender.sendMessage(ChatColor.RED + "Rollback aborted!");
+                sender.sendMessage(ChatColor.RED + "Redo aborted!");
                 return;
             }
-
-            editor.start();
             final ActiveSession session = ActiveSession.getSession(sender);
-            session.lookupCache = editor.errors;
-            sender.sendMessage(ChatColor.GREEN + "Redo finished successfully (" + editor.getElapsedTime() + " ms, " + editor.getSuccesses() + "/"
-                    + changes + " blocks" + ((editor.getErrors() > 0) ? ", " + ChatColor.RED + editor.getErrors() + " errors" + ChatColor.GREEN : "")
-                    + ")");
 
-        } catch (InterruptedException | SQLException | Error e) {
+            final RedoQuestion question = new RedoQuestion();
+            question.editor = editor;
+            session.question = question;
+
+            if (BlockActivity.config.askRedos) {
+                askQuestion(sender);
+            } else {
+                answerQuestion(sender, true);
+            }
+        } catch (SQLException | Error e) {
             sender.sendMessage(ChatColor.RED + "Exception, check error log!");
             getLogger().log(Level.SEVERE, "[Redo] " + params.getQuery() + ": ", e);
             e.printStackTrace();
@@ -490,5 +522,97 @@ public class CommandHandler implements CommandExecutor {
                 getLogger().log(Level.SEVERE, "[CommandsHandler] SQL Exception on close!", e);
             }
         }
+    }
+
+    private void askQuestion(CommandSender sender) {
+        sender.sendMessage(BlockActivity.prefix + ChatColor.YELLOW + "Are you sure you want to continue?");
+        sender.sendMessage(ChatColor.GREEN + "/ba yes" + System.getProperty("line.separator") + "/ba no");
+    }
+
+    private void answerQuestion(CommandSender sender, boolean answer) {
+        final ActiveSession session = ActiveSession.getSession(sender);
+        final QuestionData question = session.question;
+        if (!answer) {
+            if (question instanceof RollbackQuestion) {
+                sender.sendMessage(ChatColor.RED + "Rollback aborted!");
+            } else if (question instanceof RedoQuestion) {
+                sender.sendMessage(ChatColor.RED + "Redo aborted!");
+            } else if (question instanceof ClearlogQuestion) {
+                sender.sendMessage(ChatColor.RED + "Clearlog aborted!");
+            }
+        } else {
+            try {
+                if (question instanceof RollbackQuestion) {
+                    final BlockEditor editor = ((RollbackQuestion) session.question).editor;
+                    final int changes = editor.getSize();
+                    editor.start();
+                    session.lookupCache = editor.errors;
+                    sender.sendMessage(ChatColor.GREEN + "Rollback finished successfully (" + editor.getElapsedTime() + " ms, "
+                            + editor.getSuccesses() + "/" + changes + " blocks"
+                            + ((editor.getErrors() > 0) ? ", " + ChatColor.RED + editor.getErrors() + " errors" + ChatColor.GREEN : "") + ")");
+                } else if (question instanceof RedoQuestion) {
+                    final BlockEditor editor = ((RedoQuestion) session.question).editor;
+                    final int changes = editor.getSize();
+                    editor.start();
+                    session.lookupCache = editor.errors;
+                    sender.sendMessage(ChatColor.GREEN + "Redo finished successfully (" + editor.getElapsedTime() + " ms, " + editor.getSuccesses()
+                            + "/" + changes + " blocks"
+                            + ((editor.getErrors() > 0) ? ", " + ChatColor.RED + editor.getErrors() + " errors" + ChatColor.GREEN : "") + ")");
+                } else if (question instanceof ClearlogQuestion) {
+                    final QueryParams params = ((ClearlogQuestion) session.question).params;
+                    SQLConnection sqlConnection = null;
+                    Statement state = null;
+                    ResultSet result = null;
+                    try {
+                        sqlConnection = new SQLConnection(BlockActivity.sqlProfile);
+                        sqlConnection.open();
+                        state = sqlConnection.getConnection().createStatement();
+
+                        int deleted = 0;
+                        final String join = (params.players.size() > 0) ? "INNER JOIN `ba-players` USING (playerid) " : "";
+
+                        result = state.executeQuery("SELECT count(*) FROM " + params.getTable() + join + params.getWhere(LoggingType.all));
+                        result.next();
+                        deleted = result.getInt(1);
+                        if (deleted > 0) {
+                            state.execute("DELETE " + params.getTable() + " FROM " + params.getTable() + join + params.getWhere(LoggingType.all));
+                            sender.sendMessage(ChatColor.GREEN + "Cleared out table " + params.getTable() + ". Deleted " + deleted + " entries.");
+                        }
+
+                        result = state.executeQuery("SELECT COUNT(*) FROM " + params.getTable("-extra") + " LEFT JOIN " + params.getTable()
+                                + " USING (id) WHERE " + params.getTable() + ".id IS NULL");
+                        result.next();
+                        deleted = result.getInt(1);
+                        if (deleted > 0) {
+                            state.execute("DELETE " + params.getTable("-extra") + " FROM " + params.getTable("-extra") + " LEFT JOIN "
+                                    + params.getTable() + " USING (id) WHERE " + params.getTable() + ".id IS NULL;");
+                            sender.sendMessage(ChatColor.GREEN + "Cleared out table " + params.getTable("-extra") + ". Deleted " + deleted
+                                    + " entries.");
+                        }
+                    } catch (Exception e) {
+                        sender.sendMessage(ChatColor.RED + "Exception, check error log!");
+                        getLogger().log(Level.SEVERE, "[ClearLog] " + params.getQuery() + ": ", e);
+                    } finally {
+                        try {
+                            if (sqlConnection.getConnection() != null) {
+                                sqlConnection.getConnection().close();
+                            }
+                            if (state != null) {
+                                state.close();
+                            }
+                            if (result != null) {
+                                result.close();
+                            }
+                        } catch (SQLException e) {
+                            getLogger().log(Level.SEVERE, "[CommandsHandler] SQL Exception on close!", e);
+                        }
+                    }
+                }
+            } catch (InterruptedException | Error e) {
+                sender.sendMessage(ChatColor.RED + "Exception, check error log!");
+                e.printStackTrace();
+            }
+        }
+        session.question = null;
     }
 }

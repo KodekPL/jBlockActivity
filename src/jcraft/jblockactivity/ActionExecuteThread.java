@@ -47,7 +47,7 @@ public class ActionExecuteThread implements Runnable {
 
     public static class ActionRequest {
         public enum ActionType {
-            CMD_LOOKUP, CMD_CLEARLOG, CMD_ROLLBACK, CMD_REDO;
+            CMD_LOOKUP, CMD_CLEARLOG, CMD_ROLLBACK, CMD_REDO, CMD_CONFIRM;
         }
 
         private final ActionType type;

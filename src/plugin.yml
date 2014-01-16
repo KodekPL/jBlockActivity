@@ -1,12 +1,13 @@
 name: jBlockActivity
-version: 0.1.1
+version: 0.2.0
 author: Kodek
 website: 'https://github.com/KodekPL/jBlockActivity/'
 main: jcraft.jblockactivity.BlockActivity
 
 commands:
    ba:
-      permission: ba.admin
+      description: 'jBlockActivity plugin commands'
+      aliases: [blockactivity]
 permissions:
    ba.admin:
       default: op
@@ -20,6 +21,7 @@ permissions:
          ba.teleport: true
          ba.hide: true
          ba.rollback: true
+         ba.answer: true
    ba.user:
       default: false
       childern:
@@ -42,4 +44,6 @@ permissions:
    ba.hide:
       default: false
    ba.rollback:
+      default: false
+   ba.answer:
       default: false

@@ -1,10 +1,9 @@
-jBlockActivity 0.1.1
+jBlockActivity 0.2.0
 ==============
 
 My idea of better and simpler LogBlock!
 
 ## TODO: 
-* Questioner for rollback, redo and claerlog
 * Logging of chest, furnace etc. inventory
 * Logging of entities (animals, monsters)
 * Logging of Item Frames

@@ -43,3 +43,7 @@ rollback:
   - 11
   - 46
   - 51
+questioner:
+  askRollbacks: true
+  askRedos: true
+  askClearlogs: true

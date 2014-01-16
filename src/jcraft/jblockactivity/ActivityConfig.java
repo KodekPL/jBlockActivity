@@ -44,6 +44,7 @@ public class ActivityConfig {
 
     public Set<String> hiddenPlayers;
     public Set<Integer> blockBlacklist, replaceAnyway;
+    public boolean askRollbacks, askRedos, askClearlogs;
 
     public void genConfig() {
         final Map<String, Object> configDef = new HashMap<String, Object>();
@@ -88,6 +89,10 @@ public class ActivityConfig {
 
         configDef.put("rollback.replaceAnyway", Arrays.asList(8, 9, 10, 11, 51));
         configDef.put("rollback.blockBlacklist", Arrays.asList(10, 11, 46, 51));
+
+        configDef.put("questioner.askRollbacks", true);
+        configDef.put("questioner.askRedos", true);
+        configDef.put("questioner.askClearlogs", true);
 
         for (Entry<String, Object> e : configDef.entrySet()) {
             if (!config.contains(e.getKey())) {
@@ -150,6 +155,10 @@ public class ActivityConfig {
 
         replaceAnyway = new HashSet<Integer>(config.getIntegerList("rollback.replaceAnyway"));
         blockBlacklist = new HashSet<Integer>(config.getIntegerList("rollback.blockBlacklist"));
+
+        askRollbacks = config.getBoolean("questioner.askRollbacks");
+        askRedos = config.getBoolean("questioner.askRedos");
+        askClearlogs = config.getBoolean("questioner.askClearlogs");
     }
 
     public void loadWorldConfig() {
