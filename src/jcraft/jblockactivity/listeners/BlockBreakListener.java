@@ -2,6 +2,7 @@ package jcraft.jblockactivity.listeners;
 
 import static jcraft.jblockactivity.utils.ActivityUtil.canFall;
 import static jcraft.jblockactivity.utils.ActivityUtil.getSideRelativeBreakableBlocks;
+import static jcraft.jblockactivity.utils.ActivityUtil.isContainerBlock;
 import static jcraft.jblockactivity.utils.ActivityUtil.isFallingBlock;
 import static jcraft.jblockactivity.utils.ActivityUtil.isFallingBlockKiller;
 import static jcraft.jblockactivity.utils.ActivityUtil.isRelativeTopBreakableBlock;
@@ -19,6 +20,7 @@ import jcraft.jblockactivity.extradata.BlockExtraData.FlowerPotExtraData;
 import jcraft.jblockactivity.extradata.BlockExtraData.MobSpawnerExtraData;
 import jcraft.jblockactivity.extradata.BlockExtraData.SignExtraData;
 import jcraft.jblockactivity.extradata.BlockExtraData.SkullExtraData;
+import jcraft.jblockactivity.extradata.InventoryExtraData;
 
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -35,6 +37,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Bed;
 import org.bukkit.material.Button;
 import org.bukkit.material.CocoaPlant;
@@ -98,6 +102,19 @@ public class BlockBreakListener implements Listener {
             final CommandBlockExtraData extraData = new CommandBlockExtraData(cmd.getName(), cmd.getCommand());
             final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, block.getWorld(), block.getLocation().toVector(),
                     block.getState(), null, extraData);
+            BlockActivity.sendActionLog(action);
+        } else if (config.isLogging(LoggingType.inventoryaccess) && isContainerBlock(material)) {
+            /** CONTAINER **/
+            final InventoryExtraData extraData = new InventoryExtraData(((InventoryHolder) block.getState()).getInventory().getContents(), true);
+            final InventoryExtraData emptyExtraData = new InventoryExtraData(new ItemStack[0], false);
+            extraData.compareInventories(emptyExtraData);
+            if (!extraData.isEmpty()) {
+                final BlockActionLog action = new BlockActionLog(LoggingType.inventoryaccess, playerName, block.getWorld(), block.getLocation()
+                        .toVector(), block.getState(), block.getState(), extraData);
+                BlockActivity.sendActionLog(action);
+            }
+            final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, block.getWorld(), block.getLocation().toVector(),
+                    block.getState(), null, null);
             BlockActivity.sendActionLog(action);
         } else if (material == Material.ICE) {
             /** ICE **/

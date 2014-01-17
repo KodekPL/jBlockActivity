@@ -17,6 +17,7 @@ import jcraft.jblockactivity.extradata.BlockExtraData.CommandBlockExtraData;
 import jcraft.jblockactivity.extradata.BlockExtraData.SignExtraData;
 import jcraft.jblockactivity.extradata.BlockExtraData.SkullExtraData;
 import jcraft.jblockactivity.extradata.ExtraData;
+import jcraft.jblockactivity.extradata.InventoryExtraData;
 import jcraft.jblockactivity.session.LookupCache;
 import jcraft.jblockactivity.utils.MaterialNames;
 import jcraft.jblockactivity.utils.QueryParams;
@@ -24,6 +25,7 @@ import jcraft.jblockactivity.utils.QueryParams;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.block.BlockState;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 public class BlockActionLog extends ActionLog implements LookupCache {
@@ -88,7 +90,7 @@ public class BlockActionLog extends ActionLog implements LookupCache {
             state.setInt(9, getVector().getBlockZ());
             state.executeUpdate();
 
-            final BlockExtraData extraData = (BlockExtraData) getExtraData();
+            final ExtraData extraData = getExtraData();
             if (extraData != null) {
                 final int id;
                 final ResultSet result = state.getGeneratedKeys();
@@ -141,7 +143,7 @@ public class BlockActionLog extends ActionLog implements LookupCache {
             time_ago.append(diff[2]).append('m');
         }
         if (diff[0] == 0 && diff[1] == 0 && diff[2] <= 1) {
-            return "moment ago";
+            time_ago.append(diff[3]).append('s');
         }
         return time_ago.toString();
     }
@@ -155,51 +157,74 @@ public class BlockActionLog extends ActionLog implements LookupCache {
 
         final StringBuilder msg = new StringBuilder();
 
-        if (getTime() > 0) {
-            msg.append(ChatColor.GRAY + formatTime(getTime())).append(' ');
-        }
-
-        if (getLoggingType() == LoggingType.blockplace) {
-            if (oldBlockId == 0) {
-                msg.append(add).append("created ").append(MaterialNames.materialName(newBlockId, newBlockData));
-            } else {
-                msg.append(sub).append("replaced ").append(MaterialNames.materialName(oldBlockId, oldBlockData)).append(" with ")
-                        .append(MaterialNames.materialName(newBlockId, newBlockData));
+        if (getLoggingType() == LoggingType.blockplace || getLoggingType() == LoggingType.blockbreak) {
+            msg.append(ChatColor.GRAY).append(formatTime(getTime())).append(' ');
+            if (getLoggingType() == LoggingType.blockplace) {
+                if (oldBlockId == 0) {
+                    msg.append(add).append("created ").append(MaterialNames.materialName(newBlockId, newBlockData));
+                } else {
+                    msg.append(sub).append("replaced ").append(MaterialNames.materialName(oldBlockId, oldBlockData)).append(" with ")
+                            .append(MaterialNames.materialName(newBlockId, newBlockData));
+                }
+            } else if (getLoggingType() == LoggingType.blockbreak) {
+                msg.append(sub).append("destroyed ").append(MaterialNames.materialName(oldBlockId, oldBlockData));
             }
-        } else if (getLoggingType() == LoggingType.blockbreak) {
-            msg.append(sub).append("destroyed ").append(MaterialNames.materialName(oldBlockId, oldBlockData));
-        }
-        if (getVector() != null) {
-            msg.append(" at ").append(getVector().getBlockX()).append(':').append(getVector().getBlockY()).append(':')
-                    .append(getVector().getBlockZ());
-        }
-        if (getExtraData() != null) {
-            final ExtraData extraData = getExtraData();
-            if (extraData instanceof BlockExtraData) {
-                if (newBlockId == 63 || newBlockId == 68 || oldBlockId == 63 || oldBlockId == 68) {
-                    final BlockExtraData.SignExtraData data = (SignExtraData) extraData;
-                    msg.append(ChatColor.GRAY);
-                    for (int i = 0; i < 4; i++) {
-                        msg.append(" [").append(ChatColor.stripColor(data.getText()[i])).append(']');
-                    }
-                } else if (newBlockId == 144 || oldBlockId == 144) {
-                    final BlockExtraData.SkullExtraData data = (SkullExtraData) extraData;
-                    if (!data.getName().equals("")) {
-                        msg.append(ChatColor.GRAY).append(" [").append(data.getName()).append(']');
-                    }
-                } else if (oldBlockId == 137) {
-                    final BlockExtraData.CommandBlockExtraData data = (CommandBlockExtraData) extraData;
-                    if (!data.getCommand().equals("")) {
-                        String cmd = data.getCommand();
-                        if (cmd.length() > 16) {
-                            cmd = data.getCommand().substring(0, 16) + "...";
+
+            if (getVector() != null) {
+                msg.append(" at ").append(getVector().getBlockX()).append(':').append(getVector().getBlockY()).append(':')
+                        .append(getVector().getBlockZ());
+            }
+
+            if (getExtraData() != null) {
+                final ExtraData extraData = getExtraData();
+                if (extraData instanceof BlockExtraData) {
+                    if (newBlockId == 63 || newBlockId == 68 || oldBlockId == 63 || oldBlockId == 68) {
+                        final BlockExtraData.SignExtraData data = (SignExtraData) extraData;
+                        msg.append(ChatColor.GRAY);
+                        for (int i = 0; i < 4; i++) {
+                            msg.append(" [").append(ChatColor.stripColor(data.getText()[i])).append(']');
                         }
-                        msg.append(ChatColor.GRAY).append(" [").append(cmd).append(']');
+                    } else if (newBlockId == 144 || oldBlockId == 144) {
+                        final BlockExtraData.SkullExtraData data = (SkullExtraData) extraData;
+                        if (!data.getName().equals("")) {
+                            msg.append(ChatColor.GRAY).append(" [").append(data.getName()).append(']');
+                        }
+                    } else if (oldBlockId == 137) {
+                        final BlockExtraData.CommandBlockExtraData data = (CommandBlockExtraData) extraData;
+                        if (!data.getCommand().equals("")) {
+                            String cmd = data.getCommand();
+                            if (cmd.length() > 16) {
+                                cmd = data.getCommand().substring(0, 16) + "...";
+                            }
+                            msg.append(ChatColor.GRAY).append(" [").append(cmd).append(']');
+                        }
+                    }
+                }
+            }
+            msg.append(ChatColor.GRAY).append(" (").append(getTimeSince()).append(')');
+        } else if (getLoggingType() == LoggingType.inventoryaccess && getExtraData() != null) {
+            final String prefixTime = ChatColor.GRAY + formatTime(getTime()) + " ";
+            final String suffixTime = ChatColor.GRAY + " (" + getTimeSince() + ")";
+            if (getExtraData() instanceof InventoryExtraData) {
+                final InventoryExtraData extraData = (InventoryExtraData) getExtraData();
+                for (int i = 0; i < extraData.getContent().length; i++) {
+                    ItemStack item = extraData.getContent()[i];
+                    if (item == null) continue;
+                    if (item.getAmount() < 0) {
+                        msg.append(prefixTime).append(sub).append("took ").append(-item.getAmount()).append("x ")
+                                .append(MaterialNames.materialName(item.getTypeId(), item.getData().getData())).append(" from ")
+                                .append(MaterialNames.materialName(newBlockId, newBlockData)).append(suffixTime);
+                    } else {
+                        msg.append(prefixTime).append(add).append("put ").append(item.getAmount()).append("x ")
+                                .append(MaterialNames.materialName(item.getTypeId(), item.getData().getData())).append(" into ")
+                                .append(MaterialNames.materialName(newBlockId, newBlockData)).append(suffixTime);
+                    }
+                    if (i < extraData.getContent().length) {
+                        msg.append('\n');
                     }
                 }
             }
         }
-        msg.append(ChatColor.GRAY).append(" (").append(getTimeSince()).append(')');
         return msg.toString();
     }
 
@@ -214,18 +239,22 @@ public class BlockActionLog extends ActionLog implements LookupCache {
         final byte old_data = params.needData ? result.getByte("old_data") : (byte) 0;
         final byte new_data = params.needData ? result.getByte("new_data") : (byte) 0;
         final String data = params.needExtraData ? result.getString("data") : null;
-        BlockExtraData extraData = null;
+        ExtraData extraData = null;
         if (data != null) {
-            if (old_id == 63 || old_id == 68 || new_id == 63 || new_id == 68) {
-                extraData = new BlockExtraData.SignExtraData(data);
-            } else if (old_id == 144 || new_id == 144) {
-                extraData = new BlockExtraData.SkullExtraData(data);
-            } else if (old_id == 52) {
-                extraData = new BlockExtraData.MobSpawnerExtraData(data);
-            } else if (old_id == 140) {
-                extraData = new BlockExtraData.FlowerPotExtraData(data);
-            } else if (old_id == 137) {
-                extraData = new BlockExtraData.CommandBlockExtraData(data);
+            if (logType == LoggingType.blockbreak || logType == LoggingType.blockplace) {
+                if (old_id == 63 || old_id == 68 || new_id == 63 || new_id == 68) {
+                    extraData = new BlockExtraData.SignExtraData(data);
+                } else if (old_id == 144 || new_id == 144) {
+                    extraData = new BlockExtraData.SkullExtraData(data);
+                } else if (old_id == 52) {
+                    extraData = new BlockExtraData.MobSpawnerExtraData(data);
+                } else if (old_id == 140) {
+                    extraData = new BlockExtraData.FlowerPotExtraData(data);
+                } else if (old_id == 137) {
+                    extraData = new BlockExtraData.CommandBlockExtraData(data);
+                }
+            } else if (logType == LoggingType.inventoryaccess) {
+                extraData = new InventoryExtraData(data);
             }
         }
         final BlockActionLog log = new BlockActionLog(logType, playerName, params.getWorld(), location, old_id, old_data, new_id, new_data, extraData);

@@ -16,9 +16,49 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.DoubleChest;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 public class ActivityUtil {
+
+    public static int modifyContainer(BlockState block, ItemStack item) {
+        if (block instanceof InventoryHolder) {
+            final Inventory inv = ((InventoryHolder) block).getInventory();
+            if (item.getAmount() < 0) {
+                item.setAmount(-item.getAmount());
+                final ItemStack tmp = inv.removeItem(item).get(0);
+                return (tmp != null) ? tmp.getAmount() : 0;
+            } else if (item.getAmount() > 0) {
+                final ItemStack tmp = inv.addItem(item).get(0);
+                return (tmp != null) ? tmp.getAmount() : 0;
+            }
+        }
+        return 0;
+    }
+
+    public static Location getInventoryHolderLocation(InventoryHolder holder) {
+        if (holder instanceof DoubleChest) {
+            return ((DoubleChest) holder).getLocation();
+        } else if (holder instanceof BlockState) {
+            return ((BlockState) holder).getLocation();
+        } else {
+            return null;
+        }
+    }
+
+    public static Material getInventoryHolderType(InventoryHolder holder) {
+        if (holder instanceof DoubleChest) {
+            return ((DoubleChest) holder).getLocation().getBlock().getType();
+        } else if (holder instanceof BlockState) {
+            return ((BlockState) holder).getType();
+        } else {
+            return null;
+        }
+    }
 
     private static final Set<Set<Integer>> blockEquivalents;
 
@@ -274,7 +314,6 @@ public class ActivityUtil {
         case FURNACE:
         case BURNING_FURNACE:
         case BEACON:
-        case JUKEBOX:
             return true;
         default:
             return false;
@@ -359,7 +398,7 @@ public class ActivityUtil {
         return blocks;
     }
 
-    private static final BlockFace[] primaryCardinalDirs = { BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST };
+    public static final BlockFace[] primaryCardinalDirs = { BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST };
 
     public static BlockFace yawToFace(float yaw) {
         return primaryCardinalDirs[Math.round(yaw / 90f) & 0x3];
@@ -369,13 +408,13 @@ public class ActivityUtil {
         int dir = face.ordinal();
         if (right) {
             dir++;
-            if (dir > primaryCardinalDirs.length) {
+            if (dir >= primaryCardinalDirs.length) {
                 dir = 0;
             }
         } else {
             dir--;
             if (dir < 0) {
-                dir = primaryCardinalDirs.length;
+                dir = primaryCardinalDirs.length - 1;
             }
         }
         return primaryCardinalDirs[dir];

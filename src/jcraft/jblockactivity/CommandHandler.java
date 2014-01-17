@@ -13,6 +13,7 @@ import java.util.logging.Level;
 
 import jcraft.jblockactivity.ActionExecuteThread.ActionRequest;
 import jcraft.jblockactivity.ActionExecuteThread.ActionRequest.ActionType;
+import jcraft.jblockactivity.actionlogs.BlockActionLog;
 import jcraft.jblockactivity.extradata.BlockExtraData;
 import jcraft.jblockactivity.session.ActiveSession;
 import jcraft.jblockactivity.session.LookupCache;
@@ -352,6 +353,7 @@ public class CommandHandler implements CommandExecutor {
         Statement state = null;
         ResultSet result = null;
 
+        params.logType = LoggingType.all;
         params.needCoords = true;
         params.needMaterial = true;
         params.needData = true;
@@ -371,26 +373,7 @@ public class CommandHandler implements CommandExecutor {
             final BlockEditor editor = new BlockEditor(params.getWorld(), false);
 
             while (result.next()) {
-                int old_id = params.needMaterial ? result.getInt("old_id") : 0;
-                int new_id = params.needMaterial ? result.getInt("new_id") : 0;
-
-                String data = params.needExtraData ? result.getString("data") : null;
-                BlockExtraData extraData = null;
-                if (data != null) {
-                    if (old_id == 63 || old_id == 68 || new_id == 63 || new_id == 68) {
-                        extraData = new BlockExtraData.SignExtraData(data);
-                    } else if (old_id == 144 || new_id == 144) {
-                        extraData = new BlockExtraData.SkullExtraData(data);
-                    } else if (old_id == 52) {
-                        extraData = new BlockExtraData.MobSpawnerExtraData(data);
-                    } else if (old_id == 140) {
-                        extraData = new BlockExtraData.FlowerPotExtraData(data);
-                    } else if (old_id == 137) {
-                        extraData = new BlockExtraData.CommandBlockExtraData(data);
-                    }
-                }
-                editor.addBlockChange(LoggingType.getTypeById(result.getInt("type")), result.getString("playername"), result.getInt("x"),
-                        result.getInt("y"), result.getInt("z"), old_id, result.getByte("old_data"), new_id, result.getByte("new_data"), extraData);
+                editor.addBlockChange(BlockActionLog.getBlockActionLog(result, params));
             }
 
             final int changes = editor.getSize();
@@ -440,6 +423,7 @@ public class CommandHandler implements CommandExecutor {
         Statement state = null;
         ResultSet result = null;
 
+        params.logType = LoggingType.all;
         params.needCoords = true;
         params.needMaterial = true;
         params.needData = true;
@@ -526,7 +510,7 @@ public class CommandHandler implements CommandExecutor {
 
     private void askQuestion(CommandSender sender) {
         sender.sendMessage(BlockActivity.prefix + ChatColor.YELLOW + "Are you sure you want to continue?");
-        sender.sendMessage(ChatColor.GREEN + "/ba yes" + System.getProperty("line.separator") + "/ba no");
+        sender.sendMessage(ChatColor.GREEN + "/ba yes" + "\n" + "/ba no");
     }
 
     private void answerQuestion(CommandSender sender, boolean answer) {

@@ -69,6 +69,7 @@ public class LogToolListener implements Listener {
         } else {
             params.setLocation(block.getLocation());
         }
+        params.needExtraData = true;
         BlockActivity.getCommandHandler().preExecuteCommand(new ActionRequest(ActionType.CMD_LOOKUP, player, params), true);
         event.setCancelled(true);
     }

@@ -1,7 +1,7 @@
 package jcraft.jblockactivity;
 
 public enum ExtraLoggingType {
-    commandblock(1), flowerpot(2), mobspawner(3), signtext(4), skull(5);
+    commandblock(1), flowerpot(2), mobspawner(3), signtext(4), skull(5), inventory(6);
 
     private final int id;
 

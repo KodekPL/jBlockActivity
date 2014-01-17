@@ -34,7 +34,7 @@ public class QueryParams {
     }
 
     public SummarizationMode mode = SummarizationMode.NONE;
-    public LoggingType logType = LoggingType.all;
+    public LoggingType logType = LoggingType.bothblocks;
     public Order order = Order.DESC;
 
     private World world;
@@ -110,9 +110,15 @@ public class QueryParams {
             if (!types.isEmpty()) {
                 where.append('(');
                 for (final MaterialData block : types) {
-                    where.append("((new_id = ").append(block.getItemTypeId()).append(" OR old_id = ").append(block.getItemTypeId());
+                    where.append("((new_id = ").append(block.getItemTypeId());
                     if (block.getData() != -1) {
-                        where.append(") AND new_data = ").append(block.getData()).append(" OR old_data = ").append(block.getData());
+                        where.append(" AND new_data = ").append(block.getData()).append(')');
+                    } else {
+                        where.append(')');
+                    }
+                    where.append(" OR (old_id = ").append(block.getItemTypeId());
+                    if (block.getData() != -1) {
+                        where.append(" AND old_data = ").append(block.getData()).append(')');
                     } else {
                         where.append(')');
                     }
@@ -120,6 +126,32 @@ public class QueryParams {
                 }
                 where.delete(where.length() - 4, where.length());
                 where.append(") AND ");
+            }
+            break;
+        case bothblocks:
+            if (!types.isEmpty()) {
+                where.append('(');
+                for (final MaterialData block : types) {
+                    where.append("((new_id = ").append(block.getItemTypeId());
+                    if (block.getData() != -1) {
+                        where.append(" AND new_data = ").append(block.getData()).append(')');
+                    } else {
+                        where.append(')');
+                    }
+                    where.append(" OR (old_id = ").append(block.getItemTypeId());
+                    if (block.getData() != -1) {
+                        where.append(" AND old_data = ").append(block.getData()).append(')');
+                    } else {
+                        where.append(')');
+                    }
+                    where.append(") OR ");
+                }
+                where.delete(where.length() - 4, where.length());
+                where.append(" AND ").append("type = ").append(LoggingType.blockplace.getId()).append(" OR type = ")
+                        .append(LoggingType.blockbreak.getId()).append(") AND ");
+            } else {
+                where.append("type = ").append(LoggingType.blockplace.getId()).append(" OR type = ").append(LoggingType.blockbreak.getId())
+                        .append(" AND ");
             }
             break;
         case blockplace:
@@ -135,7 +167,7 @@ public class QueryParams {
                     where.append(") OR ");
                 }
                 where.delete(where.length() - 4, where.length());
-                where.append(") AND ");
+                where.append(" AND ").append("type = ").append(LoggingType.blockplace.getId()).append(") AND ");
             } else {
                 where.append("type = ").append(LoggingType.blockplace.getId()).append(" AND ");
             }
@@ -153,7 +185,7 @@ public class QueryParams {
                     where.append(") OR ");
                 }
                 where.delete(where.length() - 4, where.length());
-                where.append(") AND ");
+                where.append(" AND ").append("type = ").append(LoggingType.blockbreak.getId()).append(") AND ");
             } else {
                 where.append("type = ").append(LoggingType.blockbreak.getId()).append(" AND ");
             }
@@ -370,6 +402,7 @@ public class QueryParams {
                 logType = LoggingType.blockbreak;
             } else if (param.equals("all")) {
                 logType = LoggingType.all;
+                needExtraData = true;
             } else if (param.equals("limit")) {
                 if (values.length != 1) {
                     throw new IllegalArgumentException("Wrong count of arguments for '" + param + "'");

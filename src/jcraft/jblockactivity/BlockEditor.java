@@ -1,6 +1,9 @@
 package jcraft.jblockactivity;
 
+import static jcraft.jblockactivity.utils.ActivityUtil.isContainerBlock;
 import static jcraft.jblockactivity.utils.ActivityUtil.isEqualType;
+import static jcraft.jblockactivity.utils.ActivityUtil.modifyContainer;
+import static jcraft.jblockactivity.utils.ActivityUtil.primaryCardinalDirs;
 import static org.bukkit.Bukkit.getLogger;
 
 import java.sql.Connection;
@@ -18,13 +21,16 @@ import jcraft.jblockactivity.extradata.BlockExtraData.MobSpawnerExtraData;
 import jcraft.jblockactivity.extradata.BlockExtraData.SignExtraData;
 import jcraft.jblockactivity.extradata.BlockExtraData.SkullExtraData;
 import jcraft.jblockactivity.extradata.ExtraData;
+import jcraft.jblockactivity.extradata.InventoryExtraData;
 import jcraft.jblockactivity.session.LookupCache;
 import jcraft.jblockactivity.utils.MaterialNames;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.CommandBlock;
 import org.bukkit.block.CreatureSpawner;
@@ -32,6 +38,7 @@ import org.bukkit.block.Sign;
 import org.bukkit.block.Skull;
 import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.FlowerPot;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
@@ -75,6 +82,11 @@ public class BlockEditor extends BukkitRunnable {
     public void addBlockChange(LoggingType type, String playerName, int x, int y, int z, int oldBlockId, byte oldBlockData, int newBlockId,
             byte newBlockData, ExtraData extraData) {
         edits.add(new BlockChange(type, playerName, world, new Vector(x, y, z), oldBlockId, oldBlockData, newBlockId, newBlockData, extraData));
+    }
+
+    public void addBlockChange(BlockActionLog log) {
+        edits.add(new BlockChange(log.getLoggingType(), log.getPlayerName(), world, log.getVector(), log.getOldBlockId(), log.getOldBlockData(), log
+                .getNewBlockId(), log.getNewBlockData(), log.getExtraData()));
     }
 
     public synchronized void start() throws Error, InterruptedException {
@@ -153,16 +165,6 @@ public class BlockEditor extends BukkitRunnable {
                     world.loadChunk(block.getChunk());
                 }
 
-                if (!(isEqualType(block.getTypeId(), isRedo ? blockLog.getOldBlockId() : blockLog.getNewBlockId()) || BlockActivity.config.replaceAnyway
-                        .contains(block.getTypeId()))) {
-                    return BlockEditorResult.NO_ACTION;
-                }
-
-                if (state instanceof InventoryHolder) {
-                    ((InventoryHolder) state).getInventory().clear();
-                    state.update();
-                }
-
                 int blockId;
                 byte blockData;
                 if (!isRedo) {
@@ -173,6 +175,55 @@ public class BlockEditor extends BukkitRunnable {
                     blockData = blockLog.getNewBlockData();
                 }
 
+                if (getLoggingType() == LoggingType.inventoryaccess) {
+                    if (blockLog.getExtraData() != null) {
+                        if (isContainerBlock(Material.getMaterial(blockId))) {
+                            InventoryExtraData extraData = (InventoryExtraData) blockLog.getExtraData();
+                            for (ItemStack item : extraData.getContent()) {
+                                int leftover;
+                                try {
+                                    leftover = modifyContainer(state, new ItemStack(item.getType(), -item.getAmount(), item.getDurability()));
+                                    if (leftover > 0 && (blockId == 54 || blockId == 146)) {
+                                        for (final BlockFace face : primaryCardinalDirs) {
+                                            if (block.getRelative(face).getTypeId() == blockId) {
+                                                leftover = modifyContainer(
+                                                        block.getRelative(face).getState(),
+                                                        new ItemStack(item.getType(), (item.getAmount() < 0) ? leftover : -leftover, item
+                                                                .getDurability()));
+                                                break;
+                                            }
+                                        }
+                                    }
+                                } catch (final Exception ex) {
+                                    throw new BlockEditorException(ex.getMessage(), block.getLocation());
+                                }
+                                if (leftover > 0 && item.getAmount() < 0) {
+                                    throw new BlockEditorException("Not enough space left in " + MaterialNames.materialName(block.getTypeId()),
+                                            block.getLocation());
+                                }
+                            }
+
+                            if (!state.update()) {
+                                throw new BlockEditorException("Failed to update inventory of "
+                                        + MaterialNames.materialName(block.getTypeId(), block.getData()), block.getLocation());
+                            }
+                        }
+                    } else {
+                        return BlockEditorResult.NO_ACTION;
+                    }
+                    return BlockEditorResult.SUCCESS;
+                }
+
+                if (!(isEqualType(block.getTypeId(), isRedo ? blockLog.getOldBlockId() : blockLog.getNewBlockId()) || BlockActivity.config.replaceAnyway
+                        .contains(block.getTypeId()))) {
+                    return BlockEditorResult.NO_ACTION;
+                }
+
+                if (state instanceof InventoryHolder) {
+                    ((InventoryHolder) state).getInventory().clear();
+                    state.update();
+                }
+
                 if (block.getTypeId() == blockId) {
                     if (block.getData() != blockData) {
                         block.setData(blockData, true);
@@ -180,8 +231,10 @@ public class BlockEditor extends BukkitRunnable {
                         return BlockEditorResult.NO_ACTION;
                     }
                 } else {
-                    if (!block.setTypeIdAndData(blockId, blockData, true)) {
+                    if (!block.setTypeId(blockId)) {
                         throw new BlockEditorException(block.getTypeId(), block.getData(), blockId, blockData, block.getLocation());
+                    } else {
+                        block.setData(blockData, true);
                     }
                 }
 
