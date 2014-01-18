@@ -32,11 +32,11 @@ public class BlockPlaceListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onBlockPlace(final BlockPlaceEvent event) {
-        final Block block = event.getBlock();
-        final WorldConfig config = BlockActivity.getWorldConfig(block.getWorld().getName());
+        final WorldConfig config = BlockActivity.getWorldConfig(event.getPlayer().getWorld().getName());
         if (config == null || !config.isLogging(LoggingType.blockplace)) {
             return;
         }
+        final Block block = event.getBlock();
         final Material material = block.getType();
         final BlockState beforeState = event.getBlockReplacedState();
         final BlockState afterState = event.getBlockPlaced().getState();

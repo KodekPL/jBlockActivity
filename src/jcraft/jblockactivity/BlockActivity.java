@@ -9,6 +9,7 @@ import java.util.logging.Level;
 
 import jcraft.jblockactivity.actionlogs.ActionLog;
 import jcraft.jblockactivity.listeners.BlockBreakListener;
+import jcraft.jblockactivity.listeners.BlockInteractListener;
 import jcraft.jblockactivity.listeners.BlockPlaceListener;
 import jcraft.jblockactivity.listeners.InventoryAccessListener;
 import jcraft.jblockactivity.listeners.LogToolListener;
@@ -98,6 +99,9 @@ public class BlockActivity extends JavaPlugin {
         }
         if (config.isWorldsLogging(LoggingType.inventoryaccess)) {
             manager.registerEvents(new InventoryAccessListener(), this);
+        }
+        if (config.isWorldsLogging(LoggingType.blockinteract)) {
+            manager.registerEvents(new BlockInteractListener(), this);
         }
         manager.registerEvents(new LogToolListener(), this);
     }

@@ -4,9 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import jcraft.jblockactivity.sql.SQLConnection;
 
@@ -18,6 +21,7 @@ public class WorldConfig {
     private final String worldName;
     private boolean[] loggingTypes;
     private boolean[] extraLoggingTypes;
+    private Set<Integer> interactBlocks;
 
     private final File configFile;
     private final YamlConfiguration config;
@@ -39,6 +43,9 @@ public class WorldConfig {
             if (type.getId() <= 0) continue;
             configDef.put("logExtraData." + type.name(), true);
         }
+
+        configDef.put("interactblocks",
+                Arrays.asList(23, 25, 54, 61, 62, 64, 69, 77, 84, 92, 93, 94, 96, 107, 117, 138, 143, 145, 146, 149, 150, 154, 158));
 
         for (Entry<String, Object> e : configDef.entrySet()) {
             if (!config.contains(e.getKey())) {
@@ -69,6 +76,10 @@ public class WorldConfig {
             extraLoggingTypes[type.ordinal()] = result;
         }
 
+        if (isLogging(LoggingType.blockinteract)) {
+            interactBlocks = new HashSet<Integer>(config.getIntegerList("interactblocks"));
+        }
+
         try {
             createTable();
         } catch (SQLException e) {
@@ -94,6 +105,10 @@ public class WorldConfig {
             }
         }
         return false;
+    }
+
+    public boolean isInteractiveBlock(int id) {
+        return interactBlocks.contains(id);
     }
 
     public void createTable() throws SQLException {

@@ -153,7 +153,7 @@ public class BlockActionLog extends ActionLog implements LookupCache {
 
         final String add = ChatColor.GREEN + "+ " + ChatColor.GOLD + getPlayerName() + " " + ChatColor.WHITE;
         final String sub = ChatColor.RED + "- " + ChatColor.GOLD + getPlayerName() + " " + ChatColor.WHITE;
-        // final String interact = ChatColor.YELLOW + "> " + ChatColor.GOLD + getPlayerName() + " " + ChatColor.WHITE;
+        final String interact = ChatColor.YELLOW + "> " + ChatColor.GOLD + getPlayerName() + " " + ChatColor.WHITE;
 
         final StringBuilder msg = new StringBuilder();
 
@@ -224,6 +224,15 @@ public class BlockActionLog extends ActionLog implements LookupCache {
                     }
                 }
             }
+        } else if (getLoggingType() == LoggingType.blockinteract) {
+            msg.append(ChatColor.GRAY).append(formatTime(getTime())).append(' ');
+            msg.append(interact).append("interact with ").append(MaterialNames.materialName(newBlockId, newBlockData));
+
+            if (getVector() != null) {
+                msg.append(" at ").append(getVector().getBlockX()).append(':').append(getVector().getBlockY()).append(':')
+                        .append(getVector().getBlockZ());
+            }
+            msg.append(ChatColor.GRAY).append(" (").append(getTimeSince()).append(')');
         }
         return msg.toString();
     }

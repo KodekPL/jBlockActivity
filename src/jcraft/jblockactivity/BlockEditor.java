@@ -178,7 +178,7 @@ public class BlockEditor extends BukkitRunnable {
                 if (getLoggingType() == LoggingType.inventoryaccess) {
                     if (blockLog.getExtraData() != null) {
                         if (isContainerBlock(Material.getMaterial(blockId))) {
-                            InventoryExtraData extraData = (InventoryExtraData) blockLog.getExtraData();
+                            final InventoryExtraData extraData = (InventoryExtraData) blockLog.getExtraData();
                             for (ItemStack item : extraData.getContent()) {
                                 int leftover;
                                 try {

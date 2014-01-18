@@ -1,9 +1,35 @@
 logging:
    blockbreak: true
    blockplace: true
+   inventoryaccess: true
+   blockinteract: true
 logExtraData:
    commandblock: true
    flowerpot: true
    mobspawner: true
    signtext: true
    skull: true
+interactblocks:
+   - 23
+   - 25
+   - 54
+   - 61
+   - 62
+   - 64
+   - 69
+   - 77
+   - 84
+   - 92
+   - 93
+   - 94
+   - 96
+   - 107
+   - 117
+   - 138
+   - 143
+   - 145
+   - 146
+   - 149
+   - 150
+   - 154
+   - 158
