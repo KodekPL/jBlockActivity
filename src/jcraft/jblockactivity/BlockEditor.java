@@ -2,12 +2,11 @@ package jcraft.jblockactivity;
 
 import static jcraft.jblockactivity.utils.ActivityUtil.isContainerBlock;
 import static jcraft.jblockactivity.utils.ActivityUtil.isEqualType;
+import static jcraft.jblockactivity.utils.ActivityUtil.isSameLocation;
 import static jcraft.jblockactivity.utils.ActivityUtil.modifyContainer;
 import static jcraft.jblockactivity.utils.ActivityUtil.primaryCardinalDirs;
 import static org.bukkit.Bukkit.getLogger;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
@@ -15,6 +14,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 
 import jcraft.jblockactivity.actionlogs.BlockActionLog;
+import jcraft.jblockactivity.actionlogs.EntityActionLog;
 import jcraft.jblockactivity.extradata.BlockExtraData.CommandBlockExtraData;
 import jcraft.jblockactivity.extradata.BlockExtraData.FlowerPotExtraData;
 import jcraft.jblockactivity.extradata.BlockExtraData.MobSpawnerExtraData;
@@ -26,6 +26,7 @@ import jcraft.jblockactivity.session.LookupCache;
 import jcraft.jblockactivity.utils.MaterialNames;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -37,6 +38,9 @@ import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.Sign;
 import org.bukkit.block.Skull;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Hanging;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.FlowerPot;
@@ -45,7 +49,8 @@ import org.bukkit.util.Vector;
 
 public class BlockEditor extends BukkitRunnable {
 
-    private final Queue<BlockChange> edits = new LinkedBlockingQueue<BlockChange>();
+    private final Queue<BlockChange> blockEdits = new LinkedBlockingQueue<BlockChange>();
+    private final Queue<EntityChange> entityEdits = new LinkedBlockingQueue<EntityChange>();
     private final World world;
     private final boolean isRedo;
     private CommandSender sender;
@@ -60,7 +65,7 @@ public class BlockEditor extends BukkitRunnable {
     }
 
     public int getSize() {
-        return edits.size();
+        return blockEdits.size() + entityEdits.size();
     }
 
     public int getSuccesses() {
@@ -79,14 +84,22 @@ public class BlockEditor extends BukkitRunnable {
         this.sender = sender;
     }
 
-    public void addBlockChange(LoggingType type, String playerName, int x, int y, int z, int oldBlockId, byte oldBlockData, int newBlockId,
-            byte newBlockData, ExtraData extraData) {
-        edits.add(new BlockChange(type, playerName, world, new Vector(x, y, z), oldBlockId, oldBlockData, newBlockId, newBlockData, extraData));
+    public void addChange(LookupCache log) {
+        if (log instanceof BlockActionLog) {
+            addBlockChange((BlockActionLog) log);
+        } else {
+            addEntityChange((EntityActionLog) log);
+        }
     }
 
     public void addBlockChange(BlockActionLog log) {
-        edits.add(new BlockChange(log.getLoggingType(), log.getPlayerName(), world, log.getVector(), log.getOldBlockId(), log.getOldBlockData(), log
-                .getNewBlockId(), log.getNewBlockData(), log.getExtraData()));
+        blockEdits.add(new BlockChange(log.getLoggingType(), log.getPlayerName(), world, log.getVector(), log.getOldBlockId(), log.getOldBlockData(),
+                log.getNewBlockId(), log.getNewBlockData(), log.getExtraData()));
+    }
+
+    public void addEntityChange(EntityActionLog log) {
+        entityEdits.add(new EntityChange(log.getLoggingType(), log.getPlayerName(), world, log.getVector(), log.getEntityId(), log.getEntityData(),
+                log.getExtraData()));
     }
 
     public synchronized void start() throws Error, InterruptedException {
@@ -107,10 +120,10 @@ public class BlockEditor extends BukkitRunnable {
     public synchronized void run() {
         final List<BlockEditorException> errorList = new ArrayList<BlockEditorException>();
         int counter = 0;
-        final float size = edits.size();
-        while (!edits.isEmpty() && counter < 100) {
+        final float size = blockEdits.size() + entityEdits.size();
+        while (!blockEdits.isEmpty() && counter < 100) {
             try {
-                switch (edits.poll().perform()) {
+                switch (blockEdits.poll().perform()) {
                 case SUCCESS:
                     successes++;
                     break;
@@ -120,26 +133,114 @@ public class BlockEditor extends BukkitRunnable {
             } catch (final BlockEditorException ex) {
                 errorList.add(ex);
             } catch (final Exception ex) {
-                getLogger().log(Level.WARNING, "[WorldEditor] Exeption: ", ex);
+                getLogger().log(Level.WARNING, "[BlockEditor] Exeption: ", ex);
             }
             counter++;
             if (sender != null) {
-                float percentage = ((size - edits.size()) / size) * 100.0F;
+                float percentage = ((size - (blockEdits.size() - entityEdits.size())) / size) * 100.0F;
                 if (percentage % 20 == 0) {
                     sender.sendMessage(BlockActivity.prefix + ChatColor.YELLOW + " Rollback progress: " + percentage + "%" + " Blocks edited: "
                             + counter);
                 }
             }
         }
-        if (edits.isEmpty()) {
+        while (!entityEdits.isEmpty() && counter < 100) {
+            try {
+                switch (entityEdits.poll().perform()) {
+                case SUCCESS:
+                    successes++;
+                    break;
+                default:
+                    break;
+                }
+            } catch (final BlockEditorException ex) {
+                errorList.add(ex);
+            } catch (final Exception ex) {
+                getLogger().log(Level.WARNING, "[BlockEditor] Exeption: ", ex);
+            }
+            counter++;
+            if (sender != null) {
+                float percentage = ((size - (blockEdits.size() - entityEdits.size())) / size) * 100.0F;
+                if (percentage % 20 == 0) {
+                    sender.sendMessage(BlockActivity.prefix + ChatColor.YELLOW + " Rollback progress: " + percentage + "%" + " Blocks edited: "
+                            + counter);
+                }
+            }
+        }
+        if (blockEdits.isEmpty() && entityEdits.isEmpty()) {
             BlockActivity.getBlockActivity().getServer().getScheduler().cancelTask(taskID);
             errors = errorList.toArray(new BlockEditorException[errorList.size()]);
-            this.notify();
+            this.notifyAll();
         }
     }
 
     private static enum BlockEditorResult {
         SUCCESS, NO_ACTION, BLACKLIST;
+    }
+
+    private class EntityChange extends EntityActionLog {
+
+        public EntityChange(LoggingType type, String playerName, World world, Vector location, int entityId, int dataId, ExtraData extraData) {
+            super(type, playerName, world, location, entityId, dataId, extraData);
+        }
+
+        BlockEditorResult perform() throws BlockEditorException {
+            if (this.getLogInstance() instanceof EntityActionLog) {
+                final Block block = getLocation().getBlock();
+                final Chunk chunk = block.getChunk();
+                if (getLoggingType() == LoggingType.hangingbreak || getLoggingType() == LoggingType.hangingplace) {
+                    final Hanging[] hangings = getHangings(chunk, getLocation().toVector(), getEntityId());
+                    final BlockFace face = BlockFace.values()[getEntityData()];
+                    final Block hangBlock = block.getRelative(face.getOppositeFace());
+
+                    if (getLoggingType() == LoggingType.hangingbreak && !isRedo) {
+                        for (Hanging hanging : hangings) {
+                            if (hanging.getFacing().ordinal() == getEntityData()) {
+                                return BlockEditorResult.NO_ACTION;
+                            }
+                        }
+                        if (!block.getType().isTransparent()) {
+                            throw new BlockEditorException("No space to place " + MaterialNames.entityName(getEntityId()), block.getLocation());
+                        }
+
+                        try {
+                            final Hanging hanging = (Hanging) getWorld().spawn(hangBlock.getLocation(),
+                                    EntityType.fromId(getEntityId()).getEntityClass());
+                            hanging.teleport(block.getLocation());
+                            // BUG: https://bukkit.atlassian.net/browse/BUKKIT-3371
+                            hanging.setFacingDirection(face, true);
+                        } catch (IllegalArgumentException e) {
+                            throw new BlockEditorException("Invalid hanging block to place " + MaterialNames.entityName(getEntityId()),
+                                    block.getLocation());
+                        }
+                    } else {
+                        for (Hanging hanging : hangings) {
+                            if (hanging.getFacing().ordinal() == getEntityData()) {
+                                hanging.remove();
+                                return BlockEditorResult.SUCCESS;
+                            }
+                        }
+                        return BlockEditorResult.NO_ACTION;
+                    }
+                }
+                return BlockEditorResult.SUCCESS;
+            } else {
+                return BlockEditorResult.NO_ACTION;
+            }
+        }
+
+        private Hanging[] getHangings(Chunk chunk, Vector vector, int entityId) {
+            final List<Entity> hangings = new ArrayList<Entity>();
+            for (Entity entity : chunk.getEntities()) {
+                if (entity instanceof Hanging && entity.getType().getTypeId() == entityId) {
+                    if (isSameLocation(entity.getLocation().toVector(), vector)) {
+                        hangings.add(entity);
+                    }
+                }
+            }
+            return hangings.toArray(new Hanging[hangings.size()]);
+        }
+
     }
 
     private class BlockChange extends BlockActionLog {
@@ -157,7 +258,7 @@ public class BlockEditor extends BukkitRunnable {
                 }
 
                 final Block block = getLocation().getBlock();
-                if ((isRedo ? blockLog.getNewBlockId() : blockLog.getOldBlockId()) == 0 && block.getTypeId() == 0) {
+                if ((isRedo ? blockLog.getNewBlockId() : blockLog.getOldBlockId()) == 0 && block.getType() == Material.AIR) {
                     return BlockEditorResult.NO_ACTION;
                 }
                 final BlockState state = block.getState();
@@ -299,15 +400,10 @@ public class BlockEditor extends BukkitRunnable {
 
         }
 
-        @Override
-        public void executeStatements(Connection connection) throws SQLException {
-
-        }
-
     }
 
-    @SuppressWarnings("serial")
     public static class BlockEditorException extends Exception implements LookupCache {
+        private static final long serialVersionUID = 2182077864822995737L;
         private final Location location;
 
         public BlockEditorException(int typeBefore, byte dataBefore, int typeAfter, byte dataAfter, Location location) {

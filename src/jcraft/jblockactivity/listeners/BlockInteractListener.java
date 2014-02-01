@@ -28,6 +28,11 @@ public class BlockInteractListener implements Listener {
         }
 
         final Player player = event.getPlayer();
+
+        if (BlockActivity.isHidden(player.getName())) {
+            return;
+        }
+
         final Block block = event.getClickedBlock();
         final int typeId = block.getTypeId();
         final byte data = block.getData();

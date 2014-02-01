@@ -18,12 +18,40 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.DoubleChest;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 public class ActivityUtil {
+
+    public static String getEntityName(Entity remover) {
+        final String name;
+        if (remover instanceof Player) {
+            name = ((Player) remover).getName();
+        } else if (remover instanceof Projectile && ((Projectile) remover).getShooter() != null) {
+            final LivingEntity shooter = ((Projectile) remover).getShooter();
+            if (shooter instanceof Player) {
+                name = ((Player) shooter).getName();
+            } else {
+                name = "BA_" + shooter.getType().name().replace('_', ' ').toUpperCase();
+            }
+        } else {
+            name = "BA_" + remover.getType().name().replace('_', ' ').toUpperCase();
+        }
+        return name;
+    }
+
+    public static boolean isSameLocation(Vector v1, Vector v2) {
+        if (v1.getBlockX() != v1.getBlockX()) return false;
+        if (v1.getBlockY() != v2.getBlockY()) return false;
+        if (v1.getBlockZ() != v2.getBlockZ()) return false;
+        return true;
+    }
 
     public static int modifyContainer(BlockState block, ItemStack item) {
         if (block instanceof InventoryHolder) {

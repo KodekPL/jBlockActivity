@@ -13,8 +13,6 @@ import java.util.logging.Level;
 
 import jcraft.jblockactivity.ActionExecuteThread.ActionRequest;
 import jcraft.jblockactivity.ActionExecuteThread.ActionRequest.ActionType;
-import jcraft.jblockactivity.actionlogs.BlockActionLog;
-import jcraft.jblockactivity.extradata.BlockExtraData;
 import jcraft.jblockactivity.session.ActiveSession;
 import jcraft.jblockactivity.session.LookupCache;
 import jcraft.jblockactivity.session.LookupCacheFactory;
@@ -234,7 +232,7 @@ public class CommandHandler implements CommandExecutor {
                         continue;
                     }
                     sender.sendMessage(((session.lookupCache[i].getLocation() != null) ? "[" + (i + 1) + "] " : "")
-                            + session.lookupCache[i].toString());
+                            + session.lookupCache[i].getMessage());
                 }
                 sender.sendMessage(ChatColor.GOLD + "-------------------");
             } else {
@@ -372,8 +370,9 @@ public class CommandHandler implements CommandExecutor {
 
             final BlockEditor editor = new BlockEditor(params.getWorld(), false);
 
+            final LookupCacheFactory logsFactory = new LookupCacheFactory(params, 0F);
             while (result.next()) {
-                editor.addBlockChange(BlockActionLog.getBlockActionLog(result, params));
+                editor.addChange(logsFactory.getLookupCache(result));
             }
 
             final int changes = editor.getSize();
@@ -442,27 +441,9 @@ public class CommandHandler implements CommandExecutor {
 
             final BlockEditor editor = new BlockEditor(params.getWorld(), true);
 
+            final LookupCacheFactory logsFactory = new LookupCacheFactory(params, 0F);
             while (result.next()) {
-                int old_id = params.needMaterial ? result.getInt("old_id") : 0;
-                int new_id = params.needMaterial ? result.getInt("new_id") : 0;
-
-                String data = params.needExtraData ? result.getString("data") : null;
-                BlockExtraData extraData = null;
-                if (data != null) {
-                    if (old_id == 63 || old_id == 68 || new_id == 63 || new_id == 68) {
-                        extraData = new BlockExtraData.SignExtraData(data);
-                    } else if (old_id == 144 || new_id == 144) {
-                        extraData = new BlockExtraData.SkullExtraData(data);
-                    } else if (old_id == 52) {
-                        extraData = new BlockExtraData.MobSpawnerExtraData(data);
-                    } else if (old_id == 140) {
-                        extraData = new BlockExtraData.FlowerPotExtraData(data);
-                    } else if (old_id == 137) {
-                        extraData = new BlockExtraData.CommandBlockExtraData(data);
-                    }
-                }
-                editor.addBlockChange(LoggingType.getTypeById(result.getInt("type")), result.getString("playername"), result.getInt("x"),
-                        result.getInt("y"), result.getInt("z"), old_id, result.getByte("old_data"), new_id, result.getByte("new_data"), extraData);
+                editor.addChange(logsFactory.getLookupCache(result));
             }
 
             final int changes = editor.getSize();

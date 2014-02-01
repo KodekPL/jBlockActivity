@@ -7,6 +7,7 @@ import jcraft.jblockactivity.LoggingType;
 import jcraft.jblockactivity.extradata.ExtraData;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.util.Vector;
@@ -52,6 +53,13 @@ public abstract class ActionLog {
         return playerName;
     }
 
+    public String getColoredPlayerName() {
+        if (playerName.startsWith("BA_")) {
+            return playerName.replace("BA_", ChatColor.GREEN.toString());
+        }
+        return ChatColor.GOLD + getPlayerName();
+    }
+
     public String getWorldName() {
         return worldName;
     }
@@ -60,11 +68,16 @@ public abstract class ActionLog {
         return location;
     }
 
+    public World getWorld() {
+        final World world = Bukkit.getWorld(worldName);
+        return world;
+    }
+
     public Location getLocation() {
         if (location == null) {
             return null;
         }
-        final World world = Bukkit.getWorld(worldName);
+        final World world = getWorld();
         if (world == null) {
             return null;
         }
@@ -80,5 +93,7 @@ public abstract class ActionLog {
     }
 
     public abstract void executeStatements(Connection connection) throws SQLException;
+
+    public abstract String getMessage();
 
 }

@@ -25,7 +25,7 @@ public class SummedActionLogs implements LookupCache {
     }
 
     @Override
-    public String toString() {
+    public String getMessage() {
         return created + makeSpaces((int) ((10 - String.valueOf(created).length()) / spaceFactor)) + destroyed
                 + makeSpaces((int) ((10 - String.valueOf(destroyed).length()) / spaceFactor)) + group;
     }

@@ -3,12 +3,16 @@ logging:
    blockplace: true
    inventoryaccess: true
    blockinteract: true
+   hangingbreak: true
+   hangingplace: true
+   itemframeinteract: true
 logExtraData:
    commandblock: true
    flowerpot: true
    mobspawner: true
    signtext: true
    skull: true
+   inventory: true
 interactblocks:
    - 23
    - 25

@@ -149,10 +149,10 @@ public class BlockActionLog extends ActionLog implements LookupCache {
     }
 
     @Override
-    public String toString() {
+    public String getMessage() {
 
-        final String add = ChatColor.GREEN + "+ " + ChatColor.GOLD + getPlayerName() + " " + ChatColor.WHITE;
-        final String sub = ChatColor.RED + "- " + ChatColor.GOLD + getPlayerName() + " " + ChatColor.WHITE;
+        final String add = ChatColor.GREEN + "+ " + getColoredPlayerName() + " " + ChatColor.WHITE;
+        final String sub = ChatColor.RED + "- " + getColoredPlayerName() + " " + ChatColor.WHITE;
         final String interact = ChatColor.YELLOW + "> " + ChatColor.GOLD + getPlayerName() + " " + ChatColor.WHITE;
 
         final StringBuilder msg = new StringBuilder();
@@ -234,6 +234,7 @@ public class BlockActionLog extends ActionLog implements LookupCache {
             }
             msg.append(ChatColor.GRAY).append(" (").append(getTimeSince()).append(')');
         }
+
         return msg.toString();
     }
 

@@ -1,8 +1,17 @@
 package jcraft.jblockactivity.utils;
 
 import org.bukkit.Material;
+import org.bukkit.entity.EntityType;
 
 public class MaterialNames {
+
+    public static String entityName(EntityType entity) {
+        return entity.name().toLowerCase().replace('_', ' ');
+    }
+
+    public static String entityName(int id) {
+        return entityName(EntityType.fromId(id));
+    }
 
     public static String materialName(int id) {
         return materialName(Material.getMaterial(id), (byte) 0);

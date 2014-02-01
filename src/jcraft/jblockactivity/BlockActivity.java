@@ -11,6 +11,7 @@ import jcraft.jblockactivity.actionlogs.ActionLog;
 import jcraft.jblockactivity.listeners.BlockBreakListener;
 import jcraft.jblockactivity.listeners.BlockInteractListener;
 import jcraft.jblockactivity.listeners.BlockPlaceListener;
+import jcraft.jblockactivity.listeners.HangingListener;
 import jcraft.jblockactivity.listeners.InventoryAccessListener;
 import jcraft.jblockactivity.listeners.LogToolListener;
 import jcraft.jblockactivity.sql.SQLConnection;
@@ -102,6 +103,9 @@ public class BlockActivity extends JavaPlugin {
         }
         if (config.isWorldsLogging(LoggingType.blockinteract)) {
             manager.registerEvents(new BlockInteractListener(), this);
+        }
+        if (config.isWorldsLogging(LoggingType.hangingbreak) || config.isWorldsLogging(LoggingType.hangingplace)) {
+            manager.registerEvents(new HangingListener(), this);
         }
         manager.registerEvents(new LogToolListener(), this);
     }

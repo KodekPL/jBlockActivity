@@ -34,6 +34,9 @@ public class InventoryAccessListener implements Listener {
         if (config == null || !config.isLogging(LoggingType.inventoryaccess)) {
             return;
         }
+        if (BlockActivity.isHidden(event.getPlayer().getName())) {
+            return;
+        }
         final InventoryHolder holder = event.getInventory().getHolder();
         if (holder instanceof BlockState || holder instanceof DoubleChest) {
             final HumanEntity player = event.getPlayer();
@@ -56,6 +59,9 @@ public class InventoryAccessListener implements Listener {
     public void onInventoryOpen(InventoryOpenEvent event) {
         final WorldConfig config = BlockActivity.getWorldConfig(event.getPlayer().getWorld().getName());
         if (config == null || !config.isLogging(LoggingType.inventoryaccess)) {
+            return;
+        }
+        if (BlockActivity.isHidden(event.getPlayer().getName())) {
             return;
         }
         if (event.getInventory() != null) {
