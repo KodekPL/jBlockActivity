@@ -42,7 +42,7 @@ public class QueryParams {
             needCoords = false, needExtraData = false, prepareToolQuery = false;
     public int limit = -1, before = 0, since = 0, radius = -1;
     public boolean excludePlayersMode = false;
-    public List<String> players = new ArrayList<String>();
+    public final List<String> players = new ArrayList<String>();
     private final List<MaterialData> types = new ArrayList<MaterialData>();
     private Location location = null;
 

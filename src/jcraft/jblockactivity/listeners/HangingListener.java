@@ -78,9 +78,9 @@ public class HangingListener implements Listener {
                 break;
             }
 
-            if (config.isLogging(LoggingType.itemframeinteract) && frame.getItem().getType() != Material.AIR) {
+            if (config.isLogging(LoggingType.hanginginteract) && frame.getItem().getType() != Material.AIR) {
                 final InventoryExtraData extraData = new InventoryExtraData(new ItemStack[] { frame.getItem() }, false);
-                final EntityActionLog action = new EntityActionLog(LoggingType.itemframeinteract, removername, location.getWorld(),
+                final EntityActionLog action = new EntityActionLog(LoggingType.hanginginteract, removername, location.getWorld(),
                         location.toVector(), entityType, face, extraData);
                 BlockActivity.sendActionLog(action);
             }
@@ -109,9 +109,9 @@ public class HangingListener implements Listener {
                 return;
             }
 
-            if (config.isLogging(LoggingType.itemframeinteract) && frame.getItem().getType() != Material.AIR) {
+            if (config.isLogging(LoggingType.hanginginteract) && frame.getItem().getType() != Material.AIR) {
                 final InventoryExtraData extraData = new InventoryExtraData(new ItemStack[] { frame.getItem() }, false);
-                final EntityActionLog action = new EntityActionLog(LoggingType.itemframeinteract, removername, location.getWorld(),
+                final EntityActionLog action = new EntityActionLog(LoggingType.hanginginteract, removername, location.getWorld(),
                         location.toVector(), entityType, face, extraData);
                 BlockActivity.sendActionLog(action);
             }
@@ -123,9 +123,9 @@ public class HangingListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onPlayerInteractWithFrame(PlayerInteractEntityEvent event) {
+    public void onPlayerInteractHanging(PlayerInteractEntityEvent event) {
         final WorldConfig config = BlockActivity.getWorldConfig(event.getRightClicked().getWorld().getName());
-        if (config == null || !config.isLogging(LoggingType.itemframeinteract)) {
+        if (config == null || !config.isLogging(LoggingType.hanginginteract)) {
             return;
         }
 
@@ -142,7 +142,7 @@ public class HangingListener implements Listener {
                 item.setAmount(1);
 
                 final InventoryExtraData extraData = new InventoryExtraData(new ItemStack[] { item }, false);
-                final EntityActionLog action = new EntityActionLog(LoggingType.itemframeinteract, player.getName(), location.getWorld(),
+                final EntityActionLog action = new EntityActionLog(LoggingType.hanginginteract, player.getName(), location.getWorld(),
                         location.toVector(), entityType, face, extraData);
                 BlockActivity.sendActionLog(action);
             }
@@ -150,9 +150,9 @@ public class HangingListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onPlayerRemoveItemFromFrame(EntityDamageByEntityEvent event) {
+    public void onPlayerRemoveItemFromHanging(EntityDamageByEntityEvent event) {
         final WorldConfig config = BlockActivity.getWorldConfig(event.getEntity().getWorld().getName());
-        if (config == null || !config.isLogging(LoggingType.itemframeinteract)) {
+        if (config == null || !config.isLogging(LoggingType.hanginginteract)) {
             return;
         }
 
@@ -169,7 +169,7 @@ public class HangingListener implements Listener {
                 item.setAmount(-1);
 
                 final InventoryExtraData extraData = new InventoryExtraData(new ItemStack[] { item }, false);
-                final EntityActionLog action = new EntityActionLog(LoggingType.itemframeinteract, removername, location.getWorld(),
+                final EntityActionLog action = new EntityActionLog(LoggingType.hanginginteract, removername, location.getWorld(),
                         location.toVector(), entityType, face, extraData);
                 BlockActivity.sendActionLog(action);
             }

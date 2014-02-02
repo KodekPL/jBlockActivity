@@ -29,6 +29,10 @@ import org.bukkit.util.Vector;
 
 public class ActivityUtil {
 
+    public static boolean isItemSimilar(ItemStack item1, ItemStack item2) {
+        return item1.getType() == item2.getType() && item2.getDurability() == item2.getDurability();
+    }
+
     public static String getEntityName(Entity remover) {
         final String name;
         if (remover instanceof Player) {

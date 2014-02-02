@@ -144,6 +144,7 @@ public abstract class BlockExtraData implements ExtraData {
                 this.skullType = SkullType.values()[Integer.parseInt(splitter[2])];
             } catch (Exception e) {
                 this.rotation = BlockFace.NORTH;
+                this.name = null;
                 this.skullType = SkullType.SKELETON;
             }
         }

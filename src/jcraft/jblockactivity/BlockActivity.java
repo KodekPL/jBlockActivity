@@ -104,7 +104,8 @@ public class BlockActivity extends JavaPlugin {
         if (config.isWorldsLogging(LoggingType.blockinteract)) {
             manager.registerEvents(new BlockInteractListener(), this);
         }
-        if (config.isWorldsLogging(LoggingType.hangingbreak) || config.isWorldsLogging(LoggingType.hangingplace)) {
+        if (config.isWorldsLogging(LoggingType.hangingbreak) || config.isWorldsLogging(LoggingType.hangingplace)
+                || config.isWorldsLogging(LoggingType.hanginginteract)) {
             manager.registerEvents(new HangingListener(), this);
         }
         manager.registerEvents(new LogToolListener(), this);

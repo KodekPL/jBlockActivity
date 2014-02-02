@@ -5,7 +5,7 @@ logging:
    blockinteract: true
    hangingbreak: true
    hangingplace: true
-   itemframeinteract: true
+   hanginginteract: true
 logExtraData:
    commandblock: true
    flowerpot: true

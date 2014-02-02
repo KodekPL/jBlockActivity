@@ -13,6 +13,7 @@ import java.util.logging.Level;
 
 import jcraft.jblockactivity.ActionExecuteThread.ActionRequest;
 import jcraft.jblockactivity.ActionExecuteThread.ActionRequest.ActionType;
+import jcraft.jblockactivity.editor.BlockEditor;
 import jcraft.jblockactivity.session.ActiveSession;
 import jcraft.jblockactivity.session.LookupCache;
 import jcraft.jblockactivity.session.LookupCacheFactory;
@@ -315,7 +316,7 @@ public class CommandHandler implements CommandExecutor {
                 final ActiveSession session = ActiveSession.getSession(sender);
 
                 final ClearlogQuestion question = new ClearlogQuestion();
-                question.params = params;
+                question.setParams(params);
                 session.question = question;
 
                 if (BlockActivity.config.askClearlogs) {
@@ -387,7 +388,7 @@ public class CommandHandler implements CommandExecutor {
             final ActiveSession session = ActiveSession.getSession(sender);
 
             final RollbackQuestion question = new RollbackQuestion();
-            question.editor = editor;
+            question.setEditor(editor);
             session.question = question;
             if (BlockActivity.config.askRollbacks) {
                 askQuestion(sender);
@@ -458,7 +459,7 @@ public class CommandHandler implements CommandExecutor {
             final ActiveSession session = ActiveSession.getSession(sender);
 
             final RedoQuestion question = new RedoQuestion();
-            question.editor = editor;
+            question.setEditor(editor);
             session.question = question;
 
             if (BlockActivity.config.askRedos) {
@@ -508,7 +509,7 @@ public class CommandHandler implements CommandExecutor {
         } else {
             try {
                 if (question instanceof RollbackQuestion) {
-                    final BlockEditor editor = ((RollbackQuestion) session.question).editor;
+                    final BlockEditor editor = ((RollbackQuestion) session.question).getEditor();
                     final int changes = editor.getSize();
                     editor.start();
                     session.lookupCache = editor.errors;
@@ -516,7 +517,7 @@ public class CommandHandler implements CommandExecutor {
                             + editor.getSuccesses() + "/" + changes + " blocks"
                             + ((editor.getErrors() > 0) ? ", " + ChatColor.RED + editor.getErrors() + " errors" + ChatColor.GREEN : "") + ")");
                 } else if (question instanceof RedoQuestion) {
-                    final BlockEditor editor = ((RedoQuestion) session.question).editor;
+                    final BlockEditor editor = ((RedoQuestion) session.question).getEditor();
                     final int changes = editor.getSize();
                     editor.start();
                     session.lookupCache = editor.errors;
@@ -524,7 +525,7 @@ public class CommandHandler implements CommandExecutor {
                             + "/" + changes + " blocks"
                             + ((editor.getErrors() > 0) ? ", " + ChatColor.RED + editor.getErrors() + " errors" + ChatColor.GREEN : "") + ")");
                 } else if (question instanceof ClearlogQuestion) {
-                    final QueryParams params = ((ClearlogQuestion) session.question).params;
+                    final QueryParams params = ((ClearlogQuestion) session.question).getParams();
                     SQLConnection sqlConnection = null;
                     Statement state = null;
                     ResultSet result = null;

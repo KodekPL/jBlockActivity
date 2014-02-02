@@ -54,8 +54,8 @@ public class EntityActionLog extends ActionLog implements LookupCache {
             state.setInt(2, getLoggingType().getId());
             state.setInt(3, (getLoggingType() == LoggingType.hangingbreak) ? getEntityId() : 0);
             state.setInt(4, (getLoggingType() == LoggingType.hangingbreak) ? getEntityData() : 0);
-            state.setInt(5, (getLoggingType() == LoggingType.hangingplace) ? getEntityId() : 0);
-            state.setInt(6, (getLoggingType() == LoggingType.hangingplace) ? getEntityData() : 0);
+            state.setInt(5, (getLoggingType() == LoggingType.hangingplace || getLoggingType() == LoggingType.hanginginteract) ? getEntityId() : 0);
+            state.setInt(6, (getLoggingType() == LoggingType.hangingplace || getLoggingType() == LoggingType.hanginginteract) ? getEntityData() : 0);
             state.setInt(7, getVector().getBlockX());
             state.setInt(8, getVector().getBlockY());
             state.setInt(9, getVector().getBlockZ());
@@ -144,7 +144,7 @@ public class EntityActionLog extends ActionLog implements LookupCache {
                         .append(getVector().getBlockZ());
             }
             msg.append(ChatColor.GRAY).append(" (").append(getTimeSince()).append(')');
-        } else if (getLoggingType() == LoggingType.itemframeinteract && getExtraData() != null) {
+        } else if (getLoggingType() == LoggingType.hanginginteract && getExtraData() != null) {
             final String prefixTime = ChatColor.GRAY + formatTime(getTime()) + " ";
             final String suffixTime = ChatColor.GRAY + " (" + getTimeSince() + ")";
             if (getExtraData() instanceof InventoryExtraData) {
@@ -183,7 +183,7 @@ public class EntityActionLog extends ActionLog implements LookupCache {
         if (logType == LoggingType.hangingbreak) {
             entity_id = params.needMaterial ? result.getInt("old_id") : 0;
             entity_data = params.needData ? result.getByte("old_data") : (byte) 0;
-        } else if (logType == LoggingType.hangingplace) {
+        } else {
             entity_id = params.needMaterial ? result.getInt("new_id") : 0;
             entity_data = params.needData ? result.getByte("new_data") : (byte) 0;
         }
@@ -191,7 +191,7 @@ public class EntityActionLog extends ActionLog implements LookupCache {
         final String data = params.needExtraData ? result.getString("data") : null;
         ExtraData extraData = null;
         if (data != null) {
-            if (logType == LoggingType.inventoryaccess || logType == LoggingType.itemframeinteract) {
+            if (logType == LoggingType.hanginginteract) {
                 extraData = new InventoryExtraData(data);
             }
         }

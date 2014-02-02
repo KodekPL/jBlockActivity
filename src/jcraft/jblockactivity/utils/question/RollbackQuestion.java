@@ -1,9 +1,17 @@
 package jcraft.jblockactivity.utils.question;
 
-import jcraft.jblockactivity.BlockEditor;
+import jcraft.jblockactivity.editor.BlockEditor;
 
 public class RollbackQuestion implements QuestionData {
 
-    public BlockEditor editor = null;
+    private BlockEditor editor = null;
+
+    public BlockEditor getEditor() {
+        return editor;
+    }
+
+    public void setEditor(BlockEditor editor) {
+        this.editor = editor;
+    }
 
 }

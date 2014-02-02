@@ -30,7 +30,7 @@ public class LookupCacheFactory {
                 return BlockActionLog.getBlockActionLog(result, params);
             case hangingbreak:
             case hangingplace:
-            case itemframeinteract:
+            case hanginginteract:
                 return EntityActionLog.getEntityActionLog(result, params);
             default:
                 return null;
