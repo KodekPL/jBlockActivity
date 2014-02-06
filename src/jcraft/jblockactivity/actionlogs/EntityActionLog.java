@@ -1,6 +1,7 @@
 package jcraft.jblockactivity.actionlogs;
 
 import static jcraft.jblockactivity.utils.ActivityUtil.formatTime;
+import static jcraft.jblockactivity.utils.ActivityUtil.fromJson;
 import static jcraft.jblockactivity.utils.ActivityUtil.getPlayerId;
 
 import java.sql.Connection;
@@ -12,6 +13,7 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import jcraft.jblockactivity.LoggingType;
+import jcraft.jblockactivity.extradata.EntityExtraData;
 import jcraft.jblockactivity.extradata.ExtraData;
 import jcraft.jblockactivity.extradata.InventoryExtraData;
 import jcraft.jblockactivity.session.LookupCache;
@@ -26,7 +28,7 @@ import org.bukkit.util.Vector;
 
 public class EntityActionLog extends ActionLog implements LookupCache {
 
-    private int entityId, entityData;
+    private int entityId, entityData; // $codepro.audit.disable variableShouldBeFinal
 
     public EntityActionLog(LoggingType type, String playerName, World world, Vector location, int entityId, int dataId, ExtraData extraData) {
         super(type, playerName, world, location, extraData);
@@ -52,8 +54,8 @@ public class EntityActionLog extends ActionLog implements LookupCache {
                     + getPlayerId(getPlayerName()) + ", ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
             state.setLong(1, getTime());
             state.setInt(2, getLoggingType().getId());
-            state.setInt(3, (getLoggingType() == LoggingType.hangingbreak) ? getEntityId() : 0);
-            state.setInt(4, (getLoggingType() == LoggingType.hangingbreak) ? getEntityData() : 0);
+            state.setInt(3, (getLoggingType() == LoggingType.hangingbreak || getLoggingType() == LoggingType.creaturekill) ? getEntityId() : 0);
+            state.setInt(4, (getLoggingType() == LoggingType.hangingbreak || getLoggingType() == LoggingType.creaturekill) ? getEntityData() : 0);
             state.setInt(5, (getLoggingType() == LoggingType.hangingplace || getLoggingType() == LoggingType.hanginginteract) ? getEntityId() : 0);
             state.setInt(6, (getLoggingType() == LoggingType.hangingplace || getLoggingType() == LoggingType.hanginginteract) ? getEntityData() : 0);
             state.setInt(7, getVector().getBlockX());
@@ -62,7 +64,7 @@ public class EntityActionLog extends ActionLog implements LookupCache {
             state.executeUpdate();
 
             final ExtraData extraData = getExtraData();
-            if (extraData != null) {
+            if (extraData != null && extraData.getData() != null && !extraData.getData().equals("{}")) {
                 final int id;
                 final ResultSet result = state.getGeneratedKeys();
                 result.next();
@@ -98,7 +100,7 @@ public class EntityActionLog extends ActionLog implements LookupCache {
 
         final long diffInSeconds = (end.getTime() - start.getTime()) / 1000;
 
-        final long diff[] = new long[] { 0, 0, 0, 0 };
+        final long diff[] = { 0L, 0L, 0L, 0L };
         diff[0] = TimeUnit.SECONDS.toDays(diffInSeconds);
         diff[1] = TimeUnit.SECONDS.toHours(diffInSeconds) - (diff[0] * 24);
         diff[2] = TimeUnit.SECONDS.toMinutes(diffInSeconds) - (TimeUnit.SECONDS.toHours(diffInSeconds) * 60);
@@ -124,7 +126,7 @@ public class EntityActionLog extends ActionLog implements LookupCache {
 
         final String add = ChatColor.GREEN + "+ " + getColoredPlayerName() + " " + ChatColor.WHITE;
         final String sub = ChatColor.RED + "- " + getColoredPlayerName() + " " + ChatColor.WHITE;
-        // final String interact = ChatColor.YELLOW + "> " + ChatColor.GOLD + getPlayerName() + " " + ChatColor.WHITE;
+        final String interact = ChatColor.YELLOW + "> " + getColoredPlayerName() + " " + ChatColor.WHITE;
 
         final StringBuilder msg = new StringBuilder();
 
@@ -145,27 +147,26 @@ public class EntityActionLog extends ActionLog implements LookupCache {
             }
             msg.append(ChatColor.GRAY).append(" (").append(getTimeSince()).append(')');
         } else if (getLoggingType() == LoggingType.hanginginteract && getExtraData() != null) {
-            final String prefixTime = ChatColor.GRAY + formatTime(getTime()) + " ";
-            final String suffixTime = ChatColor.GRAY + " (" + getTimeSince() + ")";
+            msg.append(ChatColor.GRAY).append(formatTime(getTime())).append(' ');
             if (getExtraData() instanceof InventoryExtraData) {
                 final InventoryExtraData extraData = (InventoryExtraData) getExtraData();
-                for (int i = 0; i < extraData.getContent().length; i++) {
-                    ItemStack item = extraData.getContent()[i];
-                    if (item == null) continue;
+                final ItemStack item = (extraData.getContent().length > 0) ? extraData.getContent()[0] : null;
+                if (item != null) {
                     if (item.getAmount() < 0) {
-                        msg.append(prefixTime).append(sub).append("took ").append(-item.getAmount()).append("x ")
-                                .append(MaterialNames.materialName(item.getTypeId(), item.getData().getData())).append(" from item frame")
-                                .append(suffixTime);
+                        msg.append(sub).append("took ").append(-item.getAmount()).append("x ")
+                                .append(MaterialNames.materialName(item.getTypeId(), item.getData().getData())).append(" from item frame");
                     } else {
-                        msg.append(prefixTime).append(add).append("put ").append(item.getAmount()).append("x ")
-                                .append(MaterialNames.materialName(item.getTypeId(), item.getData().getData())).append(" into item frame")
-                                .append(suffixTime);
+                        msg.append(add).append("put ").append(item.getAmount()).append("x ")
+                                .append(MaterialNames.materialName(item.getTypeId(), item.getData().getData())).append(" into item frame");
                     }
-                    if (i < extraData.getContent().length) {
-                        msg.append('\n');
-                    }
+                } else {
+                    msg.append(interact).append("did something with item frame");
                 }
+                msg.append(ChatColor.GRAY).append(" (").append(getTimeSince()).append(')');
             }
+        } else if (getLoggingType() == LoggingType.creaturekill) {
+            msg.append(ChatColor.GRAY).append(formatTime(getTime())).append(' ').append(sub).append("killed ")
+                    .append(MaterialNames.entityName(getEntityId())).append(ChatColor.GRAY).append(" (").append(getTimeSince()).append(')');
         }
 
         return msg.toString();
@@ -180,7 +181,7 @@ public class EntityActionLog extends ActionLog implements LookupCache {
 
         int entity_id = 0;
         int entity_data = 0;
-        if (logType == LoggingType.hangingbreak) {
+        if (logType == LoggingType.hangingbreak || logType == LoggingType.creaturekill) {
             entity_id = params.needMaterial ? result.getInt("old_id") : 0;
             entity_data = params.needData ? result.getByte("old_data") : (byte) 0;
         } else {
@@ -193,6 +194,34 @@ public class EntityActionLog extends ActionLog implements LookupCache {
         if (data != null) {
             if (logType == LoggingType.hanginginteract) {
                 extraData = new InventoryExtraData(data);
+            } else if (logType == LoggingType.creaturekill) {
+                if (entity_id == 50) {
+                    extraData = fromJson(data, EntityExtraData.CreeperExtraData.class);
+                } else if (entity_id == 51) {
+                    extraData = fromJson(data, EntityExtraData.SkeletonExtraData.class);
+                } else if (entity_id == 54) {
+                    extraData = fromJson(data, EntityExtraData.ZombieExtraData.class);
+                } else if (entity_id == 55) {
+                    extraData = fromJson(data, EntityExtraData.SlimeExtraData.class);
+                } else if (entity_id == 58) {
+                    extraData = fromJson(data, EntityExtraData.EndermanExtraData.class);
+                } else if (entity_id == 62) {
+                    extraData = fromJson(data, EntityExtraData.MagmaCubeExtraData.class);
+                } else if (entity_id == 90) {
+                    extraData = fromJson(data, EntityExtraData.PigExtraData.class);
+                } else if (entity_id == 91) {
+                    extraData = fromJson(data, EntityExtraData.SheepExtraData.class);
+                } else if (entity_id == 95) {
+                    extraData = fromJson(data, EntityExtraData.WolfExtraData.class);
+                } else if (entity_id == 98) {
+                    extraData = fromJson(data, EntityExtraData.OcelotExtraData.class);
+                } else if (entity_id == 99) {
+                    extraData = fromJson(data, EntityExtraData.IronGolemExtraData.class);
+                } else if (entity_id == 100) {
+                    extraData = fromJson(data, EntityExtraData.HorseExtraData.class);
+                } else if (entity_id == 120) {
+                    extraData = fromJson(data, EntityExtraData.VillagerExtraData.class);
+                }
             }
         }
         final EntityActionLog log = new EntityActionLog(logType, playerName, params.getWorld(), location, entity_id, entity_data, extraData);
@@ -200,4 +229,5 @@ public class EntityActionLog extends ActionLog implements LookupCache {
         log.setTime(time);
         return log;
     }
+
 }

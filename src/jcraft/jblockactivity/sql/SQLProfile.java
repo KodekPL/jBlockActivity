@@ -7,32 +7,36 @@ public class SQLProfile {
     private final String port;
     private final String host;
 
-    public SQLProfile(String host, String portnmbr, String database, String username, String password) {
+    public SQLProfile(String host, String port, String database, String username, String password) {
         this.host = host;
-        this.port = portnmbr;
+        this.port = port;
         this.database = database;
         this.user = username;
         this.password = password;
     }
 
     public String getHost() {
-        return this.host;
+        return host;
     }
 
     public String getPort() {
-        return this.port;
+        return port;
     }
 
     public String getDatabase() {
-        return this.database;
+        return database;
     }
 
     public String getUser() {
-        return this.user;
+        return user;
     }
 
     public String getPassword() {
-        return this.password;
+        return password;
+    }
+
+    public String getUrl() {
+        return "jdbc:mysql://" + getHost() + ":" + getPort() + "/" + getDatabase() + "?useUnicode=true&characterEncoding=utf-8";
     }
 
 }

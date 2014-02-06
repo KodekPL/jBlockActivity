@@ -31,12 +31,15 @@ public class LookupCacheFactory {
             case hangingbreak:
             case hangingplace:
             case hanginginteract:
+            case creaturekill:
                 return EntityActionLog.getEntityActionLog(result, params);
             default:
                 return null;
             }
+        } else if (params.mode == SummarizationMode.BLOCKS) {
+            return new SummedActionLogs.SummedBlockActionLogs(result, params, spaceFactor);
         } else {
-            return new SummedActionLogs(result, params, spaceFactor);
+            return new SummedActionLogs.SummedEntityActionLogs(result, params, spaceFactor);
         }
     }
 }

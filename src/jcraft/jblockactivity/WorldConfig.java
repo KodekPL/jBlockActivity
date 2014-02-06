@@ -2,6 +2,7 @@ package jcraft.jblockactivity;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
@@ -11,20 +12,20 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import jcraft.jblockactivity.sql.SQLConnection;
-
 import org.bukkit.World;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 public class WorldConfig {
 
+    private final File configFile;
+    private final YamlConfiguration config;
+
     private final String worldName;
     private boolean[] loggingTypes;
     private boolean[] extraLoggingTypes;
     private Set<Integer> interactBlocks;
-
-    private final File configFile;
-    private final YamlConfiguration config;
+    public int limitEntitiesPerChunk;
+    public Set<Integer> blockBlacklist, replaceAnyway, loggingCreatures;
 
     public WorldConfig(World world) {
         this.worldName = world.getName().toLowerCase();
@@ -44,8 +45,12 @@ public class WorldConfig {
             configDef.put("logExtraData." + type.name(), true);
         }
 
-        configDef.put("interactblocks",
+        configDef.put("special.rollback.LimitEntitiesPerChunk", 16);
+        configDef.put("special.rollback.replaceAnyway", Arrays.asList(8, 9, 10, 11, 51));
+        configDef.put("special.rollback.blockBlacklist", Arrays.asList(10, 11, 46, 51));
+        configDef.put("special.logging.interactBlocks",
                 Arrays.asList(23, 25, 54, 61, 62, 64, 69, 77, 84, 92, 93, 94, 96, 107, 117, 138, 143, 145, 146, 149, 150, 154, 158));
+        configDef.put("special.logging.creatures", Arrays.asList(90, 91, 92, 93, 95, 96, 98, 100, 120));
 
         for (Entry<String, Object> e : configDef.entrySet()) {
             if (!config.contains(e.getKey())) {
@@ -77,8 +82,15 @@ public class WorldConfig {
         }
 
         if (isLogging(LoggingType.blockinteract)) {
-            interactBlocks = new HashSet<Integer>(config.getIntegerList("interactblocks"));
+            interactBlocks = new HashSet<Integer>(config.getIntegerList("special.logging.interactBlocks"));
         }
+        if (isLogging(LoggingType.creaturekill)) {
+            loggingCreatures = new HashSet<Integer>(config.getIntegerList("special.logging.creatures"));
+        }
+
+        limitEntitiesPerChunk = config.getInt("special.rollback.LimitEntitiesPerChunk");
+        replaceAnyway = new HashSet<Integer>(config.getIntegerList("special.rollback.replaceAnyway"));
+        blockBlacklist = new HashSet<Integer>(config.getIntegerList("special.rollback.blockBlacklist"));
 
         try {
             createTable();
@@ -112,9 +124,11 @@ public class WorldConfig {
     }
 
     public void createTable() throws SQLException {
-        final SQLConnection sqlConnection = new SQLConnection(BlockActivity.sqlProfile);
-        sqlConnection.open();
-        final Statement state = sqlConnection.getConnection().createStatement();
+        final Connection connection = BlockActivity.getBlockActivity().getConnection();
+        if (connection == null) {
+            return;
+        }
+        final Statement state = connection.createStatement();
         state.executeUpdate("CREATE TABLE IF NOT EXISTS `ba-"
                 + worldName
                 + "` (id INT UNSIGNED NOT NULL AUTO_INCREMENT, time DATETIME NOT NULL, type INT UNSIGNED NOT NULL, playerid INT UNSIGNED NOT NULL, old_id INT UNSIGNED NOT NULL, old_data INT UNSIGNED NOT NULL, new_id INT UNSIGNED NOT NULL, new_data INT UNSIGNED NOT NULL, x MEDIUMINT NOT NULL, y SMALLINT UNSIGNED NOT NULL, z MEDIUMINT NOT NULL, PRIMARY KEY (id), KEY coords (x, z, y), KEY time (time), KEY playerid (playerid))");
@@ -123,7 +137,7 @@ public class WorldConfig {
                     + "-extra` (id INT UNSIGNED NOT NULL, data text, PRIMARY KEY (id)) DEFAULT CHARSET=utf8");
         }
         state.close();
-        sqlConnection.closeConnection();
+        connection.close();
     }
 
 }

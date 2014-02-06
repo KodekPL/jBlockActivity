@@ -4,6 +4,7 @@ import static jcraft.jblockactivity.utils.ActivityUtil.isInt;
 import static jcraft.jblockactivity.utils.ActivityUtil.saveSpawnHeight;
 import static org.bukkit.Bukkit.getLogger;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -14,10 +15,10 @@ import java.util.logging.Level;
 import jcraft.jblockactivity.ActionExecuteThread.ActionRequest;
 import jcraft.jblockactivity.ActionExecuteThread.ActionRequest.ActionType;
 import jcraft.jblockactivity.editor.BlockEditor;
+import jcraft.jblockactivity.editor.BlockEditorResult;
 import jcraft.jblockactivity.session.ActiveSession;
 import jcraft.jblockactivity.session.LookupCache;
 import jcraft.jblockactivity.session.LookupCacheFactory;
-import jcraft.jblockactivity.sql.SQLConnection;
 import jcraft.jblockactivity.utils.QueryParams;
 import jcraft.jblockactivity.utils.QueryParams.Order;
 import jcraft.jblockactivity.utils.QueryParams.SummarizationMode;
@@ -245,13 +246,16 @@ public class CommandHandler implements CommandExecutor {
     }
 
     public void lookupCmd(CommandSender sender, QueryParams params) {
-        SQLConnection sqlConnection = null;
+        Connection connection = null;
         Statement state = null;
         ResultSet result = null;
         try {
-            sqlConnection = new SQLConnection(BlockActivity.sqlProfile);
-            sqlConnection.open();
-            state = sqlConnection.getConnection().createStatement();
+            connection = BlockActivity.getBlockActivity().getConnection();
+            if (connection == null) {
+                sender.sendMessage(ChatColor.RED + "MySQL connection lost!");
+                return;
+            }
+            state = connection.createStatement();
             result = state.executeQuery(params.getQuery());
 
             if (result.next()) {
@@ -266,7 +270,13 @@ public class CommandHandler implements CommandExecutor {
                 session.lastParams = params;
 
                 if (params.mode != SummarizationMode.NONE) {
-                    sender.sendMessage(ChatColor.GOLD + "Created - Destroyed - " + ((params.mode == SummarizationMode.TYPES) ? "Block" : "Player"));
+                    if (params.mode == SummarizationMode.BLOCKS) {
+                        sender.sendMessage(ChatColor.GOLD + "Created - Destroyed - Block");
+                    } else if (params.mode == SummarizationMode.ENTITIES) {
+                        sender.sendMessage(ChatColor.GOLD + "Kills - Entity");
+                    } else {
+                        sender.sendMessage(ChatColor.GOLD + "Created - Destroyed - Player");
+                    }
                 }
 
                 showPage(sender, 1);
@@ -281,14 +291,14 @@ public class CommandHandler implements CommandExecutor {
             sender.sendMessage(ChatColor.RED + e2.getMessage());
         } finally {
             try {
-                if (sqlConnection.getConnection() != null) {
-                    sqlConnection.getConnection().close();
+                if (result != null) {
+                    result.close();
                 }
                 if (state != null) {
                     state.close();
                 }
-                if (result != null) {
-                    result.close();
+                if (connection != null) {
+                    connection.close();
                 }
             } catch (SQLException e) {
                 getLogger().log(Level.SEVERE, "[CommandsHandler] SQL Exception on close!", e);
@@ -297,13 +307,16 @@ public class CommandHandler implements CommandExecutor {
     }
 
     public void clearlogCmd(CommandSender sender, QueryParams params) {
-        SQLConnection sqlConnection = null;
+        Connection connection = null;
         Statement state = null;
         ResultSet result = null;
         try {
-            sqlConnection = new SQLConnection(BlockActivity.sqlProfile);
-            sqlConnection.open();
-            state = sqlConnection.getConnection().createStatement();
+            connection = BlockActivity.getBlockActivity().getConnection();
+            if (connection == null) {
+                sender.sendMessage(ChatColor.RED + "MySQL connection lost!");
+                return;
+            }
+            state = connection.createStatement();
 
             int deleted = 0;
             final String join = (params.players.size() > 0) ? "INNER JOIN `ba-players` USING (playerid) " : "";
@@ -332,14 +345,14 @@ public class CommandHandler implements CommandExecutor {
             getLogger().log(Level.SEVERE, "[ClearLog] " + params.getQuery() + ": ", e);
         } finally {
             try {
-                if (sqlConnection.getConnection() != null) {
-                    sqlConnection.getConnection().close();
+                if (result != null) {
+                    result.close();
                 }
                 if (state != null) {
                     state.close();
                 }
-                if (result != null) {
-                    result.close();
+                if (connection != null) {
+                    connection.close();
                 }
             } catch (SQLException e) {
                 getLogger().log(Level.SEVERE, "[CommandsHandler] SQL Exception on close!", e);
@@ -348,7 +361,7 @@ public class CommandHandler implements CommandExecutor {
     }
 
     public void rollbackCmd(CommandSender sender, QueryParams params) {
-        SQLConnection sqlConnection = null;
+        Connection connection = null;
         Statement state = null;
         ResultSet result = null;
 
@@ -364,9 +377,12 @@ public class CommandHandler implements CommandExecutor {
         params.mode = SummarizationMode.NONE;
 
         try {
-            sqlConnection = new SQLConnection(BlockActivity.sqlProfile);
-            sqlConnection.open();
-            state = sqlConnection.getConnection().createStatement();
+            connection = BlockActivity.getBlockActivity().getConnection();
+            if (connection == null) {
+                sender.sendMessage(ChatColor.RED + "MySQL connection lost!");
+                return;
+            }
+            state = connection.createStatement();
             result = state.executeQuery(params.getQuery());
 
             final BlockEditor editor = new BlockEditor(params.getWorld(), false);
@@ -403,14 +419,14 @@ public class CommandHandler implements CommandExecutor {
             sender.sendMessage(ChatColor.RED + e.getMessage());
         } finally {
             try {
-                if (sqlConnection.getConnection() != null) {
-                    sqlConnection.getConnection().close();
+                if (result != null) {
+                    result.close();
                 }
                 if (state != null) {
                     state.close();
                 }
-                if (result != null) {
-                    result.close();
+                if (connection != null) {
+                    connection.close();
                 }
             } catch (SQLException e) {
                 getLogger().log(Level.SEVERE, "[CommandsHandler] SQL Exception on close!", e);
@@ -419,7 +435,7 @@ public class CommandHandler implements CommandExecutor {
     }
 
     public void redoCmd(CommandSender sender, QueryParams params) {
-        SQLConnection sqlConnection = null;
+        Connection connection = null;
         Statement state = null;
         ResultSet result = null;
 
@@ -435,9 +451,12 @@ public class CommandHandler implements CommandExecutor {
         params.mode = SummarizationMode.NONE;
 
         try {
-            sqlConnection = new SQLConnection(BlockActivity.sqlProfile);
-            sqlConnection.open();
-            state = sqlConnection.getConnection().createStatement();
+            connection = BlockActivity.getBlockActivity().getConnection();
+            if (connection == null) {
+                sender.sendMessage(ChatColor.RED + "MySQL connection lost!");
+                return;
+            }
+            state = connection.createStatement();
             result = state.executeQuery(params.getQuery());
 
             final BlockEditor editor = new BlockEditor(params.getWorld(), true);
@@ -475,14 +494,14 @@ public class CommandHandler implements CommandExecutor {
             sender.sendMessage(ChatColor.RED + e.getMessage());
         } finally {
             try {
-                if (sqlConnection.getConnection() != null) {
-                    sqlConnection.getConnection().close();
+                if (result != null) {
+                    result.close();
                 }
                 if (state != null) {
                     state.close();
                 }
-                if (result != null) {
-                    result.close();
+                if (connection != null) {
+                    connection.close();
                 }
             } catch (SQLException e) {
                 getLogger().log(Level.SEVERE, "[CommandsHandler] SQL Exception on close!", e);
@@ -510,29 +529,84 @@ public class CommandHandler implements CommandExecutor {
             try {
                 if (question instanceof RollbackQuestion) {
                     final BlockEditor editor = ((RollbackQuestion) session.question).getEditor();
-                    final int changes = editor.getSize();
                     editor.start();
                     session.lookupCache = editor.errors;
-                    sender.sendMessage(ChatColor.GREEN + "Rollback finished successfully (" + editor.getElapsedTime() + " ms, "
-                            + editor.getSuccesses() + "/" + changes + " blocks"
+                    sender.sendMessage(ChatColor.GREEN + "Rollback finished successfully (" + editor.getElapsedTime() + " ms"
                             + ((editor.getErrors() > 0) ? ", " + ChatColor.RED + editor.getErrors() + " errors" + ChatColor.GREEN : "") + ")");
+
+                    final int blockChanges = editor.getResults(BlockEditorResult.BLOCK_CREATED) + editor.getResults(BlockEditorResult.BLOCK_REMOVED)
+                            + editor.getResults(BlockEditorResult.BLOCK_BLACKLIST) + editor.getResults(BlockEditorResult.NO_BLOCK_ACTION);
+                    final int inventoryChanges = editor.getResults(BlockEditorResult.INVENTORY_ACCESS)
+                            + editor.getResults(BlockEditorResult.NO_INVENTORY_ACTION);
+                    final int hangingChanges = editor.getResults(BlockEditorResult.HANGING_SPAWNED)
+                            + editor.getResults(BlockEditorResult.HANGING_REMOVED) + editor.getResults(BlockEditorResult.NO_HANGING_ACTION);
+                    final int entityChanges = editor.getResults(BlockEditorResult.ENTITY_SPAWNED)
+                            + editor.getResults(BlockEditorResult.NO_ENTITY_ACTION);
+
+                    if (blockChanges > 0) {
+                        sender.sendMessage(ChatColor.GREEN + " Changed blocks: "
+                                + (editor.getResults(BlockEditorResult.BLOCK_CREATED) + editor.getResults(BlockEditorResult.BLOCK_REMOVED)) + "/"
+                                + blockChanges);
+                    }
+                    if (hangingChanges > 0) {
+                        sender.sendMessage(ChatColor.GREEN + " Changed hangings: "
+                                + (editor.getResults(BlockEditorResult.HANGING_SPAWNED) + editor.getResults(BlockEditorResult.HANGING_REMOVED)) + "/"
+                                + hangingChanges);
+                    }
+                    if (inventoryChanges > 0) {
+                        sender.sendMessage(ChatColor.GREEN + " Changed inventories: " + editor.getResults(BlockEditorResult.INVENTORY_ACCESS) + "/"
+                                + inventoryChanges);
+                    }
+                    if (entityChanges > 0) {
+                        sender.sendMessage(ChatColor.GREEN + " Spawned entities: " + editor.getResults(BlockEditorResult.ENTITY_SPAWNED) + "/"
+                                + entityChanges);
+                    }
                 } else if (question instanceof RedoQuestion) {
                     final BlockEditor editor = ((RedoQuestion) session.question).getEditor();
-                    final int changes = editor.getSize();
                     editor.start();
                     session.lookupCache = editor.errors;
-                    sender.sendMessage(ChatColor.GREEN + "Redo finished successfully (" + editor.getElapsedTime() + " ms, " + editor.getSuccesses()
-                            + "/" + changes + " blocks"
+                    sender.sendMessage(ChatColor.GREEN + "Redo finished successfully (" + editor.getElapsedTime() + " ms"
                             + ((editor.getErrors() > 0) ? ", " + ChatColor.RED + editor.getErrors() + " errors" + ChatColor.GREEN : "") + ")");
+
+                    final int blockChanges = editor.getResults(BlockEditorResult.BLOCK_CREATED) + editor.getResults(BlockEditorResult.BLOCK_REMOVED)
+                            + editor.getResults(BlockEditorResult.BLOCK_BLACKLIST) + editor.getResults(BlockEditorResult.NO_BLOCK_ACTION);
+                    final int inventoryChanges = editor.getResults(BlockEditorResult.INVENTORY_ACCESS)
+                            + editor.getResults(BlockEditorResult.NO_INVENTORY_ACTION);
+                    final int hangingChanges = editor.getResults(BlockEditorResult.HANGING_SPAWNED)
+                            + editor.getResults(BlockEditorResult.HANGING_REMOVED) + editor.getResults(BlockEditorResult.NO_HANGING_ACTION);
+                    final int entityChanges = editor.getResults(BlockEditorResult.ENTITY_SPAWNED)
+                            + editor.getResults(BlockEditorResult.NO_ENTITY_ACTION);
+
+                    if (blockChanges > 0) {
+                        sender.sendMessage(ChatColor.GREEN + " Changed blocks: "
+                                + (editor.getResults(BlockEditorResult.BLOCK_CREATED) + editor.getResults(BlockEditorResult.BLOCK_REMOVED)) + "/"
+                                + blockChanges);
+                    }
+                    if (hangingChanges > 0) {
+                        sender.sendMessage(ChatColor.GREEN + " Changed hangings: "
+                                + (editor.getResults(BlockEditorResult.HANGING_SPAWNED) + editor.getResults(BlockEditorResult.HANGING_REMOVED)) + "/"
+                                + hangingChanges);
+                    }
+                    if (inventoryChanges > 0) {
+                        sender.sendMessage(ChatColor.GREEN + " Changed inventories: " + editor.getResults(BlockEditorResult.INVENTORY_ACCESS) + "/"
+                                + inventoryChanges);
+                    }
+                    if (entityChanges > 0) {
+                        sender.sendMessage(ChatColor.GREEN + " Spawned entities: " + editor.getResults(BlockEditorResult.ENTITY_SPAWNED) + "/"
+                                + entityChanges);
+                    }
                 } else if (question instanceof ClearlogQuestion) {
                     final QueryParams params = ((ClearlogQuestion) session.question).getParams();
-                    SQLConnection sqlConnection = null;
+                    Connection connection = null;
                     Statement state = null;
                     ResultSet result = null;
                     try {
-                        sqlConnection = new SQLConnection(BlockActivity.sqlProfile);
-                        sqlConnection.open();
-                        state = sqlConnection.getConnection().createStatement();
+                        connection = BlockActivity.getBlockActivity().getConnection();
+                        if (connection == null) {
+                            sender.sendMessage(ChatColor.RED + "MySQL connection lost!");
+                            return;
+                        }
+                        state = connection.createStatement();
 
                         int deleted = 0;
                         final String join = (params.players.size() > 0) ? "INNER JOIN `ba-players` USING (playerid) " : "";
@@ -544,6 +618,7 @@ public class CommandHandler implements CommandExecutor {
                             state.execute("DELETE " + params.getTable() + " FROM " + params.getTable() + join + params.getWhere(LoggingType.all));
                             sender.sendMessage(ChatColor.GREEN + "Cleared out table " + params.getTable() + ". Deleted " + deleted + " entries.");
                         }
+                        result.close();
 
                         result = state.executeQuery("SELECT COUNT(*) FROM " + params.getTable("-extra") + " LEFT JOIN " + params.getTable()
                                 + " USING (id) WHERE " + params.getTable() + ".id IS NULL");
@@ -560,14 +635,14 @@ public class CommandHandler implements CommandExecutor {
                         getLogger().log(Level.SEVERE, "[ClearLog] " + params.getQuery() + ": ", e);
                     } finally {
                         try {
-                            if (sqlConnection.getConnection() != null) {
-                                sqlConnection.getConnection().close();
+                            if (result != null) {
+                                result.close();
                             }
                             if (state != null) {
                                 state.close();
                             }
-                            if (result != null) {
-                                result.close();
+                            if (connection != null) {
+                                connection.close();
                             }
                         } catch (SQLException e) {
                             getLogger().log(Level.SEVERE, "[CommandsHandler] SQL Exception on close!", e);

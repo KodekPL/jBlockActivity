@@ -16,7 +16,6 @@ import jcraft.jblockactivity.WorldConfig;
 import jcraft.jblockactivity.actionlogs.BlockActionLog;
 import jcraft.jblockactivity.extradata.BlockExtraData;
 import jcraft.jblockactivity.extradata.BlockExtraData.CommandBlockExtraData;
-import jcraft.jblockactivity.extradata.BlockExtraData.FlowerPotExtraData;
 import jcraft.jblockactivity.extradata.BlockExtraData.MobSpawnerExtraData;
 import jcraft.jblockactivity.extradata.BlockExtraData.SignExtraData;
 import jcraft.jblockactivity.extradata.BlockExtraData.SkullExtraData;
@@ -42,7 +41,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Bed;
 import org.bukkit.material.Button;
 import org.bukkit.material.CocoaPlant;
-import org.bukkit.material.FlowerPot;
 import org.bukkit.material.Ladder;
 import org.bukkit.material.Lever;
 import org.bukkit.material.MaterialData;
@@ -69,6 +67,7 @@ public class BlockBreakListener implements Listener {
             return;
         }
 
+        // TODO: Flower Pot contents
         if (config.isExtraLogging(ExtraLoggingType.signtext) && (material == Material.WALL_SIGN || material == Material.SIGN_POST)) {
             /** SIGN **/
             final SignExtraData extraData = new SignExtraData(((org.bukkit.block.Sign) block.getState()).getLines());
@@ -86,13 +85,6 @@ public class BlockBreakListener implements Listener {
             /** MOB SPAWNER **/
             final CreatureSpawner spawner = (CreatureSpawner) block.getState();
             final MobSpawnerExtraData extraData = new MobSpawnerExtraData(spawner.getSpawnedType());
-            final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, block.getWorld(), block.getLocation().toVector(),
-                    block.getState(), null, extraData);
-            BlockActivity.sendActionLog(action);
-        } else if (config.isExtraLogging(ExtraLoggingType.flowerpot) && material == Material.FLOWER_POT) {
-            /** FLOWER POT **/
-            final FlowerPot pot = (FlowerPot) block.getState().getData();
-            final FlowerPotExtraData extraData = new FlowerPotExtraData(pot.getContents().getItemTypeId(), pot.getContents().getData());
             final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, block.getWorld(), block.getLocation().toVector(),
                     block.getState(), null, extraData);
             BlockActivity.sendActionLog(action);
@@ -186,14 +178,7 @@ public class BlockBreakListener implements Listener {
                     final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, aboveBlock.getWorld(), aboveBlock
                             .getLocation().toVector(), aboveBlock.getState(), null, extraData);
                     BlockActivity.sendActionLog(action);
-                } else if (aboveBlock.getType() == Material.FLOWER_POT) {
-                    /** FLOWER POT **/
-                    final FlowerPot pot = (FlowerPot) block.getState().getData();
-                    final FlowerPotExtraData extraData = new FlowerPotExtraData(pot.getContents().getItemTypeId(), pot.getContents().getData());
-                    final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, aboveBlock.getWorld(), aboveBlock
-                            .getLocation().toVector(), aboveBlock.getState(), null, extraData);
-                    BlockActivity.sendActionLog(action);
-                }
+                } // TODO: Flower Pot contents
             }
 
             /** RELATIVE SIDE BLOCKS **/

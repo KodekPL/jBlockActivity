@@ -1,39 +1,64 @@
 logging:
-   blockbreak: true
-   blockplace: true
-   inventoryaccess: true
-   blockinteract: true
-   hangingbreak: true
-   hangingplace: true
-   hanginginteract: true
+  blockbreak: true
+  blockplace: true
+  inventoryaccess: true
+  blockinteract: true
+  hangingbreak: true
+  hangingplace: true
+  hanginginteract: true
 logExtraData:
-   commandblock: true
-   flowerpot: true
-   mobspawner: true
-   signtext: true
-   skull: true
-   inventory: true
-interactblocks:
-   - 23
-   - 25
-   - 54
-   - 61
-   - 62
-   - 64
-   - 69
-   - 77
-   - 84
-   - 92
-   - 93
-   - 94
-   - 96
-   - 107
-   - 117
-   - 138
-   - 143
-   - 145
-   - 146
-   - 149
-   - 150
-   - 154
-   - 158
+  commandblock: true
+  flowerpot: true
+  mobspawner: true
+  signtext: true
+  skull: true
+  inventory: true
+special:
+  rollback:
+    LimitEntitiesPerChunk: true
+    replaceAnyway:
+    - 8
+    - 9
+    - 10
+    - 11
+    - 51
+    blockBlacklist:
+    - 10
+    - 11
+    - 46
+    - 51
+  logging:
+    interactBlocks:
+    - 23
+    - 25
+    - 54
+    - 61
+    - 62
+    - 64
+    - 69
+    - 77
+    - 84
+    - 92
+    - 93
+    - 94
+    - 96
+    - 107
+    - 117
+    - 138
+    - 143
+    - 145
+    - 146
+    - 149
+    - 150
+    - 154
+    - 158
+    creatures:
+    - 90
+    - 91
+    - 92
+    - 93
+    - 95
+    - 96
+    - 98
+    - 100
+    - 120

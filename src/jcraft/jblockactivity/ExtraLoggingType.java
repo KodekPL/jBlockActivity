@@ -5,7 +5,7 @@ public enum ExtraLoggingType {
 
     private final int id;
 
-    ExtraLoggingType(int id) {
+    private ExtraLoggingType(int id) {
         this.id = id;
     }
 

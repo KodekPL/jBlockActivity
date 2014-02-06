@@ -1,6 +1,7 @@
 package jcraft.jblockactivity.actionlogs;
 
 import static jcraft.jblockactivity.utils.ActivityUtil.formatTime;
+import static jcraft.jblockactivity.utils.ActivityUtil.fromJson;
 import static jcraft.jblockactivity.utils.ActivityUtil.getPlayerId;
 
 import java.sql.Connection;
@@ -30,8 +31,8 @@ import org.bukkit.util.Vector;
 
 public class BlockActionLog extends ActionLog implements LookupCache {
 
-    private int newBlockId, oldBlockId;
-    private byte newBlockData, oldBlockData;
+    private int newBlockId, oldBlockId; // $codepro.audit.disable variableShouldBeFinal
+    private byte newBlockData, oldBlockData; // $codepro.audit.disable variableShouldBeFinal
 
     public BlockActionLog(LoggingType type, String playerName, World world, Vector location, BlockState oldState, BlockState newState,
             ExtraData extraData) {
@@ -91,7 +92,7 @@ public class BlockActionLog extends ActionLog implements LookupCache {
             state.executeUpdate();
 
             final ExtraData extraData = getExtraData();
-            if (extraData != null) {
+            if (extraData != null && extraData.getData() != null && !extraData.getData().equals("{}")) {
                 final int id;
                 final ResultSet result = state.getGeneratedKeys();
                 result.next();
@@ -127,7 +128,7 @@ public class BlockActionLog extends ActionLog implements LookupCache {
 
         final long diffInSeconds = (end.getTime() - start.getTime()) / 1000;
 
-        final long diff[] = new long[] { 0, 0, 0, 0 };
+        final long diff[] = { 0L, 0L, 0L, 0L };
         diff[0] = TimeUnit.SECONDS.toDays(diffInSeconds);
         diff[1] = TimeUnit.SECONDS.toHours(diffInSeconds) - (diff[0] * 24);
         diff[2] = TimeUnit.SECONDS.toMinutes(diffInSeconds) - (TimeUnit.SECONDS.toHours(diffInSeconds) * 60);
@@ -170,11 +171,6 @@ public class BlockActionLog extends ActionLog implements LookupCache {
                 msg.append(sub).append("destroyed ").append(MaterialNames.materialName(oldBlockId, oldBlockData));
             }
 
-            if (getVector() != null) {
-                msg.append(" at ").append(getVector().getBlockX()).append(':').append(getVector().getBlockY()).append(':')
-                        .append(getVector().getBlockZ());
-            }
-
             if (getExtraData() != null) {
                 final ExtraData extraData = getExtraData();
                 if (extraData instanceof BlockExtraData) {
@@ -200,6 +196,11 @@ public class BlockActionLog extends ActionLog implements LookupCache {
                         }
                     }
                 }
+            }
+
+            if (getVector() != null) {
+                msg.append(" at ").append(getVector().getBlockX()).append(':').append(getVector().getBlockY()).append(':')
+                        .append(getVector().getBlockZ());
             }
             msg.append(ChatColor.GRAY).append(" (").append(getTimeSince()).append(')');
         } else if (getLoggingType() == LoggingType.inventoryaccess && getExtraData() != null) {
@@ -253,15 +254,15 @@ public class BlockActionLog extends ActionLog implements LookupCache {
         if (data != null) {
             if (logType == LoggingType.blockbreak || logType == LoggingType.blockplace) {
                 if (old_id == 63 || old_id == 68 || new_id == 63 || new_id == 68) {
-                    extraData = new BlockExtraData.SignExtraData(data);
+                    extraData = fromJson(data, BlockExtraData.SignExtraData.class);
                 } else if (old_id == 144 || new_id == 144) {
-                    extraData = new BlockExtraData.SkullExtraData(data);
+                    extraData = fromJson(data, BlockExtraData.SkullExtraData.class);
                 } else if (old_id == 52) {
-                    extraData = new BlockExtraData.MobSpawnerExtraData(data);
+                    extraData = fromJson(data, BlockExtraData.MobSpawnerExtraData.class);
                 } else if (old_id == 140) {
-                    extraData = new BlockExtraData.FlowerPotExtraData(data);
+                    // TODO: Flower pot contents
                 } else if (old_id == 137) {
-                    extraData = new BlockExtraData.CommandBlockExtraData(data);
+                    extraData = fromJson(data, BlockExtraData.CommandBlockExtraData.class);
                 }
             } else if (logType == LoggingType.inventoryaccess) {
                 extraData = new InventoryExtraData(data);

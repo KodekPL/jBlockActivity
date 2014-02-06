@@ -2,6 +2,7 @@ package jcraft.jblockactivity;
 
 import static org.bukkit.Bukkit.getLogger;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -11,7 +12,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 
 import jcraft.jblockactivity.actionlogs.ActionLog;
-import jcraft.jblockactivity.sql.SQLConnection;
 
 public class LogExecuteThread implements Runnable {
 
@@ -47,12 +47,14 @@ public class LogExecuteThread implements Runnable {
                 if (queue.isEmpty() || !lock.tryLock()) {
                     continue;
                 }
-                final SQLConnection sqlConnection = new SQLConnection(BlockActivity.sqlProfile);
+                Connection connection = BlockActivity.getBlockActivity().getConnection();
                 Statement state = null;
                 try {
-                    sqlConnection.open();
-                    sqlConnection.getConnection().setAutoCommit(false);
-                    state = sqlConnection.getConnection().createStatement();
+                    if (connection == null) {
+                        return;
+                    }
+                    connection.setAutoCommit(false);
+                    state = connection.createStatement();
                     final long start = System.currentTimeMillis();
                     int count = 0;
                     while (!queue.isEmpty() && (System.currentTimeMillis() - start < maxTimePerRun || count < minLogsToProcess)) {
@@ -67,20 +69,20 @@ public class LogExecuteThread implements Runnable {
                             }
                         }
                         try {
-                            log.executeStatements(sqlConnection.getConnection());
+                            log.executeStatements(connection);
                         } catch (final SQLException ex) {
                             getLogger().log(Level.SEVERE, "[Executor] SQL Exception on executing: ", ex);
                             break;
                         }
                         count++;
                     }
-                    sqlConnection.getConnection().commit();
+                    connection.commit();
                 } catch (SQLException e) {
                     getLogger().log(Level.SEVERE, "[Executor] SQL Exception on connection:", e);
                 } finally {
                     try {
                         state.close();
-                        sqlConnection.closeConnection();
+                        connection.close();
                     } catch (final SQLException ex) {
                         getLogger().log(Level.SEVERE, "[Executor] SQL Exception on close:", ex);
                     }

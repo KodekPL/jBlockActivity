@@ -2,6 +2,7 @@ package jcraft.jblockactivity.utils;
 
 import static jcraft.jblockactivity.utils.ActivityUtil.hasExtraData;
 import static jcraft.jblockactivity.utils.ActivityUtil.isInt;
+import static jcraft.jblockactivity.utils.ActivityUtil.matchEntity;
 import static jcraft.jblockactivity.utils.ActivityUtil.parseTime;
 
 import java.util.ArrayList;
@@ -17,20 +18,22 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.material.MaterialData;
 
 public class QueryParams {
 
-    private static final Set<String> validParams = new HashSet<String>(Arrays.asList("player", "area", "block", "type", "sum", "destroyed",
-            "breaked", "created", "placed", "all", "time", "since", "before", "limit", "worldname", "asc", "desc", "coords", "loc", "location"));
+    private static final Set<String> validParams = new HashSet<String>(Arrays.asList("player", "area", "block", "entity", "sum", "destroyed",
+            "breaked", "created", "placed", "kills", "all", "time", "since", "before", "limit", "worldname", "asc", "desc", "coords", "loc",
+            "location"));
 
     public static enum Order {
         ASC, DESC;
     }
 
     public static enum SummarizationMode {
-        NONE, PLAYERS, TYPES;
+        NONE, PLAYERS, BLOCKS, ENTITIES;
     }
 
     public SummarizationMode mode = SummarizationMode.NONE;
@@ -43,7 +46,8 @@ public class QueryParams {
     public int limit = -1, before = 0, since = 0, radius = -1;
     public boolean excludePlayersMode = false;
     public final List<String> players = new ArrayList<String>();
-    private final List<MaterialData> types = new ArrayList<MaterialData>();
+    private final List<MaterialData> itemTypes = new ArrayList<MaterialData>();
+    private final List<EntityType> entityTypes = new ArrayList<EntityType>();
     private Location location = null;
 
     public QueryParams(CommandSender sender, String[] args, boolean prepareToolQuery) throws IllegalArgumentException {
@@ -79,7 +83,7 @@ public class QueryParams {
                 from += "LEFT JOIN " + getTable("-extra") + " USING (id) ";
             }
             return select + " " + from + getWhere(logType) + "ORDER BY time " + order + ", id " + order + " " + getLimit();
-        } else if (mode == SummarizationMode.TYPES) {
+        } else if (mode == SummarizationMode.BLOCKS) {
             return "SELECT new_id, SUM(created) AS created, SUM(destroyed) AS destroyed FROM ((SELECT new_id, count(*) AS created, 0 AS destroyed FROM "
                     + getTable()
                     + " INNER JOIN `ba-players` USING (playerid) "
@@ -89,6 +93,10 @@ public class QueryParams {
                     + " INNER JOIN `ba-players` USING (playerid) "
                     + getWhere(LoggingType.blockbreak)
                     + "GROUP BY old_id)) AS t GROUP BY new_id ORDER BY SUM(created) + SUM(destroyed) " + order + " " + getLimit();
+        } else if (mode == SummarizationMode.ENTITIES) {
+            return "SELECT old_id, SUM(killed) AS killed FROM (SELECT old_id, count(*) AS killed FROM " + getTable()
+                    + " INNER JOIN `ba-players` USING (playerid) " + getWhere(LoggingType.creaturekill)
+                    + "GROUP BY old_id) AS t GROUP BY old_id ORDER BY SUM(killed) " + order + " " + getLimit();
         } else {
             return "SELECT playername, SUM(created) AS created, SUM(destroyed) AS destroyed FROM ((SELECT playerid, count(*) AS created, 0 AS destroyed FROM "
                     + getTable()
@@ -107,9 +115,9 @@ public class QueryParams {
         final StringBuilder where = new StringBuilder("WHERE ");
         switch (loggingType) {
         case all:
-            if (!types.isEmpty()) {
+            if (!itemTypes.isEmpty()) {
                 where.append('(');
-                for (final MaterialData block : types) {
+                for (final MaterialData block : itemTypes) {
                     where.append("((new_id = ").append(block.getItemTypeId());
                     if (block.getData() != -1) {
                         where.append(" AND new_data = ").append(block.getData()).append(')');
@@ -129,9 +137,9 @@ public class QueryParams {
             }
             break;
         case bothblocks:
-            if (!types.isEmpty()) {
+            if (!itemTypes.isEmpty()) {
                 where.append('(');
-                for (final MaterialData block : types) {
+                for (final MaterialData block : itemTypes) {
                     where.append("((new_id = ").append(block.getItemTypeId());
                     if (block.getData() != -1) {
                         where.append(" AND new_data = ").append(block.getData()).append(')');
@@ -155,9 +163,9 @@ public class QueryParams {
             }
             break;
         case blockplace:
-            if (!types.isEmpty()) {
+            if (!itemTypes.isEmpty()) {
                 where.append('(');
-                for (final MaterialData block : types) {
+                for (final MaterialData block : itemTypes) {
                     where.append("((new_id = ").append(block.getItemTypeId());
                     if (block.getData() != -1) {
                         where.append(") AND new_data = ").append(block.getData());
@@ -173,9 +181,9 @@ public class QueryParams {
             }
             break;
         case blockbreak:
-            if (!types.isEmpty()) {
+            if (!itemTypes.isEmpty()) {
                 where.append('(');
-                for (final MaterialData block : types) {
+                for (final MaterialData block : itemTypes) {
                     where.append("((old_id = ").append(block.getItemTypeId());
                     if (block.getData() != -1) {
                         where.append(") AND old_data = ").append(block.getData());
@@ -188,6 +196,18 @@ public class QueryParams {
                 where.append(" AND ").append("type = ").append(LoggingType.blockbreak.getId()).append(") AND ");
             } else {
                 where.append("type = ").append(LoggingType.blockbreak.getId()).append(" AND ");
+            }
+            break;
+        case creaturekill:
+            if (!entityTypes.isEmpty()) {
+                where.append('(');
+                for (final EntityType entity : entityTypes) {
+                    where.append("((old_id = ").append(entity.getTypeId()).append(')').append(") OR ");
+                }
+                where.delete(where.length() - 4, where.length());
+                where.append(" AND ").append("type = ").append(LoggingType.creaturekill.getId()).append(") AND ");
+            } else {
+                where.append("type = ").append(LoggingType.creaturekill.getId()).append(" AND ");
             }
             break;
         default:
@@ -272,7 +292,7 @@ public class QueryParams {
     }
 
     public World getWorld() {
-        return this.world;
+        return world;
     }
 
     public void setLocation(Location location) {
@@ -337,7 +357,7 @@ public class QueryParams {
                         if (hasExtraData(mat)) {
                             needExtraData = true;
                         }
-                        types.add(new MaterialData(mat.getId(), (byte) data));
+                        itemTypes.add(new MaterialData(mat.getId(), (byte) data));
                     } else {
                         final Material mat = Material.matchMaterial(blockName);
                         if (mat == null) {
@@ -346,8 +366,20 @@ public class QueryParams {
                         if (hasExtraData(mat)) {
                             needExtraData = true;
                         }
-                        types.add(new MaterialData(mat.getId(), (byte) -1));
+                        itemTypes.add(new MaterialData(mat.getId(), (byte) -1));
                     }
+                }
+            } else if (param.equals("entity")) {
+                if (values.length < 1) {
+                    throw new IllegalArgumentException("No or wrong count of arguments for '" + param + "'");
+                }
+                for (final String entityName : values) {
+                    final EntityType ent = matchEntity(entityName);
+                    if (ent == null) {
+                        throw new IllegalArgumentException("No entity matching: '" + entityName + "'");
+                    }
+                    needExtraData = true;
+                    entityTypes.add(ent);
                 }
             } else if (param.equals("area")) {
                 if (player == null && !prepareToolQuery) {
@@ -385,7 +417,14 @@ public class QueryParams {
                     needData = false;
                     needPlayer = false;
                 } else if (values[0].charAt(0) == 'b') {
-                    mode = SummarizationMode.TYPES;
+                    mode = SummarizationMode.BLOCKS;
+                    needTime = false;
+                    needLogType = false;
+                    needMaterial = false;
+                    needData = false;
+                    needPlayer = false;
+                } else if (values[0].charAt(0) == 'e') {
+                    mode = SummarizationMode.ENTITIES;
                     needTime = false;
                     needLogType = false;
                     needMaterial = false;
@@ -400,6 +439,8 @@ public class QueryParams {
                 logType = LoggingType.blockplace;
             } else if (param.equals("destroyed") || param.equals("breaked")) {
                 logType = LoggingType.blockbreak;
+            } else if (param.equals("kills")) {
+                logType = LoggingType.creaturekill;
             } else if (param.equals("all")) {
                 logType = LoggingType.all;
                 needExtraData = true;

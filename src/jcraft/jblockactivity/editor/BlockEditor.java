@@ -3,12 +3,15 @@ package jcraft.jblockactivity.editor;
 import static org.bukkit.Bukkit.getLogger;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 
 import jcraft.jblockactivity.BlockActivity;
+import jcraft.jblockactivity.WorldConfig;
 import jcraft.jblockactivity.actionlogs.BlockActionLog;
 import jcraft.jblockactivity.actionlogs.EntityActionLog;
 import jcraft.jblockactivity.session.LookupCache;
@@ -23,24 +26,42 @@ public class BlockEditor extends BukkitRunnable {
     private final Queue<BlockChange> blockEdits = new LinkedBlockingQueue<BlockChange>();
     private final Queue<EntityChange> entityEdits = new LinkedBlockingQueue<EntityChange>();
     private final World world;
+    private final WorldConfig worldConfig;
     private final boolean isRedo;
     private CommandSender sender;
     private int taskID;
-    private int successes = 0;
+    private final Map<BlockEditorResult, Integer> results = new HashMap<BlockEditorResult, Integer>();
     private long elapsedTime = 0;
     public LookupCache[] errors;
 
     public BlockEditor(World world, boolean isRedo) {
         this.world = world;
+        this.worldConfig = BlockActivity.getWorldConfig(world.getName());
         this.isRedo = isRedo;
+    }
+
+    public int getBlockEditsSize() {
+        return blockEdits.size();
+    }
+
+    public int getEntityEditsSize() {
+        return entityEdits.size();
     }
 
     public int getSize() {
         return blockEdits.size() + entityEdits.size();
     }
 
-    public int getSuccesses() {
-        return successes;
+    public int getResults(BlockEditorResult result) {
+        return results.containsKey(result) ? results.get(result) : 0;
+    }
+
+    public void addResult(BlockEditorResult result) {
+        if (results.containsKey(result)) {
+            results.put(result, results.get(result) + 1);
+        } else {
+            results.put(result, 1);
+        }
     }
 
     public int getErrors() {
@@ -53,6 +74,10 @@ public class BlockEditor extends BukkitRunnable {
 
     public World getWorld() {
         return world;
+    }
+
+    public WorldConfig getWorldConfig() {
+        return worldConfig;
     }
 
     public long getElapsedTime() {
@@ -88,7 +113,7 @@ public class BlockEditor extends BukkitRunnable {
             throw new Error("Failed to schedule task!");
         }
         try {
-            this.wait();
+            wait();
         } catch (final InterruptedException ex) {
             throw new InterruptedException("Interrupted!");
         }
@@ -99,16 +124,10 @@ public class BlockEditor extends BukkitRunnable {
     public synchronized void run() {
         final List<BlockEditorException> errorList = new ArrayList<BlockEditorException>();
         int counter = 0;
-        final float size = blockEdits.size() + entityEdits.size();
+        float size = blockEdits.size();
         while (!blockEdits.isEmpty() && counter < 100) {
             try {
-                switch (blockEdits.poll().perform(this)) {
-                case SUCCESS:
-                    successes++;
-                    break;
-                default:
-                    break;
-                }
+                addResult(blockEdits.poll().perform(this));
             } catch (final BlockEditorException ex) {
                 errorList.add(ex);
             } catch (final Exception ex) {
@@ -116,22 +135,17 @@ public class BlockEditor extends BukkitRunnable {
             }
             counter++;
             if (sender != null) {
-                float percentage = ((size - (blockEdits.size() - entityEdits.size())) / size) * 100.0F;
+                float percentage = ((size - (blockEdits.size())) / size) * 100.0F;
                 if (percentage % 20 == 0) {
                     sender.sendMessage(BlockActivity.prefix + ChatColor.YELLOW + " Rollback progress: " + percentage + "%" + " Blocks edited: "
                             + counter);
                 }
             }
         }
+        size = entityEdits.size();
         while (!entityEdits.isEmpty() && counter < 100) {
             try {
-                switch (entityEdits.poll().perform(this)) {
-                case SUCCESS:
-                    successes++;
-                    break;
-                default:
-                    break;
-                }
+                addResult(entityEdits.poll().perform(this));
             } catch (final BlockEditorException ex) {
                 errorList.add(ex);
             } catch (final Exception ex) {
@@ -139,9 +153,9 @@ public class BlockEditor extends BukkitRunnable {
             }
             counter++;
             if (sender != null) {
-                float percentage = ((size - (blockEdits.size() - entityEdits.size())) / size) * 100.0F;
+                float percentage = ((size - (entityEdits.size())) / size) * 100.0F;
                 if (percentage % 20 == 0) {
-                    sender.sendMessage(BlockActivity.prefix + ChatColor.YELLOW + " Rollback progress: " + percentage + "%" + " Blocks edited: "
+                    sender.sendMessage(BlockActivity.prefix + ChatColor.YELLOW + " Rollback progress: " + percentage + "%" + " Entities edited: "
                             + counter);
                 }
             }
@@ -149,7 +163,7 @@ public class BlockEditor extends BukkitRunnable {
         if (blockEdits.isEmpty() && entityEdits.isEmpty()) {
             BlockActivity.getBlockActivity().getServer().getScheduler().cancelTask(taskID);
             errors = errorList.toArray(new BlockEditorException[errorList.size()]);
-            this.notifyAll();
+            notifyAll();
         }
     }
 

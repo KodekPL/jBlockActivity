@@ -1,10 +1,9 @@
-jBlockActivity 0.5.1
+jBlockActivity 0.6.0
 ==============
 
 My idea of better and simpler LogBlock!
 
 ## TODO: 
-* Logging of entities (animals, monsters)
-* Ability to rollback entities
+* Save inventory better
 * Create documentation
 * Create converter for LogBlock

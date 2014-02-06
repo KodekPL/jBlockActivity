@@ -31,18 +31,6 @@ tools:
     rightClickBehavior: BLOCK
 logging:
   hiddenPlayers: []
-rollback:
-  replaceAnyway:
-  - 8
-  - 9
-  - 10
-  - 11
-  - 51
-  blockBlacklist:
-  - 10
-  - 11
-  - 46
-  - 51
 questioner:
   askRollbacks: true
   askRedos: true

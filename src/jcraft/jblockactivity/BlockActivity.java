@@ -1,6 +1,7 @@
 package jcraft.jblockactivity;
 
 import java.io.File;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
@@ -11,10 +12,11 @@ import jcraft.jblockactivity.actionlogs.ActionLog;
 import jcraft.jblockactivity.listeners.BlockBreakListener;
 import jcraft.jblockactivity.listeners.BlockInteractListener;
 import jcraft.jblockactivity.listeners.BlockPlaceListener;
+import jcraft.jblockactivity.listeners.CreatureKillListener;
 import jcraft.jblockactivity.listeners.HangingListener;
 import jcraft.jblockactivity.listeners.InventoryAccessListener;
 import jcraft.jblockactivity.listeners.LogToolListener;
-import jcraft.jblockactivity.sql.SQLConnection;
+import jcraft.jblockactivity.sql.SQLConnectionPool;
 import jcraft.jblockactivity.sql.SQLProfile;
 import jcraft.jblockactivity.tool.LogTool;
 
@@ -32,7 +34,10 @@ public class BlockActivity extends JavaPlugin {
     private static CommandHandler cmdHandler;
 
     public static ActivityConfig config;
+
     public static SQLProfile sqlProfile;
+    private static SQLConnectionPool connectionPool;
+    private static boolean errorAtLoading = false, connected = true;
 
     private static Thread logExecuteThread;
     private static LogExecuteThread logExecuteRunnable;
@@ -54,7 +59,7 @@ public class BlockActivity extends JavaPlugin {
         return cmdHandler;
     }
 
-    public void onEnable() {
+    public void onLoad() {
         dataFolder = getDataFolder();
         blockActivity = this;
 
@@ -62,26 +67,35 @@ public class BlockActivity extends JavaPlugin {
         config.loadConfig();
 
         try {
-            connectSQL();
-        } catch (SQLException e) {
-            getLogger().log(Level.SEVERE, "Polaczenie z baza nie powiodlo sie!");
-            e.printStackTrace();
-            this.getPluginLoader().disablePlugin(this);
+            connectionPool = new SQLConnectionPool(sqlProfile);
+            final Connection connection = getConnection();
+            if (connection == null) {
+                errorAtLoading = true;
+                return;
+            }
+            createTables();
+            connection.close();
+        } catch (final NullPointerException ex) {
+            getLogger().log(Level.SEVERE, "Error while loading: ", ex);
+        } catch (final Exception ex) {
+            getLogger().severe("Error while loading: " + ex.getMessage());
+            errorAtLoading = true;
             return;
+        } finally {
+
         }
-        try {
-            createBasicTables();
-        } catch (SQLException e) {
-            getLogger().log(Level.SEVERE, "Nie mozna utworzyc podstawowych tabel!");
-            e.printStackTrace();
-            this.getPluginLoader().disablePlugin(this);
+    }
+
+    public void onEnable() {
+        if (errorAtLoading) {
+            this.getServer().getPluginManager().disablePlugin(this);
             return;
         }
 
         config.loadWorldConfig();
 
         cmdHandler = new CommandHandler();
-        this.getCommand("ba").setExecutor(cmdHandler);
+        getCommand("ba").setExecutor(cmdHandler);
 
         logExecuteRunnable = new LogExecuteThread(config.maxTimePerRun, config.timeBetweenRuns, config.minLogsToProcess);
         logExecuteThread = new Thread(logExecuteRunnable, "jBlockLogExecutor");
@@ -91,7 +105,7 @@ public class BlockActivity extends JavaPlugin {
         actionExecuteThread = new Thread(actionExecuteRunnable, "jBlockActionExecutor");
         actionExecuteThread.start();
 
-        final PluginManager manager = this.getServer().getPluginManager();
+        final PluginManager manager = getServer().getPluginManager();
         if (config.isWorldsLogging(LoggingType.blockplace)) {
             manager.registerEvents(new BlockPlaceListener(), this);
         }
@@ -108,31 +122,55 @@ public class BlockActivity extends JavaPlugin {
                 || config.isWorldsLogging(LoggingType.hanginginteract)) {
             manager.registerEvents(new HangingListener(), this);
         }
+        if (config.isWorldsLogging(LoggingType.creaturekill)) {
+            manager.registerEvents(new CreatureKillListener(), this);
+        }
         manager.registerEvents(new LogToolListener(), this);
     }
 
     public void onDisable() {
-        try {
-            logExecuteRunnable.terminate();
-            logExecuteThread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        if (logExecuteRunnable != null && logExecuteThread != null) {
+            try {
+                getLogger().log(Level.INFO, "Sending remaining logs(" + logExecuteRunnable.getQueueSize() + ")...");
+                logExecuteRunnable.terminate();
+                logExecuteThread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        if (connectionPool != null) {
+            connectionPool.close();
         }
     }
 
-    public void connectSQL() throws SQLException {
-        final SQLConnection sqlConnection = new SQLConnection(sqlProfile);
-        sqlConnection.open();
-        sqlConnection.closeConnection();
+    public Connection getConnection() {
+        try {
+            final Connection connection = connectionPool.getConnection();
+            if (!connected) {
+                getLogger().info("MySQL connection rebuild...");
+                connected = true;
+            }
+            return connection;
+        } catch (final Exception ex) {
+            if (connected) {
+                getLogger().log(Level.SEVERE, "Error while fetching connection: ", ex);
+                connected = false;
+            } else {
+                getLogger().severe("MySQL connection lost!");
+            }
+            return null;
+        }
     }
 
-    public void createBasicTables() throws SQLException {
-        final SQLConnection sqlConnection = new SQLConnection(sqlProfile);
-        sqlConnection.open();
-        final Statement state = sqlConnection.getConnection().createStatement();
+    public void createTables() throws SQLException {
+        final Connection connection = getConnection();
+        if (connection == null) {
+            throw new SQLException("No connection!");
+        }
+        final Statement state = connection.createStatement();
         state.executeUpdate("CREATE TABLE IF NOT EXISTS `ba-players` (playerid INT UNSIGNED NOT NULL AUTO_INCREMENT, playername varchar(32) NOT NULL, primary key (playerid))");
         state.close();
-        sqlConnection.closeConnection();
+        connection.close();
     }
 
     public static void sendActionLog(ActionLog... actions) {

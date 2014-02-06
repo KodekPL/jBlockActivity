@@ -18,7 +18,10 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.DoubleChest;
+import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
+import org.bukkit.craftbukkit.libs.com.google.gson.GsonBuilder;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -28,6 +31,66 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 public class ActivityUtil {
+
+    private final static Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+
+    public static String toJson(Object object) {
+        return gson.toJson(object);
+    }
+
+    public static <T> T fromJson(String data, Class<T> clazz) {
+        return gson.fromJson(data, clazz);
+    }
+
+    public static EntityType matchEntity(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        EntityType result = null;
+
+        try {
+            result = EntityType.fromId(Integer.parseInt(name));
+        } catch (NumberFormatException e) {
+        }
+
+        if (result == null) {
+            String filtered = name.toUpperCase();
+
+            filtered = filtered.replaceAll("\\s+", "_").replaceAll("\\W", "");
+            try {
+                result = EntityType.valueOf(filtered);
+            } catch (IllegalArgumentException e) {
+            }
+        }
+
+        return result;
+    }
+
+    public static boolean isEntitySpawnClear(Material blockId) {
+        switch (blockId) {
+        case AIR:
+        case SAPLING:
+        case LONG_GRASS:
+        case DEAD_BUSH:
+        case YELLOW_FLOWER:
+        case RED_ROSE:
+        case BROWN_MUSHROOM:
+        case RED_MUSHROOM:
+        case REDSTONE_WIRE:
+        case LEVER:
+        case STONE_BUTTON:
+        case REDSTONE_TORCH_ON:
+        case REDSTONE_TORCH_OFF:
+        case SNOW:
+        case VINE:
+        case CARPET:
+        case DOUBLE_PLANT:
+            return true;
+        default:
+            return false;
+        }
+    }
 
     public static boolean isItemSimilar(ItemStack item1, ItemStack item2) {
         return item1.getType() == item2.getType() && item2.getDurability() == item2.getDurability();

@@ -19,23 +19,23 @@ public class InventoryExtraData implements ExtraData {
 
     public InventoryExtraData(String data) {
         final String[] splitter = data.split("\0");
-        this.content = new ItemStack[splitter.length];
+        content = new ItemStack[splitter.length];
         for (int i = 0; i < splitter.length; i++) {
             String[] sItem = splitter[i].split(",");
             try {
-                this.content[i] = new ItemStack(Integer.parseInt(sItem[0]), Integer.parseInt(sItem[2]), Short.parseShort(sItem[1]));
+                content[i] = new ItemStack(Integer.parseInt(sItem[0]), Integer.parseInt(sItem[2]), Short.parseShort(sItem[1]));
             } catch (NumberFormatException e) {
-                this.content[i] = null;
+                content[i] = null;
             }
         }
     }
 
     public ItemStack[] getContent() {
-        return this.content;
+        return content;
     }
 
     public boolean isEmpty() {
-        return this.content == null;
+        return content == null;
     }
 
     @Override
@@ -52,7 +52,7 @@ public class InventoryExtraData implements ExtraData {
         final ArrayList<ItemStack> diff = new ArrayList<ItemStack>();
         final ItemStack[] newContent = invExtraData.getContent();
 
-        final int l1 = this.content.length, l2 = newContent.length;
+        final int l1 = content.length, l2 = newContent.length;
         int c1 = 0, c2 = 0;
         while (c1 < l1 || c2 < l2) {
             if (c1 >= l1) {
@@ -61,33 +61,33 @@ public class InventoryExtraData implements ExtraData {
                 continue;
             }
             if (c2 >= l2) {
-                this.content[c1].setAmount(this.content[c1].getAmount() * -1);
-                diff.add(this.content[c1]);
+                content[c1].setAmount(content[c1].getAmount() * -1);
+                diff.add(content[c1]);
                 c1++;
                 continue;
             }
-            final int comp = comperator.compare(this.content[c1], newContent[c2]);
+            final int comp = comperator.compare(content[c1], newContent[c2]);
             if (comp < 0) {
-                this.content[c1].setAmount(this.content[c1].getAmount() * -1);
-                diff.add(this.content[c1]);
+                content[c1].setAmount(content[c1].getAmount() * -1);
+                diff.add(content[c1]);
                 c1++;
             } else if (comp > 0) {
                 diff.add(newContent[c2]);
                 c2++;
             } else {
-                final int amount = newContent[c2].getAmount() - this.content[c1].getAmount();
+                final int amount = newContent[c2].getAmount() - content[c1].getAmount();
                 if (amount != 0) {
-                    this.content[c1].setAmount(amount);
-                    diff.add(this.content[c1]);
+                    content[c1].setAmount(amount);
+                    diff.add(content[c1]);
                 }
                 c1++;
                 c2++;
             }
         }
         if (diff.isEmpty()) {
-            this.content = null;
+            content = null;
         } else {
-            this.content = diff.toArray(new ItemStack[diff.size()]);
+            content = diff.toArray(new ItemStack[diff.size()]);
         }
     }
 

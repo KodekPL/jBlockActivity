@@ -30,7 +30,7 @@ public abstract class ActionLog {
     }
 
     public long getId() {
-        return this.id;
+        return id;
     }
 
     public void setId(long id) {

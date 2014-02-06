@@ -56,7 +56,7 @@ public class HangingListener implements Listener {
         }
 
         final WorldConfig config = BlockActivity.getWorldConfig(event.getEntity().getWorld().getName());
-        if (config == null || !config.isLogging(LoggingType.hangingplace)) {
+        if (config == null || !config.isLogging(LoggingType.hangingbreak)) {
             return;
         }
 
