@@ -1,7 +1,7 @@
 name: jBlockActivity
-version: 0.6.0
+version: 0.6.1
 author: Kodek
-website: 'https://github.com/KodekPL/jBlockActivity/'
+website: 'https://github.com/KodekPL/jBlockActivity'
 main: jcraft.jblockactivity.BlockActivity
 
 commands:

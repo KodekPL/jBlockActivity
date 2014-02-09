@@ -65,12 +65,16 @@ public class BlockChange extends BlockActionLog {
                     for (ItemStack item : extraData.getContent()) {
                         int leftover;
                         try {
-                            leftover = modifyContainer(state, new ItemStack(item.getType(), -item.getAmount(), item.getDurability()));
+                            ItemStack newItem1 = new ItemStack(item.getType(), -item.getAmount(), item.getDurability());
+                            newItem1.setItemMeta(item.getItemMeta());
+                            leftover = modifyContainer(state, newItem1);
                             if (leftover > 0 && (blockId == 54 || blockId == 146)) {
                                 for (final BlockFace face : primaryCardinalDirs) {
                                     if (block.getRelative(face).getTypeId() == blockId) {
-                                        leftover = modifyContainer(block.getRelative(face).getState(),
-                                                new ItemStack(item.getType(), (item.getAmount() < 0) ? leftover : -leftover, item.getDurability()));
+                                        ItemStack newItem2 = new ItemStack(item.getType(), (item.getAmount() < 0) ? leftover : -leftover,
+                                                item.getDurability());
+                                        newItem2.setItemMeta(item.getItemMeta());
+                                        leftover = modifyContainer(block.getRelative(face).getState(), newItem2);
                                         break;
                                     }
                                 }
@@ -179,5 +183,4 @@ public class BlockChange extends BlockActionLog {
         }
 
     }
-
 }

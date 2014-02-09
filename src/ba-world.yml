@@ -13,6 +13,21 @@ logExtraData:
   signtext: true
   skull: true
   inventory: true
+  itemMeta:
+    enable: true
+    name: true
+    lore: true
+    enchants: true
+    booktitle: true
+    bookauthor: true
+    bookpage: true
+    bookenchant: true
+    leathercolor: true
+    repair: true
+    skull: true
+    map: true
+    potion: true
+    firework: true
 special:
   rollback:
     LimitEntitiesPerChunk: true

@@ -97,8 +97,9 @@ public class BlockBreakListener implements Listener {
             BlockActivity.sendActionLog(action);
         } else if (config.isLogging(LoggingType.inventoryaccess) && isContainerBlock(material)) {
             /** CONTAINER **/
-            final InventoryExtraData extraData = new InventoryExtraData(((InventoryHolder) block.getState()).getInventory().getContents(), true);
-            final InventoryExtraData emptyExtraData = new InventoryExtraData(new ItemStack[0], false);
+            final InventoryExtraData extraData = new InventoryExtraData(((InventoryHolder) block.getState()).getInventory().getContents(), true,
+                    config);
+            final InventoryExtraData emptyExtraData = new InventoryExtraData(new ItemStack[0], false, config);
             extraData.compareInventories(emptyExtraData);
             if (!extraData.isEmpty()) {
                 final BlockActionLog action = new BlockActionLog(LoggingType.inventoryaccess, playerName, block.getWorld(), block.getLocation()

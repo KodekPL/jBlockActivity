@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import jcraft.jblockactivity.extradata.InventoryExtraData.ItemMetaType;
+
 import org.bukkit.World;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -23,6 +25,8 @@ public class WorldConfig {
     private final String worldName;
     private boolean[] loggingTypes;
     private boolean[] extraLoggingTypes;
+    public boolean saveItemMeta;
+    private boolean[] itemMetaTypes;
     private Set<Integer> interactBlocks;
     public int limitEntitiesPerChunk;
     public Set<Integer> blockBlacklist, replaceAnyway, loggingCreatures;
@@ -43,6 +47,10 @@ public class WorldConfig {
         for (ExtraLoggingType type : ExtraLoggingType.values()) {
             if (type.getId() <= 0) continue;
             configDef.put("logExtraData." + type.name(), true);
+        }
+        configDef.put("logExtraData.itemMeta.enable", true);
+        for (ItemMetaType type : ItemMetaType.values()) {
+            configDef.put("logExtraData.itemMeta." + type.name(), true);
         }
 
         configDef.put("special.rollback.LimitEntitiesPerChunk", 16);
@@ -81,6 +89,13 @@ public class WorldConfig {
             extraLoggingTypes[type.ordinal()] = result;
         }
 
+        saveItemMeta = config.getBoolean("logExtraData.itemMeta.enable");
+        itemMetaTypes = new boolean[ItemMetaType.values().length];
+        for (ItemMetaType type : ItemMetaType.values()) {
+            boolean result = saveItemMeta ? config.getBoolean("logExtraData.itemMeta." + type.name()) : false;
+            itemMetaTypes[type.ordinal()] = result;
+        }
+
         if (isLogging(LoggingType.blockinteract)) {
             interactBlocks = new HashSet<Integer>(config.getIntegerList("special.logging.interactBlocks"));
         }
@@ -108,6 +123,10 @@ public class WorldConfig {
 
     public boolean isExtraLogging(ExtraLoggingType logType) {
         return extraLoggingTypes[logType.ordinal()];
+    }
+
+    public boolean isItemMetaLogging(ItemMetaType type) {
+        return itemMetaTypes[type.ordinal()];
     }
 
     public boolean isExtraLogging() {

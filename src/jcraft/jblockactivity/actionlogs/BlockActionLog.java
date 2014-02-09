@@ -92,14 +92,15 @@ public class BlockActionLog extends ActionLog implements LookupCache {
             state.executeUpdate();
 
             final ExtraData extraData = getExtraData();
-            if (extraData != null && extraData.getData() != null && !extraData.getData().equals("{}")) {
+            final String sData;
+            if (extraData != null && (sData = extraData.getData()) != null && !sData.equals("{}")) {
                 final int id;
                 final ResultSet result = state.getGeneratedKeys();
                 result.next();
                 id = result.getInt(1);
                 extraState = connection.prepareStatement("INSERT INTO `ba-" + getWorldName() + "-extra` (id, data) VALUES (?, ?)");
                 extraState.setInt(1, id);
-                extraState.setString(2, extraData.getData());
+                extraState.setString(2, sData);
                 extraState.executeUpdate();
             }
         } finally {
@@ -213,12 +214,14 @@ public class BlockActionLog extends ActionLog implements LookupCache {
                     if (item == null) continue;
                     if (item.getAmount() < 0) {
                         msg.append(prefixTime).append(sub).append("took ").append(-item.getAmount()).append("x ")
-                                .append(MaterialNames.materialName(item.getTypeId(), item.getData().getData())).append(" from ")
-                                .append(MaterialNames.materialName(newBlockId, newBlockData)).append(suffixTime);
+                                .append(MaterialNames.materialName(item.getTypeId(), item.getData().getData()));
+                        if (item.hasItemMeta()) msg.append(" [e]");
+                        msg.append(" from ").append(MaterialNames.materialName(newBlockId, newBlockData)).append(suffixTime);
                     } else {
                         msg.append(prefixTime).append(add).append("put ").append(item.getAmount()).append("x ")
-                                .append(MaterialNames.materialName(item.getTypeId(), item.getData().getData())).append(" into ")
-                                .append(MaterialNames.materialName(newBlockId, newBlockData)).append(suffixTime);
+                                .append(MaterialNames.materialName(item.getTypeId(), item.getData().getData()));
+                        if (item.hasItemMeta()) msg.append(" [e]");
+                        msg.append(" into ").append(MaterialNames.materialName(newBlockId, newBlockData)).append(suffixTime);
                     }
                     if (i < extraData.getContent().length) {
                         msg.append('\n');
@@ -265,7 +268,7 @@ public class BlockActionLog extends ActionLog implements LookupCache {
                     extraData = fromJson(data, BlockExtraData.CommandBlockExtraData.class);
                 }
             } else if (logType == LoggingType.inventoryaccess) {
-                extraData = new InventoryExtraData(data);
+                extraData = fromJson(data, InventoryExtraData.class);
             }
         }
         final BlockActionLog log = new BlockActionLog(logType, playerName, params.getWorld(), location, old_id, old_data, new_id, new_data, extraData);

@@ -64,14 +64,15 @@ public class EntityActionLog extends ActionLog implements LookupCache {
             state.executeUpdate();
 
             final ExtraData extraData = getExtraData();
-            if (extraData != null && extraData.getData() != null && !extraData.getData().equals("{}")) {
+            final String sData;
+            if (extraData != null && (sData = extraData.getData()) != null && !sData.equals("{}")) {
                 final int id;
                 final ResultSet result = state.getGeneratedKeys();
                 result.next();
                 id = result.getInt(1);
                 extraState = connection.prepareStatement("INSERT INTO `ba-" + getWorldName() + "-extra` (id, data) VALUES (?, ?)");
                 extraState.setInt(1, id);
-                extraState.setString(2, extraData.getData());
+                extraState.setString(2, sData);
                 extraState.executeUpdate();
             }
         } finally {
@@ -154,10 +155,14 @@ public class EntityActionLog extends ActionLog implements LookupCache {
                 if (item != null) {
                     if (item.getAmount() < 0) {
                         msg.append(sub).append("took ").append(-item.getAmount()).append("x ")
-                                .append(MaterialNames.materialName(item.getTypeId(), item.getData().getData())).append(" from item frame");
+                                .append(MaterialNames.materialName(item.getTypeId(), item.getData().getData()));
+                        if (item.hasItemMeta()) msg.append(" [e]");
+                        msg.append(" from item frame");
                     } else {
                         msg.append(add).append("put ").append(item.getAmount()).append("x ")
-                                .append(MaterialNames.materialName(item.getTypeId(), item.getData().getData())).append(" into item frame");
+                                .append(MaterialNames.materialName(item.getTypeId(), item.getData().getData()));
+                        if (item.hasItemMeta()) msg.append(" [e]");
+                        msg.append(" into item frame");
                     }
                 } else {
                     msg.append(interact).append("did something with item frame");
@@ -193,7 +198,7 @@ public class EntityActionLog extends ActionLog implements LookupCache {
         ExtraData extraData = null;
         if (data != null) {
             if (logType == LoggingType.hanginginteract) {
-                extraData = new InventoryExtraData(data);
+                extraData = fromJson(data, InventoryExtraData.class);
             } else if (logType == LoggingType.creaturekill) {
                 if (entity_id == 50) {
                     extraData = fromJson(data, EntityExtraData.CreeperExtraData.class);

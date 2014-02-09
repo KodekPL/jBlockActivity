@@ -40,8 +40,8 @@ public class CommandHandler implements CommandExecutor {
         if (args.length == 0) {
             sender.sendMessage(ChatColor.GOLD + "jBlockActivity" + ChatColor.GRAY + " version "
                     + BlockActivity.getBlockActivity().getDescription().getVersion() + " by " + ChatColor.GOLD + " KodekPL");
-            sender.sendMessage(ChatColor.GRAY + "Visit " + ChatColor.GOLD + BlockActivity.getBlockActivity().getDescription().getWebsite()
-                    + ChatColor.GREEN + " for more information!");
+            sender.sendMessage(ChatColor.GRAY + "Visit " + ChatColor.GOLD + BlockActivity.getBlockActivity().getDescription().getWebsite() + " "
+                    + ChatColor.GREEN + "for more information!");
             return true;
         } else {
             if (args[0].equalsIgnoreCase("tool") || args[0].equalsIgnoreCase("blocktool")) {

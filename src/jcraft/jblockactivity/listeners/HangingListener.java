@@ -79,7 +79,7 @@ public class HangingListener implements Listener {
             }
 
             if (config.isLogging(LoggingType.hanginginteract) && frame.getItem().getType() != Material.AIR) {
-                final InventoryExtraData extraData = new InventoryExtraData(new ItemStack[] { frame.getItem() }, false);
+                final InventoryExtraData extraData = new InventoryExtraData(new ItemStack[] { frame.getItem() }, false, config);
                 final EntityActionLog action = new EntityActionLog(LoggingType.hanginginteract, removername, location.getWorld(),
                         location.toVector(), entityType, face, extraData);
                 BlockActivity.sendActionLog(action);
@@ -110,7 +110,7 @@ public class HangingListener implements Listener {
             }
 
             if (config.isLogging(LoggingType.hanginginteract) && frame.getItem().getType() != Material.AIR) {
-                final InventoryExtraData extraData = new InventoryExtraData(new ItemStack[] { frame.getItem() }, false);
+                final InventoryExtraData extraData = new InventoryExtraData(new ItemStack[] { frame.getItem() }, false, config);
                 final EntityActionLog action = new EntityActionLog(LoggingType.hanginginteract, removername, location.getWorld(),
                         location.toVector(), entityType, face, extraData);
                 BlockActivity.sendActionLog(action);
@@ -141,7 +141,7 @@ public class HangingListener implements Listener {
                 final ItemStack item = player.getItemInHand().clone();
                 item.setAmount(1);
 
-                final InventoryExtraData extraData = new InventoryExtraData(new ItemStack[] { item }, false);
+                final InventoryExtraData extraData = new InventoryExtraData(new ItemStack[] { item }, false, config);
                 final EntityActionLog action = new EntityActionLog(LoggingType.hanginginteract, player.getName(), location.getWorld(),
                         location.toVector(), entityType, face, extraData);
                 BlockActivity.sendActionLog(action);
@@ -168,7 +168,7 @@ public class HangingListener implements Listener {
                 final ItemStack item = frame.getItem().clone();
                 item.setAmount(-1);
 
-                final InventoryExtraData extraData = new InventoryExtraData(new ItemStack[] { item }, false);
+                final InventoryExtraData extraData = new InventoryExtraData(new ItemStack[] { item }, false, config);
                 final EntityActionLog action = new EntityActionLog(LoggingType.hanginginteract, removername, location.getWorld(),
                         location.toVector(), entityType, face, extraData);
                 BlockActivity.sendActionLog(action);

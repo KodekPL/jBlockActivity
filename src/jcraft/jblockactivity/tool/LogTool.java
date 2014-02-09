@@ -6,6 +6,7 @@ import jcraft.jblockactivity.utils.QueryParams;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
 public class LogTool {
@@ -27,7 +28,7 @@ public class LogTool {
             if (player.getItemInHand() != null && player.getItemInHand().getTypeId() != 0) {
                 inventory.setItem(freeSlot, player.getItemInHand());
             }
-            player.setItemInHand(itemMaterial.toItemStack());
+            player.setItemInHand(new ItemStack(itemMaterial.getItemType(), 1, (itemMaterial.getData() > 0) ? itemMaterial.getData() : 0));
             player.sendMessage(BlockActivity.prefix + ChatColor.GREEN + "Tool was added to your inventory!");
         } else {
             player.sendMessage(BlockActivity.prefix + ChatColor.RED + "You have no empty slot in your inventory!");
