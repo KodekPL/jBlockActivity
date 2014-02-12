@@ -3,6 +3,7 @@ package jcraft.jblockactivity.actionlogs;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import jcraft.jblockactivity.BlockActivity;
 import jcraft.jblockactivity.LoggingType;
 import jcraft.jblockactivity.extradata.ExtraData;
 
@@ -60,8 +61,8 @@ public abstract class ActionLog {
         return ChatColor.GOLD + getPlayerName();
     }
 
-    public String getWorldName() {
-        return worldName;
+    public String getWorldTableName() {
+        return BlockActivity.getWorldTableName(worldName);
     }
 
     public Vector getVector() {

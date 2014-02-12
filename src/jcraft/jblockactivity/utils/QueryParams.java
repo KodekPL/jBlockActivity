@@ -284,11 +284,11 @@ public class QueryParams {
     }
 
     public String getTable() {
-        return "`ba-" + world.getName() + "`";
+        return "`" + BlockActivity.getWorldTableName(world.getName()) + "`";
     }
 
     public String getTable(String suffix) {
-        return "`ba-" + world.getName() + suffix + "`";
+        return "`" + BlockActivity.getWorldTableName(world.getName()) + suffix + "`";
     }
 
     public World getWorld() {

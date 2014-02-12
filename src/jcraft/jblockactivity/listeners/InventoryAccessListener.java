@@ -42,10 +42,10 @@ public class InventoryAccessListener implements Listener {
             final HumanEntity player = event.getPlayer();
             final InventoryExtraData lastContent = invExtraData.get(player);
             if (lastContent != null) {
-                final InventoryExtraData newContent = new InventoryExtraData(event.getInventory().getContents(), true, config);
+                final Location location = getInventoryHolderLocation(holder);
+                final InventoryExtraData newContent = new InventoryExtraData(event.getInventory().getContents(), true, location.getWorld());
                 lastContent.compareInventories(newContent);
                 if (!lastContent.isEmpty()) {
-                    final Location location = getInventoryHolderLocation(holder);
                     final BlockActionLog action = new BlockActionLog(LoggingType.inventoryaccess, player.getName(), location.getWorld(),
                             location.toVector(), location.getBlock().getState(), location.getBlock().getState(), lastContent);
                     BlockActivity.sendActionLog(action);
@@ -68,7 +68,7 @@ public class InventoryAccessListener implements Listener {
             final InventoryHolder holder = event.getInventory().getHolder();
             if (holder instanceof BlockState || holder instanceof DoubleChest) {
                 if (getInventoryHolderType(holder) != Material.WORKBENCH) {
-                    invExtraData.put(event.getPlayer(), new InventoryExtraData(event.getInventory().getContents(), true, config));
+                    invExtraData.put(event.getPlayer(), new InventoryExtraData(event.getInventory().getContents(), true, config.getWorld()));
                 }
             }
         }

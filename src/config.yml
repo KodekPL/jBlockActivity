@@ -2,15 +2,18 @@ configVersion: 1
 mysql:
   host: '127.0.0.1'
   port: '3306'
-  database: minecraft
   username: root
   password: ''
+  database: minecraft
 loggedWorlds:
 - world
+logging:
+  hiddenPlayers: []
 queue:
   maxTimePerRun: 300
   timeBetweenRuns: 5
   minLogsToProcess: 25
+  queueWarningSize: 1000
 lookup:
   defaultDistance: 20
   defaultTime: 30 minutes
@@ -29,8 +32,6 @@ tools:
     itemData: 0
     leftClickBehavior: TOOL
     rightClickBehavior: BLOCK
-logging:
-  hiddenPlayers: []
 questioner:
   askRollbacks: true
   askRedos: true

@@ -4,6 +4,10 @@ import static jcraft.jblockactivity.utils.ActivityUtil.toJson;
 
 import org.bukkit.SkullType;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.CommandBlock;
+import org.bukkit.block.CreatureSpawner;
+import org.bukkit.block.Skull;
 import org.bukkit.entity.EntityType;
 import org.bukkit.material.MaterialData;
 
@@ -126,4 +130,21 @@ public abstract class BlockExtraData implements ExtraData {
         }
     }
 
+    public static BlockExtraData getExtraData(BlockState state) {
+        switch (state.getType()) {
+        case WALL_SIGN:
+        case SIGN_POST:
+            return new SignExtraData(((org.bukkit.block.Sign) state).getLines());
+        case SKULL:
+            final Skull skull = (Skull) state;
+            return new SkullExtraData(skull.getRotation(), skull.getOwner(), skull.getSkullType());
+        case MOB_SPAWNER:
+            return new MobSpawnerExtraData(((CreatureSpawner) state).getSpawnedType());
+        case COMMAND:
+            final CommandBlock cmd = (CommandBlock) state;
+            return new CommandBlockExtraData(cmd.getName(), cmd.getCommand());
+        default:
+            return null;
+        }
+    }
 }

@@ -6,13 +6,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import jcraft.jblockactivity.BlockActivity;
 import jcraft.jblockactivity.WorldConfig;
+import jcraft.jblockactivity.extradata.ExtraLoggingTypes.ItemMetaType;
 
 import org.bukkit.FireworkEffect;
+import org.bukkit.World;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
@@ -36,6 +40,10 @@ public class InventoryExtraData implements ExtraData {
     private String[] sContent;
     private SimpleItemMeta[] meta;
 
+    public InventoryExtraData(ItemStack[] content, boolean compress, World world) {
+        this(content, compress, BlockActivity.getWorldConfig(world.getName()));
+    }
+
     public InventoryExtraData(ItemStack[] content, boolean compress, WorldConfig config) {
         this.config = config;
         if (content != null) {
@@ -43,10 +51,19 @@ public class InventoryExtraData implements ExtraData {
         }
     }
 
+    public InventoryExtraData(String[] sContent, SimpleItemMeta[] meta, World world) {
+        this.config = BlockActivity.getWorldConfig(world.getName());
+        this.sContent = sContent;
+        this.meta = meta;
+    }
+
     public ItemStack[] getContent() {
         if (content == null && sContent != null) {
             content = new ItemStack[sContent.length];
             for (int i = 0; i < sContent.length; i++) {
+                if (sContent[i] == null || sContent[i].equals("")) {
+                    continue;
+                }
                 String[] sItem = sContent[i].split(",");
                 try {
                     content[i] = new ItemStack(Integer.parseInt(sItem[0]), Integer.parseInt(sItem[2]), Short.parseShort(sItem[1]));
@@ -66,12 +83,13 @@ public class InventoryExtraData implements ExtraData {
         return content;
     }
 
-    public boolean isEmpty() {
-        return content == null;
-    }
-
-    @Override
-    public String getData() {
+    public void fillData() {
+        if (sContent != null) {
+            return;
+        }
+        if (content == null) {
+            return;
+        }
         this.sContent = new String[content.length];
         final List<SimpleItemMeta> meta = new ArrayList<SimpleItemMeta>();
         for (int i = 0; i < content.length; i++) {
@@ -89,7 +107,25 @@ public class InventoryExtraData implements ExtraData {
         if (!meta.isEmpty()) {
             this.meta = meta.toArray(new SimpleItemMeta[meta.size()]);
         }
+    }
 
+    public String[] getStringContent() {
+        fillData();
+        return sContent;
+    }
+
+    public SimpleItemMeta[] getSimpleItemMeta() {
+        fillData();
+        return meta;
+    }
+
+    public boolean isEmpty() {
+        return content == null;
+    }
+
+    @Override
+    public String getData() {
+        fillData();
         this.config = null;
         this.content = null;
         return toJson(this);
@@ -114,7 +150,7 @@ public class InventoryExtraData implements ExtraData {
                 c1++;
                 continue;
             }
-            final int comp = comperator.compare(content[c1], newContent[c2], config.saveItemMeta);
+            final int comp = comperator.compare(content[c1], newContent[c2], config.isLoggingExtraItemMeta());
             if (comp < 0) {
                 content[c1].setAmount(content[c1].getAmount() * -1);
                 diff.add(content[c1]);
@@ -169,7 +205,7 @@ public class InventoryExtraData implements ExtraData {
             }
             boolean found = false;
             for (final ItemStack cItem : compressed) {
-                if (isSimilar(iItem, cItem, config.saveItemMeta)) {
+                if (isSimilar(iItem, cItem, config.isLoggingExtraItemMeta())) {
                     cItem.setAmount(cItem.getAmount() + iItem.getAmount());
                     found = true;
                     break;
@@ -195,17 +231,6 @@ public class InventoryExtraData implements ExtraData {
         }
     }
 
-    private boolean equalsIteMeta(ItemStack item1, ItemStack item2) {
-        if (!item1.hasItemMeta() && !item2.hasItemMeta()) {
-            return true;
-        }
-        return item1.getItemMeta().equals(item2.getItemMeta());
-    }
-
-    public static enum ItemMetaType {
-        name, lore, enchants, booktitle, bookauthor, bookpage, bookenchant, leathercolor, repair, skull, map, potion, firework;
-    }
-
     public enum MetaType {
         BOOK, ENCHANT_STORAGE, LEATHER, REPAIR, SKULL, MAP, POTION, FIREWORK, FIREWORK_EFFECT;
     }
@@ -214,7 +239,7 @@ public class InventoryExtraData implements ExtraData {
         private final int id;
         private String D1;
         private String[] L1;
-        private Map<Enchantment, Integer> E1;
+        private Map<String, Integer> E1;
         private MetaType type;
         private String T1;
         private String A1;
@@ -232,11 +257,15 @@ public class InventoryExtraData implements ExtraData {
             final ItemMeta meta = item.getItemMeta();
             if (getDisplayName() != null) meta.setDisplayName(getDisplayName());
             if (getLore() != null) meta.setLore(Arrays.asList(getLore()));
-            if (getEnchants() != null) {
-                for (Entry<Enchantment, Integer> entry : getEnchants().entrySet()) {
-                    meta.addEnchant(entry.getKey(), entry.getValue(), true);
+            if (type != null && type != MetaType.ENCHANT_STORAGE) {
+                final Map<Enchantment, Integer> enchants = getEnchants();
+                if (enchants != null) {
+                    for (Entry<Enchantment, Integer> entry : enchants.entrySet()) {
+                        meta.addEnchant(entry.getKey(), entry.getValue(), true);
+                    }
                 }
             }
+
             if (type != null) {
                 if (type == MetaType.BOOK) {
                     final BookMeta bookMeta = (BookMeta) meta;
@@ -245,8 +274,9 @@ public class InventoryExtraData implements ExtraData {
                     if (getBookPages() != null) bookMeta.setPages(getBookPages());
                 } else if (type == MetaType.ENCHANT_STORAGE) {
                     final EnchantmentStorageMeta enchantStore = (EnchantmentStorageMeta) meta;
-                    if (getEnchants() != null) {
-                        for (Entry<Enchantment, Integer> entry : getEnchants().entrySet()) {
+                    final Map<Enchantment, Integer> bookEnchants = getEnchants();
+                    if (bookEnchants != null) {
+                        for (Entry<Enchantment, Integer> entry : bookEnchants.entrySet()) {
                             enchantStore.addStoredEnchant(entry.getKey(), entry.getValue(), true);
                         }
                     }
@@ -287,43 +317,53 @@ public class InventoryExtraData implements ExtraData {
 
         public SimpleItemMeta(int id, ItemMeta meta) {
             this.id = id;
-            if (config.isItemMetaLogging(ItemMetaType.name) && meta.hasDisplayName()) D1 = meta.getDisplayName();
-            if (config.isItemMetaLogging(ItemMetaType.lore) && meta.hasLore()) L1 = meta.getLore().toArray(new String[meta.getLore().size()]);
-            if (config.isItemMetaLogging(ItemMetaType.enchants) && meta.hasEnchants()) E1 = meta.getEnchants();
+            if (config.isLoggingExtraItemMeta(ItemMetaType.name) && meta.hasDisplayName()) D1 = meta.getDisplayName();
+            if (config.isLoggingExtraItemMeta(ItemMetaType.lore) && meta.hasLore()) L1 = meta.getLore().toArray(new String[meta.getLore().size()]);
+            if (config.isLoggingExtraItemMeta(ItemMetaType.enchants) && meta.hasEnchants()) {
+                E1 = new HashMap<String, Integer>();
+                for (Entry<Enchantment, Integer> entry : meta.getEnchants().entrySet()) {
+                    E1.put(entry.getKey().getName(), entry.getValue());
+                }
+            }
 
             if (meta instanceof BookMeta) {
                 type = MetaType.BOOK;
                 final BookMeta bookMeta = (BookMeta) meta;
-                if (config.isItemMetaLogging(ItemMetaType.booktitle) && bookMeta.hasTitle()) T1 = bookMeta.getTitle();
-                if (config.isItemMetaLogging(ItemMetaType.bookauthor) && bookMeta.hasAuthor()) A1 = bookMeta.getAuthor();
-                if (config.isItemMetaLogging(ItemMetaType.bookpage) && bookMeta.hasPages()) P1 = bookMeta.getPages().toArray(
+                if (config.isLoggingExtraItemMeta(ItemMetaType.booktitle) && bookMeta.hasTitle()) T1 = bookMeta.getTitle();
+                if (config.isLoggingExtraItemMeta(ItemMetaType.bookauthor) && bookMeta.hasAuthor()) A1 = bookMeta.getAuthor();
+                if (config.isLoggingExtraItemMeta(ItemMetaType.bookpage) && bookMeta.hasPages()) P1 = bookMeta.getPages().toArray(
                         new String[meta.getLore().size()]);
             } else if (meta instanceof EnchantmentStorageMeta) {
                 type = MetaType.ENCHANT_STORAGE;
                 final EnchantmentStorageMeta enchantStore = (EnchantmentStorageMeta) meta;
-                if (config.isItemMetaLogging(ItemMetaType.bookenchant) && enchantStore.hasStoredEnchants()) E1 = enchantStore.getStoredEnchants();
+                if (config.isLoggingExtraItemMeta(ItemMetaType.bookenchant) && enchantStore.hasStoredEnchants()) {
+                    E1 = new HashMap<String, Integer>();
+                    for (Entry<Enchantment, Integer> entry : enchantStore.getStoredEnchants().entrySet()) {
+                        E1.put(entry.getKey().getName(), entry.getValue());
+                    }
+                }
             } else if (meta instanceof LeatherArmorMeta) {
                 type = MetaType.LEATHER;
                 final LeatherArmorMeta leatherMeta = (LeatherArmorMeta) meta;
-                if (config.isItemMetaLogging(ItemMetaType.leathercolor) && leatherMeta.getColor() != null) C1 = leatherMeta.getColor().asRGB();
+                if (config.isLoggingExtraItemMeta(ItemMetaType.leathercolor) && leatherMeta.getColor() != null) C1 = leatherMeta.getColor().asRGB();
             } else if (meta instanceof Repairable) {
                 final Repairable repairMeta = (Repairable) meta;
-                if (config.isItemMetaLogging(ItemMetaType.repair) && repairMeta.hasRepairCost()) {
+                if (config.isLoggingExtraItemMeta(ItemMetaType.repair) && repairMeta.hasRepairCost()) {
                     type = MetaType.REPAIR; // Special case
                     C1 = repairMeta.getRepairCost();
                 }
             } else if (meta instanceof SkullMeta) {
                 type = MetaType.SKULL;
                 final SkullMeta skullMeta = (SkullMeta) meta;
-                if (config.isItemMetaLogging(ItemMetaType.skull) && skullMeta.hasOwner()) O1 = skullMeta.getOwner();
+                if (config.isLoggingExtraItemMeta(ItemMetaType.skull) && skullMeta.hasOwner()) O1 = skullMeta.getOwner();
             } else if (meta instanceof MapMeta) {
                 type = MetaType.MAP;
                 final MapMeta mapMeta = (MapMeta) meta;
-                if (config.isItemMetaLogging(ItemMetaType.map)) S1 = mapMeta.isScaling();
+                if (config.isLoggingExtraItemMeta(ItemMetaType.map)) S1 = mapMeta.isScaling();
             } else if (meta instanceof PotionMeta) {
                 type = MetaType.POTION;
                 final PotionMeta potMeta = (PotionMeta) meta;
-                if (config.isItemMetaLogging(ItemMetaType.potion) && potMeta.hasCustomEffects()) {
+                if (config.isLoggingExtraItemMeta(ItemMetaType.potion) && potMeta.hasCustomEffects()) {
                     P2 = new SimplePotionEffect[potMeta.getCustomEffects().size()];
                     for (int i = 0; i < P2.length; i++) {
                         P2[i] = new SimplePotionEffect(potMeta.getCustomEffects().get(i));
@@ -332,7 +372,7 @@ public class InventoryExtraData implements ExtraData {
             } else if (meta instanceof FireworkMeta) {
                 type = MetaType.FIREWORK;
                 final FireworkMeta fireworkMeta = (FireworkMeta) meta;
-                if (config.isItemMetaLogging(ItemMetaType.firework) && fireworkMeta.hasEffects()) {
+                if (config.isLoggingExtraItemMeta(ItemMetaType.firework) && fireworkMeta.hasEffects()) {
                     E2 = new SimpleFireworkEffect[fireworkMeta.getEffects().size()];
                     for (int i = 0; i < E2.length; i++) {
                         E2[i] = new SimpleFireworkEffect(fireworkMeta.getEffects().get(i));
@@ -342,7 +382,7 @@ public class InventoryExtraData implements ExtraData {
             } else if (meta instanceof FireworkEffectMeta) {
                 type = MetaType.FIREWORK_EFFECT;
                 final FireworkEffectMeta fireworkMeta = (FireworkEffectMeta) meta;
-                if (config.isItemMetaLogging(ItemMetaType.firework) && fireworkMeta.hasEffect()) E3 = new SimpleFireworkEffect(
+                if (config.isLoggingExtraItemMeta(ItemMetaType.firework) && fireworkMeta.hasEffect()) E3 = new SimpleFireworkEffect(
                         fireworkMeta.getEffect());
             }
         }
@@ -368,7 +408,14 @@ public class InventoryExtraData implements ExtraData {
         }
 
         public Map<Enchantment, Integer> getEnchants() {
-            return E1;
+            if (E1 == null) {
+                return null;
+            }
+            final Map<Enchantment, Integer> enchants = new HashMap<Enchantment, Integer>();
+            for (Entry<String, Integer> entry : E1.entrySet()) {
+                enchants.put(Enchantment.getByName(entry.getKey()), entry.getValue());
+            }
+            return enchants;
         }
 
         public String getBookTitle() {
@@ -418,11 +465,11 @@ public class InventoryExtraData implements ExtraData {
     }
 
     public class SimpleFireworkEffect {
-        private boolean flicker;
-        private boolean trail;
-        private Integer[] colors;
-        private Integer[] fadeColors;
-        private org.bukkit.FireworkEffect.Type type;
+        private final boolean flicker;
+        private final boolean trail;
+        private final Integer[] colors;
+        private final Integer[] fadeColors;
+        private final org.bukkit.FireworkEffect.Type type;
 
         public SimpleFireworkEffect(FireworkEffect effect) {
             flicker = effect.hasFlicker();
@@ -451,7 +498,7 @@ public class InventoryExtraData implements ExtraData {
         }
 
         public org.bukkit.Color[] getBukkitColors() {
-            org.bukkit.Color[] colors = new org.bukkit.Color[getColors().length];
+            final org.bukkit.Color[] colors = new org.bukkit.Color[getColors().length];
             for (int i = 0; i < colors.length; i++) {
                 colors[i] = org.bukkit.Color.fromRGB(this.colors[i]);
             }
@@ -463,7 +510,7 @@ public class InventoryExtraData implements ExtraData {
         }
 
         public org.bukkit.Color[] getBukkitFadeColors() {
-            org.bukkit.Color[] fadeColors = new org.bukkit.Color[getFadeColors().length];
+            final org.bukkit.Color[] fadeColors = new org.bukkit.Color[getFadeColors().length];
             for (int i = 0; i < fadeColors.length; i++) {
                 fadeColors[i] = org.bukkit.Color.fromRGB(this.fadeColors[i]);
             }
@@ -481,10 +528,10 @@ public class InventoryExtraData implements ExtraData {
     }
 
     public class SimplePotionEffect {
-        private int amplifier;
-        private int duration;
-        private PotionEffectType type;
-        private boolean ambient;
+        private final int amplifier;
+        private final int duration;
+        private final PotionEffectType type;
+        private final boolean ambient;
 
         public SimplePotionEffect(PotionEffect effect) {
             amplifier = effect.getAmplifier();

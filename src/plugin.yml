@@ -1,5 +1,5 @@
 name: jBlockActivity
-version: 0.6.1
+version: 0.6.2
 author: Kodek
 website: 'https://github.com/KodekPL/jBlockActivity'
 main: jcraft.jblockactivity.BlockActivity
@@ -17,6 +17,7 @@ permissions:
          ba.tool.lookup: true
          ba.toolitem.spawn: true
          ba.toolblock.spawn: true
+         ba.tool.nocooldown: true
          ba.clearlog: true
          ba.teleport: true
          ba.hide: true
@@ -36,6 +37,8 @@ permissions:
    ba.toolblock.spawn:
       default: false
    ba.tool.lookup:
+      default: false
+   ba.tool.nocooldown:
       default: false
    ba.clearlog:
       default: false

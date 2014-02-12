@@ -1,8 +1,16 @@
 package jcraft.jblockactivity.extradata;
 
+import static jcraft.jblockactivity.utils.ActivityUtil.packEntityEquipment;
+import static jcraft.jblockactivity.utils.ActivityUtil.packEntityEquipmentChance;
 import static jcraft.jblockactivity.utils.ActivityUtil.toJson;
+import jcraft.jblockactivity.BlockActivity;
+import jcraft.jblockactivity.WorldConfig;
+import jcraft.jblockactivity.extradata.ExtraLoggingTypes.EntityMetaType;
+import jcraft.jblockactivity.extradata.InventoryExtraData.SimpleItemMeta;
 
+import org.bukkit.Art;
 import org.bukkit.DyeColor;
+import org.bukkit.World;
 import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Enderman;
@@ -12,6 +20,7 @@ import org.bukkit.entity.IronGolem;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MagmaCube;
 import org.bukkit.entity.Ocelot;
+import org.bukkit.entity.Painting;
 import org.bukkit.entity.Pig;
 import org.bukkit.entity.Sheep;
 import org.bukkit.entity.Skeleton;
@@ -21,26 +30,36 @@ import org.bukkit.entity.Villager;
 import org.bukkit.entity.Villager.Profession;
 import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Zombie;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
 public abstract class EntityExtraData implements ExtraData {
-
-    /*
-     * TODO: Horse inventory, TODO: Entities equipment
-     */
-
     private String customName;
     private Boolean customNameVisible;
     private Boolean canPickupItems;
     private Boolean removeWhenFarAway;
 
-    protected EntityExtraData(Entity entity) {
+    private String[] equipmentContent;
+    private SimpleItemMeta[] equipmentMeta;
+    private Float[] dropChance;
+
+    protected EntityExtraData(WorldConfig config, Entity entity) {
         if (entity instanceof LivingEntity) {
             final LivingEntity lEntity = (LivingEntity) entity;
-            this.customName = lEntity.getCustomName();
-            this.customNameVisible = lEntity.isCustomNameVisible() ? true : null;
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.customname)) this.customName = lEntity.getCustomName();
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.customname)) this.customNameVisible = lEntity.isCustomNameVisible() ? true : null;
             this.canPickupItems = lEntity.getCanPickupItems() ? true : null;
             this.removeWhenFarAway = lEntity.getRemoveWhenFarAway() ? null : false;
+
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.equipment)) {
+                final ItemStack[] eqArray = packEntityEquipment(lEntity.getEquipment());
+                if (eqArray != null) {
+                    dropChance = packEntityEquipmentChance(lEntity.getEquipment());
+                    final InventoryExtraData invExtraData = new InventoryExtraData(eqArray, false, config);
+                    equipmentContent = invExtraData.getStringContent();
+                    equipmentMeta = invExtraData.getSimpleItemMeta();
+                }
+            }
         }
     }
 
@@ -62,9 +81,21 @@ public abstract class EntityExtraData implements ExtraData {
         return removeWhenFarAway;
     }
 
+    public ItemStack[] getEquipmentContent(World world) {
+        if (equipmentContent != null) {
+            final InventoryExtraData invExtraData = new InventoryExtraData(equipmentContent, equipmentMeta, world);
+            return invExtraData.getContent();
+        }
+        return null;
+    }
+
+    public Float[] getEquipmentDropChances() {
+        return dropChance;
+    }
+
     public static class UnknownExtraData extends EntityExtraData {
-        public UnknownExtraData(Entity entity) {
-            super(entity);
+        public UnknownExtraData(WorldConfig config, Entity entity) {
+            super(config, entity);
         }
 
         @Override
@@ -74,11 +105,12 @@ public abstract class EntityExtraData implements ExtraData {
     }
 
     public static class SkeletonExtraData extends EntityExtraData {
-        private final SkeletonType type;
+        private SkeletonType type;
 
-        public SkeletonExtraData(Skeleton entity) {
-            super(entity);
-            type = (entity.getSkeletonType() == SkeletonType.NORMAL) ? null : entity.getSkeletonType();
+        public SkeletonExtraData(WorldConfig config, Skeleton entity) {
+            super(config, entity);
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.skeletontype)) type = (entity.getSkeletonType() == SkeletonType.NORMAL) ? null
+                    : entity.getSkeletonType();
         }
 
         public SkeletonType getType() {
@@ -92,13 +124,13 @@ public abstract class EntityExtraData implements ExtraData {
     }
 
     public static class ZombieExtraData extends EntityExtraData {
-        private final Boolean isBaby;
-        private final Boolean isVillager;
+        private Boolean isBaby;
+        private Boolean isVillager;
 
-        public ZombieExtraData(Zombie entity) {
-            super(entity);
-            isBaby = entity.isBaby() ? true : null;
-            isVillager = entity.isVillager() ? true : null;
+        public ZombieExtraData(WorldConfig config, Zombie entity) {
+            super(config, entity);
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.zombiebaby)) isBaby = entity.isBaby() ? true : null;
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.zombievillager)) isVillager = entity.isVillager() ? true : null;
         }
 
         public Boolean isBaby() {
@@ -116,11 +148,11 @@ public abstract class EntityExtraData implements ExtraData {
     }
 
     public static class MagmaCubeExtraData extends EntityExtraData {
-        private final Integer size;
+        private Integer size;
 
-        public MagmaCubeExtraData(MagmaCube entity) {
-            super(entity);
-            size = entity.getSize();
+        public MagmaCubeExtraData(WorldConfig config, MagmaCube entity) {
+            super(config, entity);
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.magmacubesize)) size = entity.getSize();
         }
 
         public Integer getSize() {
@@ -134,11 +166,11 @@ public abstract class EntityExtraData implements ExtraData {
     }
 
     public static class SlimeExtraData extends EntityExtraData {
-        private final Integer size;
+        private Integer size;
 
-        public SlimeExtraData(Slime entity) {
-            super(entity);
-            size = entity.getSize();
+        public SlimeExtraData(WorldConfig config, Slime entity) {
+            super(config, entity);
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.slimesize)) size = entity.getSize();
         }
 
         public Integer getSize() {
@@ -152,11 +184,11 @@ public abstract class EntityExtraData implements ExtraData {
     }
 
     public static class CreeperExtraData extends EntityExtraData {
-        private final Boolean isPowered;
+        private Boolean isPowered;
 
-        public CreeperExtraData(Creeper entity) {
-            super(entity);
-            isPowered = entity.isPowered() ? true : null;
+        public CreeperExtraData(WorldConfig config, Creeper entity) {
+            super(config, entity);
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.creeperpowered)) isPowered = entity.isPowered() ? true : null;
         }
 
         public Boolean isPowered() {
@@ -170,18 +202,20 @@ public abstract class EntityExtraData implements ExtraData {
     }
 
     public static class EndermanExtraData extends EntityExtraData {
-        private final Integer blockId;
-        private final Byte blockData;
+        private Integer blockId;
+        private Byte blockData;
 
-        public EndermanExtraData(Enderman entity) {
-            super(entity);
-            final MaterialData material = entity.getCarriedMaterial();
-            if (material.getItemTypeId() == 0) {
-                blockId = null;
-                blockData = null;
-            } else {
-                blockId = material.getItemTypeId();
-                blockData = (material.getData() == 0) ? null : material.getData();
+        public EndermanExtraData(WorldConfig config, Enderman entity) {
+            super(config, entity);
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.endermancarriedblock)) {
+                final MaterialData material = entity.getCarriedMaterial();
+                if (material.getItemTypeId() == 0) {
+                    blockId = null;
+                    blockData = null;
+                } else {
+                    blockId = material.getItemTypeId();
+                    blockData = (material.getData() == 0) ? null : material.getData();
+                }
             }
         }
 
@@ -207,11 +241,11 @@ public abstract class EntityExtraData implements ExtraData {
     }
 
     public static class IronGolemExtraData extends EntityExtraData {
-        private final Boolean isPlayerCreated;
+        private Boolean isPlayerCreated;
 
-        public IronGolemExtraData(IronGolem entity) {
-            super(entity);
-            isPlayerCreated = entity.isPlayerCreated();
+        public IronGolemExtraData(WorldConfig config, IronGolem entity) {
+            super(config, entity);
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.irongolemplayercreation)) isPlayerCreated = entity.isPlayerCreated();
         }
 
         public Boolean isPlayerCreated() {
@@ -225,15 +259,15 @@ public abstract class EntityExtraData implements ExtraData {
     }
 
     public static class AgeableExtraData extends EntityExtraData {
-        private final Integer age;
-        private final Boolean ageLock;
-        private final Boolean isAdult;
+        private Integer age;
+        private Boolean ageLock;
+        private Boolean isAdult;
 
-        public AgeableExtraData(Ageable entity) {
-            super(entity);
-            this.age = (entity.getAge() == 0) ? null : entity.getAge();
-            this.ageLock = entity.getAgeLock() ? true : null;
-            this.isAdult = entity.isAdult() ? null : false;
+        public AgeableExtraData(WorldConfig config, Ageable entity) {
+            super(config, entity);
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.age)) this.age = (entity.getAge() == 0) ? null : entity.getAge();
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.age)) this.ageLock = entity.getAgeLock() ? true : null;
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.animalbaby)) this.isAdult = entity.isAdult() ? null : false;
         }
 
         public Integer getAge() {
@@ -255,11 +289,12 @@ public abstract class EntityExtraData implements ExtraData {
     }
 
     public static class VillagerExtraData extends AgeableExtraData {
-        private final Profession profession;
+        private Profession profession;
 
-        public VillagerExtraData(Villager entity) {
-            super(entity);
-            this.profession = (entity.getProfession() == Profession.FARMER) ? null : entity.getProfession();
+        public VillagerExtraData(WorldConfig config, Villager entity) {
+            super(config, entity);
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.villagerproffesion)) this.profession = (entity.getProfession() == Profession.FARMER) ? null
+                    : entity.getProfession();
         }
 
         public Profession getProfession() {
@@ -273,27 +308,52 @@ public abstract class EntityExtraData implements ExtraData {
     }
 
     public static class HorseExtraData extends AgeableExtraData {
-        private final Boolean isTamed;
-        private final String owner;
-        private final org.bukkit.entity.Horse.Variant variant;
-        private final org.bukkit.entity.Horse.Color color;
-        private final org.bukkit.entity.Horse.Style style;
-        private final Integer maxDomestication;
-        private final Integer domestication;
-        private final Double jumpStrength;
-        private final Boolean isCarryingChest;
+        private Boolean isTamed;
+        private String owner;
+        private org.bukkit.entity.Horse.Variant variant;
+        private org.bukkit.entity.Horse.Color color;
+        private org.bukkit.entity.Horse.Style style;
+        private Integer maxDomestication;
+        private Integer domestication;
+        private Double jumpStrength;
+        private Boolean isCarryingChest;
+        private String[] inventoryContent;
+        private SimpleItemMeta[] inventoryMeta;
 
-        public HorseExtraData(Horse entity) {
-            super(entity);
-            isTamed = entity.isTamed() ? true : null;
-            owner = (entity.getOwner() != null) ? entity.getOwner().getName() : null;
-            variant = entity.getVariant();
-            color = entity.getColor();
-            style = entity.getStyle();
+        public HorseExtraData(WorldConfig config, Horse entity) {
+            super(config, entity);
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.horseowner)) isTamed = entity.isTamed() ? true : null;
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.horseowner)) owner = (entity.getOwner() != null) ? entity.getOwner().getName() : null;
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.horselook)) variant = entity.getVariant();
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.horselook)) color = entity.getColor();
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.horselook)) style = entity.getStyle();
             maxDomestication = entity.getMaxDomestication();
             domestication = entity.getDomestication();
             jumpStrength = entity.getJumpStrength();
-            isCarryingChest = entity.isCarryingChest() ? true : null;
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.horseinventory)) {
+                isCarryingChest = entity.isCarryingChest() ? true : null;
+
+                if (entity.isCarryingChest()) {
+                    inventoryContent = new String[entity.getInventory().getSize() + 2];
+                    inventoryMeta = new SimpleItemMeta[entity.getInventory().getSize() + 2];
+                } else {
+                    inventoryContent = new String[2];
+                    inventoryMeta = new SimpleItemMeta[2];
+                }
+
+                final ItemStack[] content = new ItemStack[inventoryContent.length];
+                content[0] = entity.getInventory().getSaddle();
+                content[1] = entity.getInventory().getArmor();
+                if (content.length > 2) {
+                    for (int i = 2; i < entity.getInventory().getSize() + 2; i++) {
+                        content[i] = entity.getInventory().getItem(i - 2);
+                    }
+                }
+
+                final InventoryExtraData invExtraData = new InventoryExtraData(content, false, config);
+                inventoryContent = invExtraData.getStringContent();
+                inventoryMeta = invExtraData.getSimpleItemMeta();
+            }
         }
 
         public org.bukkit.entity.Horse.Variant getVariant() {
@@ -332,6 +392,14 @@ public abstract class EntityExtraData implements ExtraData {
             return isCarryingChest;
         }
 
+        public ItemStack[] getInventory(World world) {
+            if (inventoryContent != null) {
+                final InventoryExtraData invExtraData = new InventoryExtraData(inventoryContent, inventoryMeta, world);
+                return invExtraData.getContent();
+            }
+            return null;
+        }
+
         @Override
         public String getData() {
             return toJson(this);
@@ -339,17 +407,18 @@ public abstract class EntityExtraData implements ExtraData {
     }
 
     public static class WolfExtraData extends AgeableExtraData {
-        private final Boolean isTamed;
-        private final String owner;
-        private final Boolean isSitting;
-        private final DyeColor collarColor;
+        private Boolean isTamed;
+        private String owner;
+        private Boolean isSitting;
+        private DyeColor collarColor;
 
-        public WolfExtraData(Wolf entity) {
-            super(entity);
-            isTamed = entity.isTamed() ? true : null;
-            owner = (entity.getOwner() != null) ? entity.getOwner().getName() : null;
-            isSitting = entity.isSitting() ? true : null;
-            collarColor = (entity.getCollarColor() == DyeColor.RED) ? null : entity.getCollarColor();
+        public WolfExtraData(WorldConfig config, Wolf entity) {
+            super(config, entity);
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.wolfowner)) isTamed = entity.isTamed() ? true : null;
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.wolfowner)) owner = (entity.getOwner() != null) ? entity.getOwner().getName() : null;
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.wolfowner)) isSitting = entity.isSitting() ? true : null;
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.wolfcollar)) collarColor = (entity.getCollarColor() == DyeColor.RED) ? null : entity
+                    .getCollarColor();
         }
 
         public Boolean isTamed() {
@@ -375,17 +444,18 @@ public abstract class EntityExtraData implements ExtraData {
     }
 
     public static class OcelotExtraData extends AgeableExtraData {
-        private final Boolean isTamed;
-        private final String owner;
-        private final Boolean isSitting;
-        private final org.bukkit.entity.Ocelot.Type catType;
+        private Boolean isTamed;
+        private String owner;
+        private Boolean isSitting;
+        private org.bukkit.entity.Ocelot.Type catType;
 
-        public OcelotExtraData(Ocelot entity) {
-            super(entity);
-            isTamed = entity.isTamed() ? true : null;
-            owner = (entity.getOwner() != null) ? entity.getOwner().getName() : null;
-            isSitting = entity.isSitting() ? true : null;
-            catType = (entity.getCatType() == org.bukkit.entity.Ocelot.Type.WILD_OCELOT) ? null : entity.getCatType();
+        public OcelotExtraData(WorldConfig config, Ocelot entity) {
+            super(config, entity);
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.catowner)) isTamed = entity.isTamed() ? true : null;
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.catowner)) owner = (entity.getOwner() != null) ? entity.getOwner().getName() : null;
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.catowner)) isSitting = entity.isSitting() ? true : null;
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.cattype)) catType = (entity.getCatType() == org.bukkit.entity.Ocelot.Type.WILD_OCELOT) ? null
+                    : entity.getCatType();
         }
 
         public Boolean isTamed() {
@@ -411,11 +481,11 @@ public abstract class EntityExtraData implements ExtraData {
     }
 
     public static class PigExtraData extends AgeableExtraData {
-        private final Boolean saddle;
+        private Boolean saddle;
 
-        public PigExtraData(Pig entity) {
-            super(entity);
-            this.saddle = entity.hasSaddle() ? true : null;
+        public PigExtraData(WorldConfig config, Pig entity) {
+            super(config, entity);
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.pigsaddle)) saddle = entity.hasSaddle() ? true : null;
         }
 
         public Boolean hasSaddle() {
@@ -429,13 +499,13 @@ public abstract class EntityExtraData implements ExtraData {
     }
 
     public static class SheepExtraData extends AgeableExtraData {
-        private final DyeColor color;
-        private final Boolean sheared;
+        private DyeColor color;
+        private Boolean sheared;
 
-        public SheepExtraData(Sheep entity) {
-            super(entity);
-            this.color = (entity.getColor() == DyeColor.WHITE) ? null : entity.getColor();
-            this.sheared = entity.isSheared() ? true : null;
+        public SheepExtraData(WorldConfig config, Sheep entity) {
+            super(config, entity);
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.sheepcolor)) color = (entity.getColor() == DyeColor.WHITE) ? null : entity.getColor();
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.sheepsheard)) sheared = entity.isSheared() ? true : null;
         }
 
         public DyeColor getColor() {
@@ -452,37 +522,57 @@ public abstract class EntityExtraData implements ExtraData {
         }
     }
 
+    public static class PaintingExtraData extends EntityExtraData {
+        private final Art art;
+
+        public PaintingExtraData(WorldConfig config, Painting entity) {
+            super(config, entity);
+            this.art = entity.getArt();
+        }
+
+        public Art getArt() {
+            return art;
+        }
+
+        @Override
+        public String getData() {
+            return toJson(this);
+        }
+    }
+
     public static EntityExtraData getExtraData(Entity entity) {
+        WorldConfig config = BlockActivity.getWorldConfig(entity.getWorld().getName());
         switch (entity.getType()) {
         case SHEEP:
-            return new SheepExtraData((Sheep) entity);
+            return new SheepExtraData(config, (Sheep) entity);
         case PIG:
-            return new PigExtraData((Pig) entity);
+            return new PigExtraData(config, (Pig) entity);
         case OCELOT:
-            return new OcelotExtraData((Ocelot) entity);
+            return new OcelotExtraData(config, (Ocelot) entity);
         case WOLF:
-            return new WolfExtraData((Wolf) entity);
+            return new WolfExtraData(config, (Wolf) entity);
         case HORSE:
-            return new HorseExtraData((Horse) entity);
+            return new HorseExtraData(config, (Horse) entity);
         case VILLAGER:
-            return new VillagerExtraData((Villager) entity);
+            return new VillagerExtraData(config, (Villager) entity);
         case IRON_GOLEM:
-            return new IronGolemExtraData((IronGolem) entity);
+            return new IronGolemExtraData(config, (IronGolem) entity);
         case CREEPER:
-            return new CreeperExtraData((Creeper) entity);
+            return new CreeperExtraData(config, (Creeper) entity);
         case SLIME:
-            return new SlimeExtraData((Slime) entity);
+            return new SlimeExtraData(config, (Slime) entity);
         case MAGMA_CUBE:
-            return new MagmaCubeExtraData((MagmaCube) entity);
+            return new MagmaCubeExtraData(config, (MagmaCube) entity);
         case ZOMBIE:
-            return new ZombieExtraData((Zombie) entity);
+            return new ZombieExtraData(config, (Zombie) entity);
         case SKELETON:
-            return new SkeletonExtraData((Skeleton) entity);
+            return new SkeletonExtraData(config, (Skeleton) entity);
         case ENDERMAN:
-            return new EndermanExtraData((Enderman) entity);
+            return new EndermanExtraData(config, (Enderman) entity);
+        case PAINTING:
+            return new PaintingExtraData(config, (Painting) entity);
         default:
             return null;
         }
     }
-
 }

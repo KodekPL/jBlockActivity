@@ -31,8 +31,8 @@ import org.bukkit.util.Vector;
 
 public class BlockActionLog extends ActionLog implements LookupCache {
 
-    private int newBlockId, oldBlockId; // $codepro.audit.disable variableShouldBeFinal
-    private byte newBlockData, oldBlockData; // $codepro.audit.disable variableShouldBeFinal
+    private int newBlockId, oldBlockId;
+    private byte newBlockData, oldBlockData;
 
     public BlockActionLog(LoggingType type, String playerName, World world, Vector location, BlockState oldState, BlockState newState,
             ExtraData extraData) {
@@ -77,7 +77,7 @@ public class BlockActionLog extends ActionLog implements LookupCache {
         PreparedStatement state = null;
         PreparedStatement extraState = null;
         try {
-            state = connection.prepareStatement("INSERT INTO `ba-" + getWorldName()
+            state = connection.prepareStatement("INSERT INTO `" + getWorldTableName()
                     + "` (time, type, playerid, old_id, old_data, new_id, new_data, x, y, z) VALUES (FROM_UNIXTIME(?), ?, "
                     + getPlayerId(getPlayerName()) + ", ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
             state.setLong(1, getTime());
@@ -98,7 +98,7 @@ public class BlockActionLog extends ActionLog implements LookupCache {
                 final ResultSet result = state.getGeneratedKeys();
                 result.next();
                 id = result.getInt(1);
-                extraState = connection.prepareStatement("INSERT INTO `ba-" + getWorldName() + "-extra` (id, data) VALUES (?, ?)");
+                extraState = connection.prepareStatement("INSERT INTO `" + getWorldTableName() + "-extra` (id, data) VALUES (?, ?)");
                 extraState.setInt(1, id);
                 extraState.setString(2, sData);
                 extraState.executeUpdate();

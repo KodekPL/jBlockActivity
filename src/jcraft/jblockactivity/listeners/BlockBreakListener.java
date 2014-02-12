@@ -10,15 +10,11 @@ import static jcraft.jblockactivity.utils.ActivityUtil.isRelativeTopBreakableBlo
 import java.util.List;
 
 import jcraft.jblockactivity.BlockActivity;
-import jcraft.jblockactivity.ExtraLoggingType;
 import jcraft.jblockactivity.LoggingType;
 import jcraft.jblockactivity.WorldConfig;
 import jcraft.jblockactivity.actionlogs.BlockActionLog;
 import jcraft.jblockactivity.extradata.BlockExtraData;
-import jcraft.jblockactivity.extradata.BlockExtraData.CommandBlockExtraData;
-import jcraft.jblockactivity.extradata.BlockExtraData.MobSpawnerExtraData;
-import jcraft.jblockactivity.extradata.BlockExtraData.SignExtraData;
-import jcraft.jblockactivity.extradata.BlockExtraData.SkullExtraData;
+import jcraft.jblockactivity.extradata.ExtraLoggingTypes.BlockMetaType;
 import jcraft.jblockactivity.extradata.InventoryExtraData;
 
 import org.bukkit.GameMode;
@@ -27,9 +23,6 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
-import org.bukkit.block.CommandBlock;
-import org.bukkit.block.CreatureSpawner;
-import org.bukkit.block.Skull;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -68,38 +61,31 @@ public class BlockBreakListener implements Listener {
         }
 
         // TODO: Flower Pot contents
-        if (config.isExtraLogging(ExtraLoggingType.signtext) && (material == Material.WALL_SIGN || material == Material.SIGN_POST)) {
+        if (config.isLoggingExtraBlockMeta(BlockMetaType.signtext) && (material == Material.WALL_SIGN || material == Material.SIGN_POST)) {
             /** SIGN **/
-            final SignExtraData extraData = new SignExtraData(((org.bukkit.block.Sign) block.getState()).getLines());
             final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, block.getWorld(), block.getLocation().toVector(),
-                    block.getState(), null, extraData);
+                    block.getState(), null, BlockExtraData.getExtraData(block.getState()));
             BlockActivity.sendActionLog(action);
-        } else if (config.isExtraLogging(ExtraLoggingType.skull) && material == Material.SKULL) {
+        } else if (config.isLoggingExtraBlockMeta(BlockMetaType.skull) && material == Material.SKULL) {
             /** SKULL **/
-            final Skull skull = (Skull) block.getState();
-            final BlockExtraData extraData = new SkullExtraData(skull.getRotation(), skull.getOwner(), skull.getSkullType());
             final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, block.getWorld(), block.getLocation().toVector(),
-                    block.getState(), null, extraData);
+                    block.getState(), null, BlockExtraData.getExtraData(block.getState()));
             BlockActivity.sendActionLog(action);
-        } else if (config.isExtraLogging(ExtraLoggingType.mobspawner) && material == Material.MOB_SPAWNER) {
+        } else if (config.isLoggingExtraBlockMeta(BlockMetaType.mobspawner) && material == Material.MOB_SPAWNER) {
             /** MOB SPAWNER **/
-            final CreatureSpawner spawner = (CreatureSpawner) block.getState();
-            final MobSpawnerExtraData extraData = new MobSpawnerExtraData(spawner.getSpawnedType());
             final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, block.getWorld(), block.getLocation().toVector(),
-                    block.getState(), null, extraData);
+                    block.getState(), null, BlockExtraData.getExtraData(block.getState()));
             BlockActivity.sendActionLog(action);
-        } else if (config.isExtraLogging(ExtraLoggingType.commandblock) && material == Material.COMMAND) {
+        } else if (config.isLoggingExtraBlockMeta(BlockMetaType.commandblock) && material == Material.COMMAND) {
             /** COMMAND BLOCK **/
-            final CommandBlock cmd = (CommandBlock) block.getState();
-            final CommandBlockExtraData extraData = new CommandBlockExtraData(cmd.getName(), cmd.getCommand());
             final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, block.getWorld(), block.getLocation().toVector(),
-                    block.getState(), null, extraData);
+                    block.getState(), null, BlockExtraData.getExtraData(block.getState()));
             BlockActivity.sendActionLog(action);
         } else if (config.isLogging(LoggingType.inventoryaccess) && isContainerBlock(material)) {
             /** CONTAINER **/
             final InventoryExtraData extraData = new InventoryExtraData(((InventoryHolder) block.getState()).getInventory().getContents(), true,
-                    config);
-            final InventoryExtraData emptyExtraData = new InventoryExtraData(new ItemStack[0], false, config);
+                    block.getWorld());
+            final InventoryExtraData emptyExtraData = new InventoryExtraData(new ItemStack[0], false, block.getWorld());
             extraData.compareInventories(emptyExtraData);
             if (!extraData.isEmpty()) {
                 final BlockActionLog action = new BlockActionLog(LoggingType.inventoryaccess, playerName, block.getWorld(), block.getLocation()
@@ -175,9 +161,8 @@ public class BlockBreakListener implements Listener {
                     }
                 } else if (aboveBlock.getType() == Material.SIGN_POST || aboveBlock.getType() == Material.WALL_SIGN) {
                     /** SIGN **/
-                    final SignExtraData extraData = new SignExtraData(((org.bukkit.block.Sign) aboveBlock.getState()).getLines());
                     final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, aboveBlock.getWorld(), aboveBlock
-                            .getLocation().toVector(), aboveBlock.getState(), null, extraData);
+                            .getLocation().toVector(), aboveBlock.getState(), null, BlockExtraData.getExtraData(aboveBlock.getState()));
                     BlockActivity.sendActionLog(action);
                 } // TODO: Flower Pot contents
             }
@@ -236,9 +221,8 @@ public class BlockBreakListener implements Listener {
                         break;
                     case WALL_SIGN:
                         if (relativeBlock.getRelative(((org.bukkit.material.Sign) materialData).getAttachedFace()).equals(block)) {
-                            SignExtraData extraData = new SignExtraData(((org.bukkit.block.Sign) relativeBlock.getState()).getLines());
                             action = new BlockActionLog(LoggingType.blockbreak, playerName, relativeBlock.getWorld(), relativeBlock.getLocation()
-                                    .toVector(), relativeBlock.getState(), null, extraData);
+                                    .toVector(), relativeBlock.getState(), null, BlockExtraData.getExtraData(relativeBlock.getState()));
                         }
                         break;
                     case TRAP_DOOR:

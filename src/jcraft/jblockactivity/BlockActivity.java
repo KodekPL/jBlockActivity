@@ -81,8 +81,6 @@ public class BlockActivity extends JavaPlugin {
             getLogger().severe("Error while loading: " + ex.getMessage());
             errorAtLoading = true;
             return;
-        } finally {
-
         }
     }
 
@@ -97,7 +95,7 @@ public class BlockActivity extends JavaPlugin {
         cmdHandler = new CommandHandler();
         getCommand("ba").setExecutor(cmdHandler);
 
-        logExecuteRunnable = new LogExecuteThread(config.maxTimePerRun, config.timeBetweenRuns, config.minLogsToProcess);
+        logExecuteRunnable = new LogExecuteThread(config.maxTimePerRun, config.timeBetweenRuns, config.minLogsToProcess, config.queueWarningSize);
         logExecuteThread = new Thread(logExecuteRunnable, "jBlockLogExecutor");
         logExecuteThread.start();
 
@@ -196,6 +194,14 @@ public class BlockActivity extends JavaPlugin {
         return null;
     }
 
+    public static String getWorldTableName(String name) {
+        final WorldConfig config = getWorldConfig(name);
+        if (config != null) {
+            return config.tableName;
+        }
+        return null;
+    }
+
     public static boolean isWorldLogged(String name) {
         if (worldConfigs.containsKey(name)) {
             return true;
@@ -220,11 +226,10 @@ public class BlockActivity extends JavaPlugin {
     }
 
     public static boolean isHidden(String playerName) {
-        return config.hiddenPlayers.contains(playerName.toLowerCase());
+        return config.hiddenPlayers.contains(playerName);
     }
 
     public static boolean hidePlayer(String playerName) {
-        playerName = playerName.toLowerCase();
         if (config.hiddenPlayers.contains(playerName)) {
             config.hiddenPlayers.remove(playerName);
             return false;

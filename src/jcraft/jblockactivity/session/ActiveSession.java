@@ -17,11 +17,11 @@ public class ActiveSession {
     public QuestionData question = null;
 
     public static boolean hasSession(CommandSender sender) {
-        return sessions.containsKey(sender.getName().toLowerCase());
+        return sessions.containsKey(sender.getName());
     }
 
     public static boolean hasSession(String playerName) {
-        return sessions.containsKey(playerName.toLowerCase());
+        return sessions.containsKey(playerName);
     }
 
     public static ActiveSession getSession(CommandSender sender) {
@@ -29,10 +29,10 @@ public class ActiveSession {
     }
 
     public static ActiveSession getSession(String playerName) {
-        ActiveSession session = sessions.get(playerName.toLowerCase());
+        ActiveSession session = sessions.get(playerName);
         if (session == null) {
             session = new ActiveSession();
-            sessions.put(playerName.toLowerCase(), session);
+            sessions.put(playerName, session);
         }
         return session;
     }

@@ -418,7 +418,7 @@ public class SQLConnectionPool implements Closeable {
         public void terminate() {
             try {
                 conn.close();
-            } catch (final SQLException ex) {
+            } catch (final SQLException e) {
             }
         }
     }

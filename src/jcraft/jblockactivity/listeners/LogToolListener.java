@@ -44,7 +44,7 @@ public class LogToolListener implements Listener {
             return;
         }
 
-        if (!player.hasPermission("ba.admin")) {
+        if (!player.hasPermission("ba.tool.nocooldown")) {
             if (BlockActivity.lastToolUse.containsKey(player.getName())) {
                 if (System.currentTimeMillis() - BlockActivity.lastToolUse.get(player.getName()) < BlockActivity.config.toolUseCooldown) {
                     player.sendMessage(BlockActivity.prefix + ChatColor.RED + "You can't use lookup tool that often!");

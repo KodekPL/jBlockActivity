@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 import jcraft.jblockactivity.LoggingType;
 import jcraft.jblockactivity.extradata.EntityExtraData;
+import jcraft.jblockactivity.extradata.EntityExtraData.PaintingExtraData;
 import jcraft.jblockactivity.extradata.ExtraData;
 import jcraft.jblockactivity.extradata.InventoryExtraData;
 import jcraft.jblockactivity.session.LookupCache;
@@ -28,7 +29,7 @@ import org.bukkit.util.Vector;
 
 public class EntityActionLog extends ActionLog implements LookupCache {
 
-    private int entityId, entityData; // $codepro.audit.disable variableShouldBeFinal
+    private final int entityId, entityData;
 
     public EntityActionLog(LoggingType type, String playerName, World world, Vector location, int entityId, int dataId, ExtraData extraData) {
         super(type, playerName, world, location, extraData);
@@ -49,7 +50,7 @@ public class EntityActionLog extends ActionLog implements LookupCache {
         PreparedStatement state = null;
         PreparedStatement extraState = null;
         try {
-            state = connection.prepareStatement("INSERT INTO `ba-" + getWorldName()
+            state = connection.prepareStatement("INSERT INTO `" + getWorldTableName()
                     + "` (time, type, playerid, old_id, old_data, new_id, new_data, x, y, z) VALUES (FROM_UNIXTIME(?), ?, "
                     + getPlayerId(getPlayerName()) + ", ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
             state.setLong(1, getTime());
@@ -70,7 +71,7 @@ public class EntityActionLog extends ActionLog implements LookupCache {
                 final ResultSet result = state.getGeneratedKeys();
                 result.next();
                 id = result.getInt(1);
-                extraState = connection.prepareStatement("INSERT INTO `ba-" + getWorldName() + "-extra` (id, data) VALUES (?, ?)");
+                extraState = connection.prepareStatement("INSERT INTO `" + getWorldTableName() + "-extra` (id, data) VALUES (?, ?)");
                 extraState.setInt(1, id);
                 extraState.setString(2, sData);
                 extraState.executeUpdate();
@@ -197,7 +198,11 @@ public class EntityActionLog extends ActionLog implements LookupCache {
         final String data = params.needExtraData ? result.getString("data") : null;
         ExtraData extraData = null;
         if (data != null) {
-            if (logType == LoggingType.hanginginteract) {
+            if (logType == LoggingType.hangingplace || logType == LoggingType.hangingbreak) {
+                if (entity_id == 9) {
+                    extraData = fromJson(data, PaintingExtraData.class);
+                }
+            } else if (logType == LoggingType.hanginginteract) {
                 extraData = fromJson(data, InventoryExtraData.class);
             } else if (logType == LoggingType.creaturekill) {
                 if (entity_id == 50) {

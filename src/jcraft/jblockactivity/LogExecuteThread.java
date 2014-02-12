@@ -16,13 +16,14 @@ import jcraft.jblockactivity.actionlogs.ActionLog;
 public class LogExecuteThread implements Runnable {
 
     public final LinkedBlockingQueue<ActionLog> queue = new LinkedBlockingQueue<ActionLog>();
-    public final int maxTimePerRun, timeBetweenRuns, minLogsToProcess;
+    public final int maxTimePerRun, timeBetweenRuns, minLogsToProcess, queueWarningSize;
     public final Lock lock = new ReentrantLock();
 
-    public LogExecuteThread(int maxTimePerRun, int timeBetweenRuns, int minLogsToProcess) {
+    public LogExecuteThread(int maxTimePerRun, int timeBetweenRuns, int minLogsToProcess, int queueWarningSize) {
         this.maxTimePerRun = maxTimePerRun;
         this.timeBetweenRuns = timeBetweenRuns;
         this.minLogsToProcess = minLogsToProcess;
+        this.queueWarningSize = queueWarningSize;
     }
 
     private boolean running = true;
@@ -47,6 +48,11 @@ public class LogExecuteThread implements Runnable {
                 if (queue.isEmpty() || !lock.tryLock()) {
                     continue;
                 }
+
+                if (queueWarningSize > 0 && queue.size() >= queueWarningSize) {
+                    getLogger().info("[Queue] Queue is overloaded! Size: " + getQueueSize());
+                }
+
                 Connection connection = BlockActivity.getBlockActivity().getConnection();
                 Statement state = null;
                 try {

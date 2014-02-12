@@ -18,6 +18,7 @@ import jcraft.jblockactivity.extradata.EntityExtraData.HorseExtraData;
 import jcraft.jblockactivity.extradata.EntityExtraData.IronGolemExtraData;
 import jcraft.jblockactivity.extradata.EntityExtraData.MagmaCubeExtraData;
 import jcraft.jblockactivity.extradata.EntityExtraData.OcelotExtraData;
+import jcraft.jblockactivity.extradata.EntityExtraData.PaintingExtraData;
 import jcraft.jblockactivity.extradata.EntityExtraData.PigExtraData;
 import jcraft.jblockactivity.extradata.EntityExtraData.SheepExtraData;
 import jcraft.jblockactivity.extradata.EntityExtraData.SkeletonExtraData;
@@ -46,6 +47,7 @@ import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MagmaCube;
 import org.bukkit.entity.Ocelot;
+import org.bukkit.entity.Painting;
 import org.bukkit.entity.Pig;
 import org.bukkit.entity.Sheep;
 import org.bukkit.entity.Skeleton;
@@ -74,7 +76,14 @@ public class EntityChange extends EntityActionLog {
                 if (getLoggingType() == LoggingType.hangingbreak && !blockEditor.isRedo()) {
                     for (Hanging hanging : hangings) {
                         if (hanging.getFacing().ordinal() == getEntityData()) {
-                            return BlockEditorResult.NO_HANGING_ACTION;
+                            if (getExtraData() != null && getEntityId() == 9) { // Painting
+                                PaintingExtraData extraData = (PaintingExtraData) getExtraData();
+                                if (((Painting) hanging).getArt() == extraData.getArt()) {
+                                    return BlockEditorResult.NO_HANGING_ACTION;
+                                }
+                            } else {
+                                return BlockEditorResult.NO_HANGING_ACTION;
+                            }
                         }
                     }
                     if (!block.getType().isTransparent()) {
@@ -86,6 +95,10 @@ public class EntityChange extends EntityActionLog {
                                 .spawn(hangBlock.getLocation(), EntityType.fromId(getEntityId()).getEntityClass());
                         hanging.teleport(block.getLocation());
                         hanging.setFacingDirection(face, true);
+                        if (getExtraData() != null && hanging instanceof Painting) {
+                            final PaintingExtraData extraData = (PaintingExtraData) getExtraData();
+                            ((Painting) hanging).setArt(extraData.getArt(), true);
+                        }
                         return BlockEditorResult.HANGING_SPAWNED;
                     } catch (IllegalArgumentException e) {
                         throw new BlockEditorException("Invalid hanging block to place " + MaterialNames.entityName(getEntityId()),
@@ -94,8 +107,16 @@ public class EntityChange extends EntityActionLog {
                 } else {
                     for (Hanging hanging : hangings) {
                         if (hanging.getFacing().ordinal() == getEntityData()) {
-                            hanging.remove();
-                            return BlockEditorResult.HANGING_REMOVED;
+                            if (getExtraData() != null && getEntityId() == 9) { // Painting
+                                PaintingExtraData extraData = (PaintingExtraData) getExtraData();
+                                if (((Painting) hanging).getArt() == extraData.getArt()) {
+                                    hanging.remove();
+                                    return BlockEditorResult.HANGING_REMOVED;
+                                }
+                            } else {
+                                hanging.remove();
+                                return BlockEditorResult.HANGING_REMOVED;
+                            }
                         }
                     }
                     return BlockEditorResult.NO_HANGING_ACTION;
@@ -160,6 +181,21 @@ public class EntityChange extends EntityActionLog {
                         if (data.isCustomNameVisible() != null) lEntity.setCustomNameVisible(data.isCustomNameVisible());
                         if (data.getCanPickupItems() != null) lEntity.setCanPickupItems(data.getCanPickupItems());
                         if (data.getRemoveWhenFarAway() != null) lEntity.setRemoveWhenFarAway(data.getRemoveWhenFarAway());
+
+                        final ItemStack[] entityEq = data.getEquipmentContent(getWorld());
+                        if (entityEq != null) {
+                            final Float[] dropChances = data.getEquipmentDropChances();
+                            if (entityEq[0] != null) lEntity.getEquipment().setItemInHand(entityEq[0]);
+                            if (dropChances[0] != null) lEntity.getEquipment().setItemInHandDropChance(dropChances[0]);
+                            if (entityEq[1] != null) lEntity.getEquipment().setHelmet(entityEq[1]);
+                            if (dropChances[1] != null) lEntity.getEquipment().setHelmetDropChance(dropChances[1]);
+                            if (entityEq[2] != null) lEntity.getEquipment().setChestplate(entityEq[2]);
+                            if (dropChances[2] != null) lEntity.getEquipment().setChestplateDropChance(dropChances[2]);
+                            if (entityEq[3] != null) lEntity.getEquipment().setLeggings(entityEq[3]);
+                            if (dropChances[3] != null) lEntity.getEquipment().setLeggingsDropChance(dropChances[3]);
+                            if (entityEq[4] != null) lEntity.getEquipment().setBoots(entityEq[4]);
+                            if (dropChances[4] != null) lEntity.getEquipment().setBootsDropChance(dropChances[4]);
+                        }
                     }
 
                     if (entity instanceof Ageable) {
@@ -231,6 +267,20 @@ public class EntityChange extends EntityActionLog {
                         if (data.getDomestication() != null) horse.setDomestication(data.getDomestication());
                         if (data.getJumpStrength() != null) horse.setJumpStrength(data.getJumpStrength());
                         if (data.isCarryingChest() != null) horse.setCarryingChest(data.isCarryingChest());
+
+                        final ItemStack[] invContent = data.getInventory(getWorld());
+                        if (invContent != null) {
+                            if (invContent[0] != null) horse.getInventory().setSaddle(invContent[0]);
+                            if (invContent[1] != null) horse.getInventory().setArmor(invContent[1]);
+                            if (horse.isCarryingChest() && invContent.length > 2) {
+                                for (int i = 2; i < horse.getInventory().getSize() + 2; i++) {
+                                    if (invContent[i] != null) {
+                                        horse.getInventory().setItem(i - 2, invContent[i]);
+                                    }
+                                }
+                            }
+                        }
+
                         if (data.isTamed() != null) horse.setTamed(data.isTamed());
                         if (data.getOwner() != null) {
                             horse.setOwner(getOfflinePlayer(data.getOwner()));

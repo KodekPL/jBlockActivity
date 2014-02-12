@@ -6,13 +6,13 @@ import static jcraft.jblockactivity.utils.ActivityUtil.isFallingBlockKiller;
 import static jcraft.jblockactivity.utils.ActivityUtil.turnFace;
 import static jcraft.jblockactivity.utils.ActivityUtil.yawToFace;
 import jcraft.jblockactivity.BlockActivity;
-import jcraft.jblockactivity.ExtraLoggingType;
 import jcraft.jblockactivity.LoggingType;
 import jcraft.jblockactivity.WorldConfig;
 import jcraft.jblockactivity.actionlogs.BlockActionLog;
 import jcraft.jblockactivity.extradata.BlockExtraData;
 import jcraft.jblockactivity.extradata.BlockExtraData.SignExtraData;
 import jcraft.jblockactivity.extradata.BlockExtraData.SkullExtraData;
+import jcraft.jblockactivity.extradata.ExtraLoggingTypes.BlockMetaType;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -47,7 +47,7 @@ public class BlockPlaceListener implements Listener {
         }
 
         // SignChangeEvent
-        if (config.isExtraLogging(ExtraLoggingType.signtext) && (material == Material.SIGN_POST || material == Material.WALL_SIGN)) {
+        if (config.isLoggingExtraBlockMeta(BlockMetaType.signtext) && (material == Material.SIGN_POST || material == Material.WALL_SIGN)) {
             return;
         }
 
@@ -177,7 +177,7 @@ public class BlockPlaceListener implements Listener {
         if (config == null || !config.isLogging(LoggingType.blockplace)) {
             return;
         }
-        if (!config.isExtraLogging(ExtraLoggingType.signtext)) {
+        if (!config.isLoggingExtraBlockMeta(BlockMetaType.signtext)) {
             return;
         }
         final String playerName = event.getPlayer().getName();

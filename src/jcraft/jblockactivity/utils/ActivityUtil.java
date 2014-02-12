@@ -25,6 +25,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -40,6 +41,40 @@ public class ActivityUtil {
 
     public static <T> T fromJson(String data, Class<T> clazz) {
         return gson.fromJson(data, clazz);
+    }
+
+    public static ItemStack[] packEntityEquipment(EntityEquipment eq) {
+        final ItemStack[] eqArray = new ItemStack[5];
+        if (isItem(eq.getItemInHand())) eqArray[0] = eq.getItemInHand();
+        if (isItem(eq.getHelmet())) eqArray[1] = eq.getHelmet();
+        if (isItem(eq.getChestplate())) eqArray[2] = eq.getChestplate();
+        if (isItem(eq.getLeggings())) eqArray[3] = eq.getLeggings();
+        if (isItem(eq.getBoots())) eqArray[4] = eq.getBoots();
+
+        for (ItemStack item : eqArray) {
+            if (item != null) {
+                return eqArray;
+            }
+        }
+        return null;
+    }
+
+    public static Float[] packEntityEquipmentChance(EntityEquipment eq) {
+        final Float[] dropChance = new Float[5];
+        if (isItem(eq.getItemInHand())) dropChance[0] = eq.getItemInHandDropChance();
+        if (isItem(eq.getHelmet())) dropChance[1] = eq.getHelmetDropChance();
+        if (isItem(eq.getChestplate())) dropChance[2] = eq.getChestplateDropChance();
+        if (isItem(eq.getLeggings())) dropChance[3] = eq.getLeggingsDropChance();
+        if (isItem(eq.getBoots())) dropChance[4] = eq.getBootsDropChance();
+
+        return dropChance;
+    }
+
+    public static boolean isItem(ItemStack item) {
+        if (item == null || item.getType() == Material.AIR) {
+            return false;
+        }
+        return true;
     }
 
     public static EntityType matchEntity(String name) {

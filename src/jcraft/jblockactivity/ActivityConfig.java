@@ -8,8 +8,10 @@ import static org.bukkit.Bukkit.getWorlds;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -34,7 +36,7 @@ public class ActivityConfig {
     }
 
     public String sqlHost, sqlPort, sqlDatabase, sqlUsername, sqlPassword;
-    public int maxTimePerRun, timeBetweenRuns, minLogsToProcess;
+    public int maxTimePerRun, timeBetweenRuns, minLogsToProcess, queueWarningSize;
     private boolean[] loggingTypes;
 
     public int defaultDistance, defaultTime;
@@ -45,15 +47,15 @@ public class ActivityConfig {
     public boolean askRollbacks, askRedos, askClearlogs;
 
     public void genConfig() {
-        final Map<String, Object> configDef = new HashMap<String, Object>();
+        final Map<String, Object> configDef = new LinkedHashMap<String, Object>();
 
         configDef.put("configVersion", 1);
 
         configDef.put("mysql.host", "127.0.0.1");
         configDef.put("mysql.port", 3306);
-        configDef.put("mysql.database", "minecraft");
         configDef.put("mysql.username", "root");
         configDef.put("mysql.password", "password");
+        configDef.put("mysql.database", "minecraft");
 
         final List<String> logWorlds = new ArrayList<String>();
         for (World world : getWorlds()) {
@@ -61,9 +63,12 @@ public class ActivityConfig {
         }
         configDef.put("loggedWorlds", logWorlds);
 
+        configDef.put("logging.hiddenPlayers", Arrays.asList("Dinnerbone"));
+
         configDef.put("queue.maxTimePerRun", 300);
         configDef.put("queue.timeBetweenRuns", 5);
         configDef.put("queue.minLogsToProcess", 25);
+        configDef.put("queue.queueWarningSize", 1000);
 
         configDef.put("lookup.defaultDistance", 20);
         configDef.put("lookup.defaultTime", "30 minutes");
@@ -82,8 +87,6 @@ public class ActivityConfig {
         configDef.put("tools.blocktool.params", "area 0 all sum none limit 15 desc");
         configDef.put("tools.blocktool.leftClickBehavior", "TOOL");
         configDef.put("tools.blocktool.rightClickBehavior", "BLOCK");
-
-        configDef.put("logging.hiddenPlayers", new ArrayList<String>());
 
         configDef.put("questioner.askRollbacks", true);
         configDef.put("questioner.askRedos", true);
@@ -115,6 +118,7 @@ public class ActivityConfig {
         maxTimePerRun = config.getInt("queue.maxTimePerRun");
         timeBetweenRuns = config.getInt("queue.timeBetweenRuns");
         minLogsToProcess = config.getInt("queue.minLogsToProcess");
+        queueWarningSize = config.getInt("queue.queueWarningSize");
 
         defaultDistance = config.getInt("lookup.defaultDistance");
         defaultTime = parseTime(config.getString("lookup.defaultTime").split(" "));
@@ -145,7 +149,7 @@ public class ActivityConfig {
 
         hiddenPlayers = new HashSet<String>();
         for (final String playerName : config.getStringList("logging.hiddenPlayers")) {
-            hiddenPlayers.add(playerName.toLowerCase().trim());
+            hiddenPlayers.add(playerName.trim());
         }
 
         askRollbacks = config.getBoolean("questioner.askRollbacks");

@@ -1,3 +1,4 @@
+tableName: `ba-world`
 logging:
   blockbreak: true
   blockplace: true
@@ -6,31 +7,58 @@ logging:
   hangingbreak: true
   hangingplace: true
   hanginginteract: true
+  creaturekill: true
 logExtraData:
-  commandblock: true
-  flowerpot: true
-  mobspawner: true
-  signtext: true
-  skull: true
-  inventory: true
-  itemMeta:
+  blockMeta:
+    signtext: true
+    commandblock: true
+    skull: true
+    inventory: true
+    mobspawner: true
     enable: true
-    name: true
+  itemMeta:
+    firework: true
+    bookpage: true
+    booktitle: true
+    bookenchant: true
+    repair: true
+    bookauthor: true
+    enable: true
     lore: true
     enchants: true
-    booktitle: true
-    bookauthor: true
-    bookpage: true
-    bookenchant: true
-    leathercolor: true
-    repair: true
-    skull: true
     map: true
+    name: true
     potion: true
-    firework: true
+    skull: true
+    leathercolor: true
+  entityMeta:
+    catowner: true
+    enable: true
+    zombievillager: true
+    equipment: true
+    pigsaddle: true
+    wolfowner: true
+    age: true
+    slimesize: true
+    wolfcollar: true
+    irongolemplayercreation: true
+    animalbaby: true
+    villagerproffesion: true
+    skeletontype: true
+    horseowner: true
+    sheepsheard: true
+    cattype: true
+    horseinventory: true
+    creeperpowered: true
+    endermancarriedblock: true
+    magmacubesize: true
+    customname: true
+    sheepcolor: true
+    zombiebaby: true
+    horselook: true
 special:
   rollback:
-    LimitEntitiesPerChunk: true
+    limitEntitiesPerChunk: 16
     replaceAnyway:
     - 8
     - 9
@@ -67,6 +95,9 @@ special:
     - 150
     - 154
     - 158
+    hangings:
+    - 9
+    - 18
     creatures:
     - 90
     - 91

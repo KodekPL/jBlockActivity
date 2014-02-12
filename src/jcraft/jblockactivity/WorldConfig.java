@@ -8,12 +8,16 @@ import java.sql.Statement;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import jcraft.jblockactivity.extradata.InventoryExtraData.ItemMetaType;
+import jcraft.jblockactivity.extradata.ExtraLoggingTypes.BlockMetaType;
+import jcraft.jblockactivity.extradata.ExtraLoggingTypes.EntityMetaType;
+import jcraft.jblockactivity.extradata.ExtraLoggingTypes.ItemMetaType;
 
+import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -23,42 +27,57 @@ public class WorldConfig {
     private final YamlConfiguration config;
 
     private final String worldName;
+    public String tableName;
     private boolean[] loggingTypes;
-    private boolean[] extraLoggingTypes;
-    public boolean saveItemMeta;
-    private boolean[] itemMetaTypes;
+
+    private boolean saveExtraBlockMeta;
+    private boolean[] extraBlockMetaTypes;
+
+    private boolean saveExtraItemMeta;
+    private boolean[] extraItemMetaTypes;
+
+    private boolean saveExtraEntityMeta;
+    private boolean[] extraEntityMetaTypes;
+
     private Set<Integer> interactBlocks;
     public int limitEntitiesPerChunk;
-    public Set<Integer> blockBlacklist, replaceAnyway, loggingCreatures;
+    public Set<Integer> blockBlacklist, replaceAnyway, loggingCreatures, loggingHangings;
 
     public WorldConfig(World world) {
-        this.worldName = world.getName().toLowerCase();
+        this.worldName = world.getName();
         configFile = new File(BlockActivity.dataFolder, "ba-" + worldName + ".yml");
         config = YamlConfiguration.loadConfiguration(configFile);
     }
 
     public void genConfig() {
-        final Map<String, Object> configDef = new HashMap<String, Object>();
+        final Map<String, Object> configDef = new LinkedHashMap<String, Object>();
+
+        configDef.put("tableName", "ba-" + worldName);
 
         for (LoggingType type : LoggingType.values()) {
             if (type.getId() <= 0) continue;
             configDef.put("logging." + type.name(), true);
         }
-        for (ExtraLoggingType type : ExtraLoggingType.values()) {
-            if (type.getId() <= 0) continue;
-            configDef.put("logExtraData." + type.name(), true);
+        configDef.put("logExtraData.blockMeta.enable", true);
+        for (BlockMetaType type : BlockMetaType.values()) {
+            configDef.put("logExtraData.blockMeta." + type.name(), true);
         }
         configDef.put("logExtraData.itemMeta.enable", true);
         for (ItemMetaType type : ItemMetaType.values()) {
             configDef.put("logExtraData.itemMeta." + type.name(), true);
         }
+        configDef.put("logExtraData.entityMeta.enable", true);
+        for (EntityMetaType type : EntityMetaType.values()) {
+            configDef.put("logExtraData.entityMeta." + type.name(), true);
+        }
 
-        configDef.put("special.rollback.LimitEntitiesPerChunk", 16);
+        configDef.put("special.rollback.limitEntitiesPerChunk", 16);
         configDef.put("special.rollback.replaceAnyway", Arrays.asList(8, 9, 10, 11, 51));
         configDef.put("special.rollback.blockBlacklist", Arrays.asList(10, 11, 46, 51));
         configDef.put("special.logging.interactBlocks",
                 Arrays.asList(23, 25, 54, 61, 62, 64, 69, 77, 84, 92, 93, 94, 96, 107, 117, 138, 143, 145, 146, 149, 150, 154, 158));
         configDef.put("special.logging.creatures", Arrays.asList(90, 91, 92, 93, 95, 96, 98, 100, 120));
+        configDef.put("special.logging.hangings", Arrays.asList(9, 18));
 
         for (Entry<String, Object> e : configDef.entrySet()) {
             if (!config.contains(e.getKey())) {
@@ -76,24 +95,34 @@ public class WorldConfig {
     public boolean loadConfig() {
         genConfig();
 
+        tableName = config.getString("tableName");
+
         loggingTypes = new boolean[LoggingType.values().length];
         for (LoggingType type : LoggingType.values()) {
             if (type.getId() <= 0) continue;
             boolean result = config.getBoolean("logging." + type.name());
             loggingTypes[type.ordinal()] = result;
         }
-        extraLoggingTypes = new boolean[ExtraLoggingType.values().length];
-        for (ExtraLoggingType type : ExtraLoggingType.values()) {
-            if (type.getId() <= 0) continue;
-            boolean result = config.getBoolean("logExtraData." + type.name());
-            extraLoggingTypes[type.ordinal()] = result;
+
+        saveExtraBlockMeta = config.getBoolean("logExtraData.blockMeta.enable");
+        extraBlockMetaTypes = new boolean[BlockMetaType.values().length];
+        for (BlockMetaType type : BlockMetaType.values()) {
+            boolean result = config.getBoolean("logExtraData.blockMeta." + type.name());
+            extraBlockMetaTypes[type.ordinal()] = result;
         }
 
-        saveItemMeta = config.getBoolean("logExtraData.itemMeta.enable");
-        itemMetaTypes = new boolean[ItemMetaType.values().length];
+        saveExtraItemMeta = config.getBoolean("logExtraData.itemMeta.enable");
+        extraItemMetaTypes = new boolean[ItemMetaType.values().length];
         for (ItemMetaType type : ItemMetaType.values()) {
-            boolean result = saveItemMeta ? config.getBoolean("logExtraData.itemMeta." + type.name()) : false;
-            itemMetaTypes[type.ordinal()] = result;
+            boolean result = saveExtraItemMeta ? config.getBoolean("logExtraData.itemMeta." + type.name()) : false;
+            extraItemMetaTypes[type.ordinal()] = result;
+        }
+
+        saveExtraEntityMeta = config.getBoolean("logExtraData.entityMeta.enable");
+        extraEntityMetaTypes = new boolean[EntityMetaType.values().length];
+        for (EntityMetaType type : EntityMetaType.values()) {
+            boolean result = saveExtraEntityMeta ? config.getBoolean("logExtraData.entityMeta." + type.name()) : false;
+            extraEntityMetaTypes[type.ordinal()] = result;
         }
 
         if (isLogging(LoggingType.blockinteract)) {
@@ -102,8 +131,11 @@ public class WorldConfig {
         if (isLogging(LoggingType.creaturekill)) {
             loggingCreatures = new HashSet<Integer>(config.getIntegerList("special.logging.creatures"));
         }
+        if (isLogging(LoggingType.hangingplace) || isLogging(LoggingType.hangingbreak) || isLogging(LoggingType.hanginginteract)) {
+            loggingHangings = new HashSet<Integer>(config.getIntegerList("special.logging.hangings"));
+        }
 
-        limitEntitiesPerChunk = config.getInt("special.rollback.LimitEntitiesPerChunk");
+        limitEntitiesPerChunk = config.getInt("special.rollback.limitEntitiesPerChunk");
         replaceAnyway = new HashSet<Integer>(config.getIntegerList("special.rollback.replaceAnyway"));
         blockBlacklist = new HashSet<Integer>(config.getIntegerList("special.rollback.blockBlacklist"));
 
@@ -121,25 +153,36 @@ public class WorldConfig {
         return loggingTypes[logType.ordinal()];
     }
 
-    public boolean isExtraLogging(ExtraLoggingType logType) {
-        return extraLoggingTypes[logType.ordinal()];
+    public boolean isLoggingExtraBlockMeta(BlockMetaType logType) {
+        return extraBlockMetaTypes[logType.ordinal()];
     }
 
-    public boolean isItemMetaLogging(ItemMetaType type) {
-        return itemMetaTypes[type.ordinal()];
+    public boolean isLoggingExtraBlockMeta() {
+        return saveExtraBlockMeta;
     }
 
-    public boolean isExtraLogging() {
-        for (boolean state : extraLoggingTypes) {
-            if (state) {
-                return true;
-            }
-        }
-        return false;
+    public boolean isLoggingExtraItemMeta(ItemMetaType type) {
+        return extraItemMetaTypes[type.ordinal()];
+    }
+
+    public boolean isLoggingExtraItemMeta() {
+        return saveExtraItemMeta;
+    }
+
+    public boolean isLoggingExtraEntityMeta(EntityMetaType type) {
+        return extraEntityMetaTypes[type.ordinal()];
+    }
+
+    public boolean isLoggingExtraEntityMeta() {
+        return saveExtraEntityMeta;
     }
 
     public boolean isInteractiveBlock(int id) {
         return interactBlocks.contains(id);
+    }
+
+    public World getWorld() {
+        return Bukkit.getWorld(worldName);
     }
 
     public void createTable() throws SQLException {
@@ -148,11 +191,11 @@ public class WorldConfig {
             return;
         }
         final Statement state = connection.createStatement();
-        state.executeUpdate("CREATE TABLE IF NOT EXISTS `ba-"
-                + worldName
+        state.executeUpdate("CREATE TABLE IF NOT EXISTS `"
+                + tableName
                 + "` (id INT UNSIGNED NOT NULL AUTO_INCREMENT, time DATETIME NOT NULL, type INT UNSIGNED NOT NULL, playerid INT UNSIGNED NOT NULL, old_id INT UNSIGNED NOT NULL, old_data INT UNSIGNED NOT NULL, new_id INT UNSIGNED NOT NULL, new_data INT UNSIGNED NOT NULL, x MEDIUMINT NOT NULL, y SMALLINT UNSIGNED NOT NULL, z MEDIUMINT NOT NULL, PRIMARY KEY (id), KEY coords (x, z, y), KEY time (time), KEY playerid (playerid))");
-        if (isExtraLogging()) {
-            state.executeUpdate("CREATE TABLE IF NOT EXISTS `ba-" + worldName
+        if (isLoggingExtraBlockMeta()) {
+            state.executeUpdate("CREATE TABLE IF NOT EXISTS `" + tableName
                     + "-extra` (id INT UNSIGNED NOT NULL, data text, PRIMARY KEY (id)) DEFAULT CHARSET=utf8");
         }
         state.close();
