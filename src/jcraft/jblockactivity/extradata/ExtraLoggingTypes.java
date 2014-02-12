@@ -29,7 +29,7 @@ public class ExtraLoggingTypes {
         sheepsheard,
         skeletontype,
         slimesize,
-        villagerproffesion,
+        villagerprofession,
         wolfcollar,
         wolfowner,
         zombiebaby,

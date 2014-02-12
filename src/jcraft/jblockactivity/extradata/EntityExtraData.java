@@ -293,7 +293,7 @@ public abstract class EntityExtraData implements ExtraData {
 
         public VillagerExtraData(WorldConfig config, Villager entity) {
             super(config, entity);
-            if (config.isLoggingExtraEntityMeta(EntityMetaType.villagerproffesion)) this.profession = (entity.getProfession() == Profession.FARMER) ? null
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.villagerprofession)) this.profession = (entity.getProfession() == Profession.FARMER) ? null
                     : entity.getProfession();
         }
 

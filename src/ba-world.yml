@@ -10,52 +10,52 @@ logging:
   creaturekill: true
 logExtraData:
   blockMeta:
-    signtext: true
+    enable: true
     commandblock: true
-    skull: true
     inventory: true
     mobspawner: true
-    enable: true
+    signtext: true
+    skull: true
   itemMeta:
-    firework: true
+    enable: true
+    bookauthor: true
+    bookenchant: true
     bookpage: true
     booktitle: true
-    bookenchant: true
-    repair: true
-    bookauthor: true
-    enable: true
-    lore: true
     enchants: true
+    firework: true
+    leathercolor: true
+    lore: true
     map: true
     name: true
     potion: true
+    repair: true
     skull: true
-    leathercolor: true
   entityMeta:
-    catowner: true
     enable: true
-    zombievillager: true
-    equipment: true
-    pigsaddle: true
-    wolfowner: true
     age: true
-    slimesize: true
-    wolfcollar: true
-    irongolemplayercreation: true
     animalbaby: true
-    villagerproffesion: true
-    skeletontype: true
-    horseowner: true
-    sheepsheard: true
+    catowner: true
     cattype: true
-    horseinventory: true
     creeperpowered: true
-    endermancarriedblock: true
-    magmacubesize: true
     customname: true
-    sheepcolor: true
-    zombiebaby: true
+    endermancarriedblock: true
+    equipment: true
+    horseinventory: true
     horselook: true
+    horseowner: true
+    irongolemplayercreation: true
+    magmacubesize: true
+    pigsaddle: true
+    sheepcolor: true
+    sheepsheard: true
+    skeletontype: true
+    slimesize: true
+    villagerprofession: true
+    wolfcollar: true
+    wolfowner: true
+    zombiebaby: true
+    zombievillager: true
 special:
   rollback:
     limitEntitiesPerChunk: 16
