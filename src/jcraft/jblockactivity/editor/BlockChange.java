@@ -5,7 +5,7 @@ import static jcraft.jblockactivity.utils.ActivityUtil.isEqualType;
 import static jcraft.jblockactivity.utils.ActivityUtil.modifyContainer;
 import static jcraft.jblockactivity.utils.ActivityUtil.primaryCardinalDirs;
 import jcraft.jblockactivity.LoggingType;
-import jcraft.jblockactivity.actionlogs.BlockActionLog;
+import jcraft.jblockactivity.actionlog.BlockActionLog;
 import jcraft.jblockactivity.extradata.BlockExtraData.CommandBlockExtraData;
 import jcraft.jblockactivity.extradata.BlockExtraData.MobSpawnerExtraData;
 import jcraft.jblockactivity.extradata.BlockExtraData.SignExtraData;

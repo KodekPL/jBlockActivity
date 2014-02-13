@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import jcraft.jblockactivity.BlockActivity;
-import jcraft.jblockactivity.WorldConfig;
+import jcraft.jblockactivity.config.WorldConfig;
 import jcraft.jblockactivity.extradata.ExtraLoggingTypes.ItemMetaType;
 
 import org.bukkit.FireworkEffect;

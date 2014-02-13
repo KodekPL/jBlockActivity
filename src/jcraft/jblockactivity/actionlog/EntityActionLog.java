@@ -1,4 +1,4 @@
-package jcraft.jblockactivity.actionlogs;
+package jcraft.jblockactivity.actionlog;
 
 import static jcraft.jblockactivity.utils.ActivityUtil.formatTime;
 import static jcraft.jblockactivity.utils.ActivityUtil.fromJson;

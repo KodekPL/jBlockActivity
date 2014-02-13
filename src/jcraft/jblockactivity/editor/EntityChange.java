@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jcraft.jblockactivity.LoggingType;
-import jcraft.jblockactivity.actionlogs.EntityActionLog;
+import jcraft.jblockactivity.actionlog.EntityActionLog;
 import jcraft.jblockactivity.extradata.EntityExtraData;
 import jcraft.jblockactivity.extradata.EntityExtraData.AgeableExtraData;
 import jcraft.jblockactivity.extradata.EntityExtraData.CreeperExtraData;

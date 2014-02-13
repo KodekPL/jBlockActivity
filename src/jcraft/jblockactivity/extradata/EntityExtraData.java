@@ -4,7 +4,7 @@ import static jcraft.jblockactivity.utils.ActivityUtil.packEntityEquipment;
 import static jcraft.jblockactivity.utils.ActivityUtil.packEntityEquipmentChance;
 import static jcraft.jblockactivity.utils.ActivityUtil.toJson;
 import jcraft.jblockactivity.BlockActivity;
-import jcraft.jblockactivity.WorldConfig;
+import jcraft.jblockactivity.config.WorldConfig;
 import jcraft.jblockactivity.extradata.ExtraLoggingTypes.EntityMetaType;
 import jcraft.jblockactivity.extradata.InventoryExtraData.SimpleItemMeta;
 

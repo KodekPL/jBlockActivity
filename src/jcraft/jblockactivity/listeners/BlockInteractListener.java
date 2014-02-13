@@ -2,8 +2,8 @@ package jcraft.jblockactivity.listeners;
 
 import jcraft.jblockactivity.BlockActivity;
 import jcraft.jblockactivity.LoggingType;
-import jcraft.jblockactivity.WorldConfig;
-import jcraft.jblockactivity.actionlogs.BlockActionLog;
+import jcraft.jblockactivity.actionlog.BlockActionLog;
+import jcraft.jblockactivity.config.WorldConfig;
 
 import org.bukkit.Location;
 import org.bukkit.block.Block;

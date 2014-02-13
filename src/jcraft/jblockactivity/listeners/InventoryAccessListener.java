@@ -8,8 +8,8 @@ import java.util.Map;
 
 import jcraft.jblockactivity.BlockActivity;
 import jcraft.jblockactivity.LoggingType;
-import jcraft.jblockactivity.WorldConfig;
-import jcraft.jblockactivity.actionlogs.BlockActionLog;
+import jcraft.jblockactivity.actionlog.BlockActionLog;
+import jcraft.jblockactivity.config.WorldConfig;
 import jcraft.jblockactivity.extradata.InventoryExtraData;
 
 import org.bukkit.Location;

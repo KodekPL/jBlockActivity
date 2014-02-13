@@ -3,8 +3,8 @@ package jcraft.jblockactivity.listeners;
 import static jcraft.jblockactivity.utils.ActivityUtil.getEntityName;
 import jcraft.jblockactivity.BlockActivity;
 import jcraft.jblockactivity.LoggingType;
-import jcraft.jblockactivity.WorldConfig;
-import jcraft.jblockactivity.actionlogs.EntityActionLog;
+import jcraft.jblockactivity.actionlog.EntityActionLog;
+import jcraft.jblockactivity.config.WorldConfig;
 import jcraft.jblockactivity.extradata.EntityExtraData;
 import jcraft.jblockactivity.extradata.InventoryExtraData;
 

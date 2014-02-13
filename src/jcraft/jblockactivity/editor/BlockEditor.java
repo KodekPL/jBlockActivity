@@ -11,9 +11,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 
 import jcraft.jblockactivity.BlockActivity;
-import jcraft.jblockactivity.WorldConfig;
-import jcraft.jblockactivity.actionlogs.BlockActionLog;
-import jcraft.jblockactivity.actionlogs.EntityActionLog;
+import jcraft.jblockactivity.actionlog.BlockActionLog;
+import jcraft.jblockactivity.actionlog.EntityActionLog;
+import jcraft.jblockactivity.config.WorldConfig;
 import jcraft.jblockactivity.session.LookupCache;
 
 import org.bukkit.ChatColor;

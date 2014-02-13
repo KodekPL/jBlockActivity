@@ -3,6 +3,7 @@ package jcraft.jblockactivity;
 import static jcraft.jblockactivity.utils.ActivityUtil.isInt;
 import static jcraft.jblockactivity.utils.ActivityUtil.saveSpawnHeight;
 import static org.bukkit.Bukkit.getLogger;
+import static org.bukkit.Bukkit.getWorld;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -19,6 +20,7 @@ import jcraft.jblockactivity.editor.BlockEditorResult;
 import jcraft.jblockactivity.session.ActiveSession;
 import jcraft.jblockactivity.session.LookupCache;
 import jcraft.jblockactivity.session.LookupCacheFactory;
+import jcraft.jblockactivity.utils.LogBlockConverter;
 import jcraft.jblockactivity.utils.QueryParams;
 import jcraft.jblockactivity.utils.QueryParams.Order;
 import jcraft.jblockactivity.utils.QueryParams.SummarizationMode;
@@ -29,6 +31,7 @@ import jcraft.jblockactivity.utils.question.RollbackQuestion;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -179,6 +182,55 @@ public class CommandHandler implements CommandExecutor {
             } else if (args[0].equalsIgnoreCase("clearlog") && sender.hasPermission("ba.clearlog")) {
                 preExecuteCommand(new ActionRequest(ActionType.CMD_CLEARLOG, sender, args), true);
                 return true;
+            } else if (args[0].equalsIgnoreCase("convertlogblock") && sender.hasPermission("ba.admin")) {
+                if (args.length == 1) {
+                    if (!(sender instanceof Player)) {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "No world specified!");
+                        return false;
+                    }
+                    if (LogBlockConverter.RUNNING) {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "Converter is in progress!");
+                        return false;
+                    }
+                    final LogBlockConverter converter = new LogBlockConverter(sender, ((Player) sender).getWorld());
+                    if (!converter.setupLogBlock()) {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "LogBlock plugin has not been detected!");
+                        return false;
+                    }
+                    if (!converter.setupBlockChanges()) {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "Retrieving block changes from database failed!");
+                        return false;
+                    }
+                    if (!converter.start()) {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "There are no changes to convert!");
+                        return false;
+                    }
+                    return true;
+                } else if (args.length >= 2) {
+                    final World world = getWorld(args[1]);
+                    if (world == null) {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "There is no world called " + args[1] + ".");
+                        return false;
+                    }
+                    if (LogBlockConverter.RUNNING) {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "Converter is in progress!");
+                        return false;
+                    }
+                    final LogBlockConverter converter = new LogBlockConverter(sender, world);
+                    if (!converter.setupLogBlock()) {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "LogBlock has not been detected!");
+                        return false;
+                    }
+                    if (!converter.setupBlockChanges()) {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "Retrieving block changes from database failed!");
+                        return false;
+                    }
+                    if (!converter.start()) {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "There are no changes to convert!");
+                        return false;
+                    }
+                    return true;
+                }
             }
         }
         sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "Unknown command '" + args[0] + "'.");

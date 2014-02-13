@@ -11,8 +11,8 @@ import java.util.List;
 
 import jcraft.jblockactivity.BlockActivity;
 import jcraft.jblockactivity.LoggingType;
-import jcraft.jblockactivity.WorldConfig;
-import jcraft.jblockactivity.actionlogs.BlockActionLog;
+import jcraft.jblockactivity.actionlog.BlockActionLog;
+import jcraft.jblockactivity.config.WorldConfig;
 import jcraft.jblockactivity.extradata.BlockExtraData;
 import jcraft.jblockactivity.extradata.ExtraLoggingTypes.BlockMetaType;
 import jcraft.jblockactivity.extradata.InventoryExtraData;

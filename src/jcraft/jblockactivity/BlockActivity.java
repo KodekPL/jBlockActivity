@@ -8,7 +8,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
-import jcraft.jblockactivity.actionlogs.ActionLog;
+import jcraft.jblockactivity.actionlog.ActionLog;
+import jcraft.jblockactivity.config.ActivityConfig;
+import jcraft.jblockactivity.config.WorldConfig;
 import jcraft.jblockactivity.listeners.BlockBreakListener;
 import jcraft.jblockactivity.listeners.BlockInteractListener;
 import jcraft.jblockactivity.listeners.BlockPlaceListener;

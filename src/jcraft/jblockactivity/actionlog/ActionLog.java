@@ -1,4 +1,4 @@
-package jcraft.jblockactivity.actionlogs;
+package jcraft.jblockactivity.actionlog;
 
 import java.sql.Connection;
 import java.sql.SQLException;

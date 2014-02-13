@@ -1,4 +1,4 @@
-package jcraft.jblockactivity;
+package jcraft.jblockactivity.config;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,13 +6,14 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import jcraft.jblockactivity.BlockActivity;
+import jcraft.jblockactivity.LoggingType;
 import jcraft.jblockactivity.extradata.ExtraLoggingTypes.BlockMetaType;
 import jcraft.jblockactivity.extradata.ExtraLoggingTypes.EntityMetaType;
 import jcraft.jblockactivity.extradata.ExtraLoggingTypes.ItemMetaType;

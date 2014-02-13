@@ -11,7 +11,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 
-import jcraft.jblockactivity.actionlogs.ActionLog;
+import jcraft.jblockactivity.actionlog.ActionLog;
 
 public class LogExecuteThread implements Runnable {
 

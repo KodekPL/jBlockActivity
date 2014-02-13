@@ -1,4 +1,4 @@
-package jcraft.jblockactivity;
+package jcraft.jblockactivity.config;
 
 import static jcraft.jblockactivity.utils.ActivityUtil.parseTime;
 import static org.bukkit.Bukkit.getConsoleSender;
@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -17,6 +16,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import jcraft.jblockactivity.BlockActivity;
+import jcraft.jblockactivity.LoggingType;
 import jcraft.jblockactivity.sql.SQLProfile;
 import jcraft.jblockactivity.tool.LogTool;
 import jcraft.jblockactivity.tool.LogTool.ToolBehavior;

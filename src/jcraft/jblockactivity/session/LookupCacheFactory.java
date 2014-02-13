@@ -4,9 +4,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import jcraft.jblockactivity.LoggingType;
-import jcraft.jblockactivity.actionlogs.BlockActionLog;
-import jcraft.jblockactivity.actionlogs.EntityActionLog;
-import jcraft.jblockactivity.actionlogs.SummedActionLogs;
+import jcraft.jblockactivity.actionlog.BlockActionLog;
+import jcraft.jblockactivity.actionlog.EntityActionLog;
+import jcraft.jblockactivity.actionlog.SummedActionLogs;
 import jcraft.jblockactivity.utils.QueryParams;
 import jcraft.jblockactivity.utils.QueryParams.SummarizationMode;
 
