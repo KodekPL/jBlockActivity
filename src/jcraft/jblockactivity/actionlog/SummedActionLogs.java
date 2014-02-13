@@ -36,6 +36,11 @@ public class SummedActionLogs {
         public Location getLocation() {
             return null;
         }
+
+        @Override
+        public ActionLog getActionLog() {
+            return null;
+        }
     }
 
     public static class SummedEntityActionLogs implements LookupCache {
@@ -56,6 +61,11 @@ public class SummedActionLogs {
 
         @Override
         public Location getLocation() {
+            return null;
+        }
+
+        @Override
+        public ActionLog getActionLog() {
             return null;
         }
     }

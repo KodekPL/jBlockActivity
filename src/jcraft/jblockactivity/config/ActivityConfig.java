@@ -46,6 +46,7 @@ public class ActivityConfig {
 
     public Set<String> hiddenPlayers;
     public boolean askRollbacks, askRedos, askClearlogs;
+    public boolean callActionLogQueueEvent;
 
     public void genConfig() {
         final Map<String, Object> configDef = new LinkedHashMap<String, Object>();
@@ -92,6 +93,8 @@ public class ActivityConfig {
         configDef.put("questioner.askRollbacks", true);
         configDef.put("questioner.askRedos", true);
         configDef.put("questioner.askClearlogs", true);
+
+        configDef.put("event.callActionLogQueueEvent", false);
 
         for (Entry<String, Object> e : configDef.entrySet()) {
             if (!config.contains(e.getKey())) {
@@ -156,6 +159,8 @@ public class ActivityConfig {
         askRollbacks = config.getBoolean("questioner.askRollbacks");
         askRedos = config.getBoolean("questioner.askRedos");
         askClearlogs = config.getBoolean("questioner.askClearlogs");
+
+        callActionLogQueueEvent = config.getBoolean("event.callActionLogQueueEvent");
     }
 
     public void loadWorldConfig() {

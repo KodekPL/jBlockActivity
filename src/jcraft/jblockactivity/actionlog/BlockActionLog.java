@@ -242,6 +242,11 @@ public class BlockActionLog extends ActionLog implements LookupCache {
         return msg.toString();
     }
 
+    @Override
+    public ActionLog getActionLog() {
+        return this;
+    }
+
     public static BlockActionLog getBlockActionLog(ResultSet result, QueryParams params) throws SQLException {
         final int id = params.needId ? result.getInt("id") : 0;
         final long time = params.needTime ? result.getTimestamp("time").getTime() : 0;
@@ -276,4 +281,5 @@ public class BlockActionLog extends ActionLog implements LookupCache {
         log.setTime(time);
         return log;
     }
+
 }

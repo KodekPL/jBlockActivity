@@ -104,14 +104,14 @@ public class CommandHandler implements CommandExecutor {
                     sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You don't have required permission - ba.rollback");
                     return false;
                 }
-                preExecuteCommand(new ActionRequest(ActionType.CMD_ROLLBACK, sender, args), true);
+                preExecuteCommand(new ActionRequest(ActionType.CMD_ROLLBACK, sender, args, true), true);
                 return true;
             } else if (args[0].equals("redo")) {
                 if (!sender.hasPermission("ba.rollback")) {
                     sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You don't have required permission - ba.rollback");
                     return false;
                 }
-                preExecuteCommand(new ActionRequest(ActionType.CMD_REDO, sender, args), true);
+                preExecuteCommand(new ActionRequest(ActionType.CMD_REDO, sender, args, true), true);
                 return true;
             } else if (args[0].equalsIgnoreCase("page")) {
                 if (args.length == 2 && isInt(args[1])) {
@@ -171,16 +171,16 @@ public class CommandHandler implements CommandExecutor {
                 }
                 final boolean answer = args[0].equalsIgnoreCase("yes");
                 if (answer) {
-                    preExecuteCommand(new ActionRequest(ActionType.CMD_CONFIRM, sender, new String[0]), true);
+                    preExecuteCommand(new ActionRequest(ActionType.CMD_CONFIRM, sender, new String[0], true), false);
                 } else {
                     answerQuestion(sender, answer);
                 }
                 return true;
             } else if (args[0].equalsIgnoreCase("lookup") && sender.hasPermission("ba.lookup")) {
-                preExecuteCommand(new ActionRequest(ActionType.CMD_LOOKUP, sender, args), true);
+                preExecuteCommand(new ActionRequest(ActionType.CMD_LOOKUP, sender, args, true), false);
                 return true;
             } else if (args[0].equalsIgnoreCase("clearlog") && sender.hasPermission("ba.clearlog")) {
-                preExecuteCommand(new ActionRequest(ActionType.CMD_CLEARLOG, sender, args), true);
+                preExecuteCommand(new ActionRequest(ActionType.CMD_CLEARLOG, sender, args, true), true);
                 return true;
             } else if (args[0].equalsIgnoreCase("convertlogblock") && sender.hasPermission("ba.admin")) {
                 if (args.length == 1) {
@@ -251,13 +251,13 @@ public class CommandHandler implements CommandExecutor {
             lookupCmd(request.getSender(), request.getParams());
             break;
         case CMD_CLEARLOG:
-            clearlogCmd(request.getSender(), request.getParams());
+            clearlogCmd(request.getSender(), request.getParams(), request.askQuestion());
             break;
         case CMD_ROLLBACK:
-            rollbackCmd(request.getSender(), request.getParams());
+            rollbackCmd(request.getSender(), request.getParams(), request.askQuestion());
             break;
         case CMD_REDO:
-            redoCmd(request.getSender(), request.getParams());
+            redoCmd(request.getSender(), request.getParams(), request.askQuestion());
             break;
         case CMD_CONFIRM:
             answerQuestion(request.getSender(), true);
@@ -358,7 +358,7 @@ public class CommandHandler implements CommandExecutor {
         }
     }
 
-    public void clearlogCmd(CommandSender sender, QueryParams params) {
+    public void clearlogCmd(CommandSender sender, QueryParams params, boolean askQuestion) {
         Connection connection = null;
         Statement state = null;
         ResultSet result = null;
@@ -384,7 +384,7 @@ public class CommandHandler implements CommandExecutor {
                 question.setParams(params);
                 session.question = question;
 
-                if (BlockActivity.config.askClearlogs) {
+                if (askQuestion && BlockActivity.config.askClearlogs) {
                     askQuestion(sender);
                 } else {
                     answerQuestion(sender, true);
@@ -412,7 +412,7 @@ public class CommandHandler implements CommandExecutor {
         }
     }
 
-    public void rollbackCmd(CommandSender sender, QueryParams params) {
+    public void rollbackCmd(CommandSender sender, QueryParams params, boolean askQuestion) {
         Connection connection = null;
         Statement state = null;
         ResultSet result = null;
@@ -458,7 +458,7 @@ public class CommandHandler implements CommandExecutor {
             final RollbackQuestion question = new RollbackQuestion();
             question.setEditor(editor);
             session.question = question;
-            if (BlockActivity.config.askRollbacks) {
+            if (askQuestion && BlockActivity.config.askRollbacks) {
                 askQuestion(sender);
             } else {
                 answerQuestion(sender, true);
@@ -486,7 +486,7 @@ public class CommandHandler implements CommandExecutor {
         }
     }
 
-    public void redoCmd(CommandSender sender, QueryParams params) {
+    public void redoCmd(CommandSender sender, QueryParams params, boolean askQuestion) {
         Connection connection = null;
         Statement state = null;
         ResultSet result = null;
@@ -533,7 +533,7 @@ public class CommandHandler implements CommandExecutor {
             question.setEditor(editor);
             session.question = question;
 
-            if (BlockActivity.config.askRedos) {
+            if (askQuestion && BlockActivity.config.askRedos) {
                 askQuestion(sender);
             } else {
                 answerQuestion(sender, true);

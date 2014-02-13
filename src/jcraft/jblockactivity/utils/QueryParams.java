@@ -50,6 +50,10 @@ public class QueryParams {
     private final List<EntityType> entityTypes = new ArrayList<EntityType>();
     private Location location = null;
 
+    public QueryParams(String args) throws IllegalArgumentException {
+        this(null, args.trim().split(" "), false);
+    }
+
     public QueryParams(CommandSender sender, String[] args, boolean prepareToolQuery) throws IllegalArgumentException {
         final List<String> argsList = new ArrayList<String>(Arrays.asList(args));
         if (!isValidParam(argsList.get(0))) {

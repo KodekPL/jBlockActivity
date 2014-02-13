@@ -54,17 +54,27 @@ public class ActionExecuteThread implements Runnable {
         private final CommandSender sender;
         private String[] args;
         private QueryParams params;
+        private final boolean askQuestion;
 
         public ActionRequest(ActionType type, CommandSender sender, QueryParams params) {
             this.type = type;
             this.sender = sender;
             this.params = params;
+            this.askQuestion = false;
         }
 
-        public ActionRequest(ActionType type, CommandSender sender, String[] args) {
+        public ActionRequest(ActionType type, CommandSender sender, QueryParams params, boolean askQuestion) {
+            this.type = type;
+            this.sender = sender;
+            this.params = params;
+            this.askQuestion = askQuestion;
+        }
+
+        public ActionRequest(ActionType type, CommandSender sender, String[] args, boolean askQuestion) {
             this.type = type;
             this.sender = sender;
             this.args = args;
+            this.askQuestion = askQuestion;
         }
 
         public ActionType getType() {
@@ -77,6 +87,10 @@ public class ActionExecuteThread implements Runnable {
 
         public String[] getArgs() {
             return args;
+        }
+
+        public boolean askQuestion() {
+            return askQuestion;
         }
 
         private void parseParams() throws IllegalArgumentException {

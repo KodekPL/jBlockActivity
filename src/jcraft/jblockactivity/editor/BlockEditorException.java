@@ -1,5 +1,6 @@
 package jcraft.jblockactivity.editor;
 
+import jcraft.jblockactivity.actionlog.ActionLog;
 import jcraft.jblockactivity.session.LookupCache;
 import jcraft.jblockactivity.utils.MaterialNames;
 
@@ -23,4 +24,10 @@ public class BlockEditorException extends Exception implements LookupCache {
     public Location getLocation() {
         return location;
     }
+
+    @Override
+    public ActionLog getActionLog() {
+        return null;
+    }
+
 }

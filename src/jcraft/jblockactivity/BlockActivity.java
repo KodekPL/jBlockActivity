@@ -2,15 +2,19 @@ package jcraft.jblockactivity;
 
 import java.io.File;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
 import jcraft.jblockactivity.actionlog.ActionLog;
 import jcraft.jblockactivity.config.ActivityConfig;
 import jcraft.jblockactivity.config.WorldConfig;
+import jcraft.jblockactivity.event.ActionLogQueueEvent;
 import jcraft.jblockactivity.listeners.BlockBreakListener;
 import jcraft.jblockactivity.listeners.BlockInteractListener;
 import jcraft.jblockactivity.listeners.BlockPlaceListener;
@@ -18,10 +22,13 @@ import jcraft.jblockactivity.listeners.CreatureKillListener;
 import jcraft.jblockactivity.listeners.HangingListener;
 import jcraft.jblockactivity.listeners.InventoryAccessListener;
 import jcraft.jblockactivity.listeners.LogToolListener;
+import jcraft.jblockactivity.session.LookupCacheFactory;
 import jcraft.jblockactivity.sql.SQLConnectionPool;
 import jcraft.jblockactivity.sql.SQLProfile;
 import jcraft.jblockactivity.tool.LogTool;
+import jcraft.jblockactivity.utils.QueryParams;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.PluginManager;
@@ -162,7 +169,7 @@ public class BlockActivity extends JavaPlugin {
         }
     }
 
-    public void createTables() throws SQLException {
+    private void createTables() throws SQLException {
         final Connection connection = getConnection();
         if (connection == null) {
             throw new SQLException("No connection!");
@@ -181,12 +188,66 @@ public class BlockActivity extends JavaPlugin {
             if (action == null) {
                 continue;
             }
-            logExecuteRunnable.queue.add(action);
+            if (config.callActionLogQueueEvent) {
+                ActionLogQueueEvent event = new ActionLogQueueEvent(action);
+                Bukkit.getPluginManager().callEvent(event);
+                if (!event.isCancelled()) {
+                    logExecuteRunnable.queue.add(event.getActionLog());
+                }
+            } else {
+                logExecuteRunnable.queue.add(action);
+            }
         }
     }
 
     public static LogExecuteThread getLogExecuteThread() {
         return logExecuteRunnable;
+    }
+
+    public static List<ActionLog> getActionLogs(QueryParams params) {
+        final List<ActionLog> lookupLogs = new ArrayList<ActionLog>();
+        Connection connection = null;
+        Statement state = null;
+        ResultSet result = null;
+        try {
+            connection = BlockActivity.getBlockActivity().getConnection();
+            if (connection == null) {
+                return lookupLogs;
+            }
+            state = connection.createStatement();
+            result = state.executeQuery(params.getQuery());
+
+            if (result.next()) {
+                result.beforeFirst();
+
+                final LookupCacheFactory logsFactory = new LookupCacheFactory(params, 0);
+                while (result.next()) {
+                    lookupLogs.add(logsFactory.getLookupCache(result).getActionLog());
+                }
+                return lookupLogs;
+            } else {
+                return lookupLogs;
+            }
+        } catch (SQLException e1) {
+            org.bukkit.Bukkit.getLogger().log(Level.SEVERE, "[Lookup] " + params.getQuery() + ": ", e1);
+            e1.printStackTrace();
+        } catch (IllegalArgumentException e2) {
+            return lookupLogs;
+        } finally {
+            try {
+                if (result != null) {
+                    result.close();
+                }
+                if (state != null) {
+                    state.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (SQLException e) {
+            }
+        }
+        return lookupLogs;
     }
 
     public static WorldConfig getWorldConfig(String name) {

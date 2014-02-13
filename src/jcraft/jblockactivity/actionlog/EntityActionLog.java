@@ -178,6 +178,11 @@ public class EntityActionLog extends ActionLog implements LookupCache {
         return msg.toString();
     }
 
+    @Override
+    public ActionLog getActionLog() {
+        return this;
+    }
+
     public static EntityActionLog getEntityActionLog(ResultSet result, QueryParams params) throws SQLException {
         final int id = params.needId ? result.getInt("id") : 0;
         final long time = params.needTime ? result.getTimestamp("time").getTime() : 0;

@@ -36,3 +36,5 @@ questioner:
   askRollbacks: true
   askRedos: true
   askClearlogs: true
+event:
+  callActionLogQueueEvent: false
