@@ -56,16 +56,32 @@ public class BlockActionLog extends ActionLog implements LookupCache {
         this.newBlockData = newBlockData;
     }
 
+    public void setNewBlockId(int blockId) {
+        this.newBlockId = blockId;
+    }
+
     public int getNewBlockId() {
         return newBlockId;
+    }
+
+    public void setNewBlockData(byte blockData) {
+        this.newBlockData = blockData;
     }
 
     public byte getNewBlockData() {
         return newBlockData;
     }
 
+    public void setOldBlockId(int blockId) {
+        this.oldBlockId = blockId;
+    }
+
     public int getOldBlockId() {
         return oldBlockId;
+    }
+
+    public void setOldBlockData(byte blockData) {
+        this.oldBlockData = blockData;
     }
 
     public byte getOldBlockData() {

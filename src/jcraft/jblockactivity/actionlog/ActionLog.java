@@ -11,15 +11,16 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 
 public abstract class ActionLog {
 
     private long id, time;
-    private final LoggingType type;
-    private final String playerName, worldName;
-    private final Vector location;
-    private final ExtraData extraData;
+    private LoggingType type;
+    private String playerName, worldName;
+    private Vector location;
+    private ExtraData extraData;
 
     protected ActionLog(LoggingType type, String playerName, World world, Vector location, ExtraData extraData) {
         this.time = System.currentTimeMillis() / 1000;
@@ -46,8 +47,16 @@ public abstract class ActionLog {
         return time;
     }
 
+    public void setLoggingType(LoggingType type) {
+        this.type = type;
+    }
+
     public LoggingType getLoggingType() {
         return type;
+    }
+
+    public void setPlayerName(String playerName) {
+        this.playerName = playerName;
     }
 
     public String getPlayerName() {
@@ -65,8 +74,20 @@ public abstract class ActionLog {
         return BlockActivity.getWorldTableName(worldName);
     }
 
+    public void setVector(BlockVector vector) {
+        this.location = vector;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location.toVector();
+    }
+
     public Vector getVector() {
         return location;
+    }
+
+    public void setWorld(World world) {
+        this.worldName = world.getName();
     }
 
     public World getWorld() {
@@ -83,6 +104,10 @@ public abstract class ActionLog {
             return null;
         }
         return location.toLocation(world);
+    }
+
+    public void setExtraData(ExtraData extraData) {
+        this.extraData = extraData;
     }
 
     public ExtraData getExtraData() {

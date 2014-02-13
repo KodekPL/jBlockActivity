@@ -29,7 +29,7 @@ import org.bukkit.util.Vector;
 
 public class EntityActionLog extends ActionLog implements LookupCache {
 
-    private final int entityId, entityData;
+    private int entityId, entityData;
 
     public EntityActionLog(LoggingType type, String playerName, World world, Vector location, int entityId, int dataId, ExtraData extraData) {
         super(type, playerName, world, location, extraData);
@@ -37,8 +37,16 @@ public class EntityActionLog extends ActionLog implements LookupCache {
         this.entityData = dataId;
     }
 
+    public void setEntityId(int entityId) {
+        this.entityId = entityId;
+    }
+
     public int getEntityId() {
         return entityId;
+    }
+
+    public void setEntityData(int entityData) {
+        this.entityData = entityData;
     }
 
     public int getEntityData() {
