@@ -46,7 +46,7 @@ public class InventoryExtraData implements ExtraData {
 
     public InventoryExtraData(ItemStack[] content, boolean compress, WorldConfig config) {
         this.config = config;
-        if (content != null) {
+        if (config != null && content != null) {
             this.content = compress ? compressInventory(content) : content;
         }
     }

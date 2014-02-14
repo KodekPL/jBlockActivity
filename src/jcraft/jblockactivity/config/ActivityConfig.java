@@ -166,12 +166,9 @@ public class ActivityConfig {
     public void loadWorldConfig() {
         final List<String> sWorlds = config.getStringList("loggedWorlds");
         for (String worldName : sWorlds) {
-            World world = getWorld(worldName);
-            if (world != null) {
-                WorldConfig worldConfig = new WorldConfig(world);
-                if (worldConfig.loadConfig()) {
-                    BlockActivity.worldConfigs.put(world.getName(), worldConfig);
-                }
+            WorldConfig worldConfig = new WorldConfig(worldName);
+            if (worldConfig.loadConfig()) {
+                BlockActivity.worldConfigs.put(worldName, worldConfig);
             }
         }
 

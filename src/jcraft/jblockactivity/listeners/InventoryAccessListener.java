@@ -68,7 +68,8 @@ public class InventoryAccessListener implements Listener {
             final InventoryHolder holder = event.getInventory().getHolder();
             if (holder instanceof BlockState || holder instanceof DoubleChest) {
                 if (getInventoryHolderType(holder) != Material.WORKBENCH) {
-                    invExtraData.put(event.getPlayer(), new InventoryExtraData(event.getInventory().getContents(), true, config.getWorld()));
+                    invExtraData.put(event.getPlayer(),
+                            new InventoryExtraData(event.getInventory().getContents(), true, event.getPlayer().getWorld()));
                 }
             }
         }

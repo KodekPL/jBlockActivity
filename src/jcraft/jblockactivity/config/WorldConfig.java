@@ -18,8 +18,6 @@ import jcraft.jblockactivity.extradata.ExtraLoggingTypes.BlockMetaType;
 import jcraft.jblockactivity.extradata.ExtraLoggingTypes.EntityMetaType;
 import jcraft.jblockactivity.extradata.ExtraLoggingTypes.ItemMetaType;
 
-import org.bukkit.Bukkit;
-import org.bukkit.World;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 public class WorldConfig {
@@ -44,8 +42,8 @@ public class WorldConfig {
     public int limitEntitiesPerChunk;
     public Set<Integer> blockBlacklist, replaceAnyway, loggingCreatures, loggingHangings;
 
-    public WorldConfig(World world) {
-        this.worldName = world.getName();
+    public WorldConfig(String worldName) {
+        this.worldName = worldName;
         configFile = new File(BlockActivity.dataFolder, "ba-" + worldName + ".yml");
         config = YamlConfiguration.loadConfiguration(configFile);
     }
@@ -180,10 +178,6 @@ public class WorldConfig {
 
     public boolean isInteractiveBlock(int id) {
         return interactBlocks.contains(id);
-    }
-
-    public World getWorld() {
-        return Bukkit.getWorld(worldName);
     }
 
     public void createTable() throws SQLException {

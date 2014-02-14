@@ -82,7 +82,7 @@ public class BlockActivity extends JavaPlugin {
                 errorAtLoading = true;
                 return;
             }
-            createTables();
+            createGlobalTables();
             connection.close();
         } catch (final NullPointerException ex) {
             getLogger().log(Level.SEVERE, "Error while loading: ", ex);
@@ -169,7 +169,7 @@ public class BlockActivity extends JavaPlugin {
         }
     }
 
-    private void createTables() throws SQLException {
+    private void createGlobalTables() throws SQLException {
         final Connection connection = getConnection();
         if (connection == null) {
             throw new SQLException("No connection!");
