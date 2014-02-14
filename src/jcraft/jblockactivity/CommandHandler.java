@@ -19,6 +19,8 @@ import jcraft.jblockactivity.editor.BlockEditorResult;
 import jcraft.jblockactivity.session.ActiveSession;
 import jcraft.jblockactivity.session.LookupCache;
 import jcraft.jblockactivity.session.LookupCacheFactory;
+import jcraft.jblockactivity.utils.ImportQueryGen;
+import jcraft.jblockactivity.utils.ImportQueryGen.ImportPlugin;
 import jcraft.jblockactivity.utils.QueryParams;
 import jcraft.jblockactivity.utils.QueryParams.Order;
 import jcraft.jblockactivity.utils.QueryParams.SummarizationMode;
@@ -179,7 +181,30 @@ public class CommandHandler implements CommandExecutor {
             } else if (args[0].equalsIgnoreCase("clearlog") && sender.hasPermission("ba.clearlog")) {
                 preExecuteCommand(new ActionRequest(ActionType.CMD_CLEARLOG, sender, args, true), true);
                 return true;
+            } else if (args[0].equalsIgnoreCase("importlogs") && sender.hasPermission("ba.admin")) {
+                if (args.length == 4) {
+                    ImportPlugin pluginName;
+                    try {
+                        pluginName = ImportQueryGen.ImportPlugin.valueOf(args[1].toUpperCase());
+                    } catch (IllegalArgumentException e) {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "There is no option of importing for plugin '"
+                                + args[1].toUpperCase() + "'");
+                        return false;
+                    }
+                    if (ImportQueryGen.createImportFile(pluginName, args[2], args[3])) {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.GREEN + "File with SQL query was saved in plugin directory!");
+                        return true;
+                    } else {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "There is no logged world called '" + args[3] + "'");
+                        return false;
+                    }
+                } else {
+                    sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You have to specify plugin, old table name and world name!");
+                    sender.sendMessage(BlockActivity.prefix + ChatColor.YELLOW + "Command example: /ba importlogs LOGBLOCK lb-world world");
+                    return false;
+                }
             }
+
         }
         sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "Unknown command '" + args[0] + "'.");
         return false;
