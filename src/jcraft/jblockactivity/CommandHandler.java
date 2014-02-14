@@ -197,14 +197,7 @@ public class CommandHandler implements CommandExecutor {
                         sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "LogBlock plugin has not been detected!");
                         return false;
                     }
-                    if (!converter.setupBlockChanges()) {
-                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "Retrieving block changes from database failed!");
-                        return false;
-                    }
-                    if (!converter.start()) {
-                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "There are no changes to convert!");
-                        return false;
-                    }
+                    converter.start();
                     return true;
                 } else if (args.length >= 2) {
                     final World world = getWorld(args[1]);
@@ -221,14 +214,7 @@ public class CommandHandler implements CommandExecutor {
                         sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "LogBlock has not been detected!");
                         return false;
                     }
-                    if (!converter.setupBlockChanges()) {
-                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "Retrieving block changes from database failed!");
-                        return false;
-                    }
-                    if (!converter.start()) {
-                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "There are no changes to convert!");
-                        return false;
-                    }
+                    converter.start();
                     return true;
                 }
             }

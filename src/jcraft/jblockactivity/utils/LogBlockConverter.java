@@ -27,6 +27,7 @@ public class LogBlockConverter extends BukkitRunnable {
     private final CommandSender sender;
     private final World world;
 
+    private boolean ready = false;
     private final Queue<de.diddiz.LogBlock.BlockChange> changes = new LinkedList<de.diddiz.LogBlock.BlockChange>();
     private LogBlock logBlock;
     private int fullQueue = 0, progress = 0;
@@ -47,35 +48,35 @@ public class LogBlockConverter extends BukkitRunnable {
         return false;
     }
 
-    public boolean setupBlockChanges() {
-        try {
-            final de.diddiz.LogBlock.QueryParams params = new de.diddiz.LogBlock.QueryParams(logBlock);
-            params.bct = BlockChangeType.ALL;
-            params.limit = -1;
-            params.world = world;
-            params.needDate = true;
-            params.needType = true;
-            params.needData = true;
-            params.needPlayer = true;
-            params.needSignText = true;
-            params.needCoords = true;
+    public void getBlockChanges() {
+        if (!ready) {
+            try {
+                final de.diddiz.LogBlock.QueryParams params = new de.diddiz.LogBlock.QueryParams(logBlock);
+                params.bct = BlockChangeType.ALL;
+                params.limit = 1000;
+                params.world = world;
+                params.needDate = true;
+                params.needType = true;
+                params.needData = true;
+                params.needPlayer = true;
+                params.needSignText = true;
+                params.needCoords = true;
 
-            changes.addAll(logBlock.getBlockChanges(params));
-            fullQueue = changes.size();
-            return true;
-        } catch (SQLException e) {
-            return false;
+                sender.sendMessage(ChatColor.GREEN + "Fetching block changes... It can take a lot of time!");
+                changes.addAll(logBlock.getBlockChanges(params));
+                fullQueue = changes.size();
+            } catch (SQLException e) {
+                sender.sendMessage("Retrieving block changes from database failed!");
+                stop();
+            }
         }
+        ready = true;
     }
 
-    public boolean start() {
-        if (changes.isEmpty()) {
-            return false;
-        }
+    public void start() {
         final BlockActivity blockActivity = BlockActivity.getBlockActivity();
-        task = blockActivity.getServer().getScheduler().runTaskTimer(blockActivity, this, 0, 20);
+        task = blockActivity.getServer().getScheduler().runTaskTimerAsynchronously(blockActivity, this, 0, 20);
         RUNNING = true;
-        return true;
     }
 
     public void stop() {
@@ -84,6 +85,8 @@ public class LogBlockConverter extends BukkitRunnable {
 
     @Override
     public void run() {
+        getBlockChanges();
+
         if (changes.isEmpty()) {
             task.cancel();
             RUNNING = false;
