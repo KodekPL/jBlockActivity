@@ -188,7 +188,7 @@ public class WorldConfig {
         final Statement state = connection.createStatement();
         state.executeUpdate("CREATE TABLE IF NOT EXISTS `"
                 + tableName
-                + "` (id INT UNSIGNED NOT NULL AUTO_INCREMENT, time DATETIME NOT NULL, type INT UNSIGNED NOT NULL, playerid INT UNSIGNED NOT NULL, old_id INT UNSIGNED NOT NULL, old_data INT UNSIGNED NOT NULL, new_id INT UNSIGNED NOT NULL, new_data INT UNSIGNED NOT NULL, x MEDIUMINT NOT NULL, y SMALLINT UNSIGNED NOT NULL, z MEDIUMINT NOT NULL, PRIMARY KEY (id), KEY coords (x, z, y), KEY time (time), KEY playerid (playerid))");
+                + "` (id INT UNSIGNED NOT NULL AUTO_INCREMENT, time DATETIME NOT NULL, type SMALLINT UNSIGNED NOT NULL, playerid MEDIUMINT UNSIGNED NOT NULL, old_id MEDIUMINT UNSIGNED NOT NULL, old_data MEDIUMINT UNSIGNED NOT NULL, new_id MEDIUMINT UNSIGNED NOT NULL, new_data MEDIUMINT UNSIGNED NOT NULL, x MEDIUMINT NOT NULL, y SMALLINT UNSIGNED NOT NULL, z MEDIUMINT NOT NULL, PRIMARY KEY (id), KEY coords (x, z, y), KEY time (time), KEY playerid (playerid))");
         if (isLoggingExtraBlockMeta()) {
             state.executeUpdate("CREATE TABLE IF NOT EXISTS `" + tableName
                     + "-extra` (id INT UNSIGNED NOT NULL, data text, PRIMARY KEY (id)) DEFAULT CHARSET=utf8");

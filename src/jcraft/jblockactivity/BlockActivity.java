@@ -175,7 +175,7 @@ public class BlockActivity extends JavaPlugin {
             throw new SQLException("No connection!");
         }
         final Statement state = connection.createStatement();
-        state.executeUpdate("CREATE TABLE IF NOT EXISTS `ba-players` (playerid INT UNSIGNED NOT NULL AUTO_INCREMENT, playername varchar(32) NOT NULL, primary key (playerid))");
+        state.executeUpdate("CREATE TABLE IF NOT EXISTS `ba-players` (playerid MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT, playername varchar(32) NOT NULL, primary key (playerid))");
         state.close();
         connection.close();
     }
