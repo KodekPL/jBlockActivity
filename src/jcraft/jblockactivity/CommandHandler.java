@@ -39,178 +39,181 @@ import org.bukkit.entity.Player;
 public class CommandHandler implements CommandExecutor {
 
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (args.length == 0) {
-            sender.sendMessage(ChatColor.GOLD + "jBlockActivity" + ChatColor.GRAY + " version "
-                    + BlockActivity.getBlockActivity().getDescription().getVersion() + " by " + ChatColor.GOLD + " KodekPL");
-            sender.sendMessage(ChatColor.GRAY + "Visit " + ChatColor.GOLD + BlockActivity.getBlockActivity().getDescription().getWebsite() + " "
-                    + ChatColor.GRAY + "for more information!");
-            return true;
-        } else {
-            if (args[0].equalsIgnoreCase("tool") || args[0].equalsIgnoreCase("blocktool")) {
-                if (!sender.hasPermission("ba.tool.lookup")) {
-                    sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You don't have required permission - ba.tool.lookup");
-                    return false;
-                }
-                if (!(sender instanceof Player)) {
-                    sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You have to be a player.");
-                    return false;
-                }
-                final Player player = (Player) sender;
-                final boolean block = args[0].equalsIgnoreCase("blocktool");
-                if (block && sender.hasPermission("ba.toolblock.spawn")) {
-                    BlockActivity.logBlockTool.giveTool(player);
-                    return true;
-                } else if (sender.hasPermission("ba.toolitem.spawn")) {
-                    BlockActivity.logItemTool.giveTool(player);
-                    return true;
-                }
-                sender.sendMessage(BlockActivity.prefix + ChatColor.RED
-                        + "You don't have required permission - ba.toolblock.spawn / ba.toolitem.spawn");
-                return false;
-            } else if (args[0].equalsIgnoreCase("hide")) {
-                if (!(sender instanceof Player)) {
-                    sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You have to be a player.");
-                    return false;
-                }
-                if (!sender.hasPermission("ba.hide")) {
-                    sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You don't have required permission - ba.hide");
-                    return false;
-                }
-
-                if (BlockActivity.hidePlayer(sender.getName())) {
-                    sender.sendMessage(BlockActivity.prefix + ChatColor.GREEN + "You are now hidden and aren't logged.");
-                } else {
-                    sender.sendMessage(BlockActivity.prefix + ChatColor.GREEN + "You aren't hidden anylonger.");
-                }
+        try {
+            if (args.length == 0) {
+                sender.sendMessage(ChatColor.GOLD + "jBlockActivity" + ChatColor.GRAY + " version "
+                        + BlockActivity.getBlockActivity().getDescription().getVersion() + " by " + ChatColor.GOLD + " KodekPL");
+                sender.sendMessage(ChatColor.GRAY + "Visit " + ChatColor.GOLD + BlockActivity.getBlockActivity().getDescription().getWebsite() + " "
+                        + ChatColor.GRAY + "for more information!");
                 return true;
-            } else if (args[0].equalsIgnoreCase("savequeue") && sender.hasPermission("ba.savequeue")) {
-                final LogExecuteThread executor = BlockActivity.getLogExecuteThread();
-                sender.sendMessage(ChatColor.GOLD + "Current queue size: " + executor.getQueueSize());
-                int lastSize = -1, fails = 0;
-                while (executor.getQueueSize() > 0) {
-                    fails = (lastSize == executor.getQueueSize()) ? fails + 1 : 0;
-                    if (fails > 10) {
-                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "Unable to save queue!");
+            } else {
+                if (args[0].equalsIgnoreCase("tool") || args[0].equalsIgnoreCase("blocktool")) {
+                    if (!sender.hasPermission("ba.tool.lookup")) {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You don't have required permission - ba.tool.lookup");
                         return false;
                     }
-                    lastSize = executor.getQueueSize();
-                    executor.notifyLock();
-                }
-                sender.sendMessage(BlockActivity.prefix + ChatColor.GREEN + "Queue saved successfully.");
-                return true;
-            } else if (args[0].equals("rollback") || args[0].equals("undo") || args[0].equals("rb")) {
-                if (!sender.hasPermission("ba.rollback")) {
-                    sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You don't have required permission - ba.rollback");
-                    return false;
-                }
-                preExecuteCommand(new ActionRequest(ActionType.CMD_ROLLBACK, sender, args, true), true);
-                return true;
-            } else if (args[0].equals("redo")) {
-                if (!sender.hasPermission("ba.rollback")) {
-                    sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You don't have required permission - ba.rollback");
-                    return false;
-                }
-                preExecuteCommand(new ActionRequest(ActionType.CMD_REDO, sender, args, true), true);
-                return true;
-            } else if (args[0].equalsIgnoreCase("page")) {
-                if (args.length == 2 && isInt(args[1])) {
-                    showPage(sender, Integer.valueOf(args[1]));
-                } else {
-                    sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You have to specify a page numer!");
-                }
-                return true;
-            } else if (args[0].equalsIgnoreCase("tp")) {
-                if (!(sender instanceof Player)) {
-                    sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You have to be a player.");
-                    return false;
-                }
-                if (!sender.hasPermission("ba.teleport")) {
-                    sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You don't have required permission - ba.teleport");
-                    return false;
-                }
-                if (args.length != 2 || !isInt(args[1])) {
-                    sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You have to specify a log ID numer!");
-                    return false;
-                }
-
-                final int pos = Integer.parseInt(args[1]) - 1;
-                final Player player = (Player) sender;
-                final ActiveSession session = ActiveSession.getSession(player);
-
-                if (session.lookupCache == null) {
-                    sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You havn't done a lookup yet!");
-                    return false;
-                }
-
-                if (pos >= 0 && pos < session.lookupCache.length) {
-                    final Location loc = session.lookupCache[pos].getLocation();
-                    if (loc != null) {
-                        player.teleport(new Location(loc.getWorld(), loc.getX() + 0.5, saveSpawnHeight(loc), loc.getZ() + 0.5, player.getLocation()
-                                .getYaw(), player.getLocation().getPitch()));
-                        player.sendMessage(BlockActivity.prefix + ChatColor.GOLD + "Teleported to " + loc.getBlockX() + ":" + loc.getBlockY() + ":"
-                                + loc.getBlockZ());
+                    if (!(sender instanceof Player)) {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You have to be a player.");
+                        return false;
+                    }
+                    final Player player = (Player) sender;
+                    final boolean block = args[0].equalsIgnoreCase("blocktool");
+                    if (block && sender.hasPermission("ba.toolblock.spawn")) {
+                        BlockActivity.logBlockTool.giveTool(player);
                         return true;
-                    } else {
-                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "There is no location! Add 'coords' parameter to lookup.");
-                        return false;
-                    }
-                } else {
-                    sender.sendMessage(ChatColor.RED + "'" + args[1] + " is out of range");
-                    return false;
-                }
-            } else if (args[0].equalsIgnoreCase("yes") || args[0].equalsIgnoreCase("no")) {
-                if (!sender.hasPermission("ba.answer")) {
-                    sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You don't have required permission - ba.answer");
-                    return false;
-                }
-                final ActiveSession session = ActiveSession.getSession(sender);
-                if (session.question == null) {
-                    sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You are not asked for anything!");
-                    return false;
-                }
-                final boolean answer = args[0].equalsIgnoreCase("yes");
-                if (answer) {
-                    preExecuteCommand(new ActionRequest(ActionType.CMD_CONFIRM, sender, new String[0], true), false);
-                } else {
-                    answerQuestion(sender, answer);
-                }
-                return true;
-            } else if (args[0].equalsIgnoreCase("lookup") && sender.hasPermission("ba.lookup")) {
-                preExecuteCommand(new ActionRequest(ActionType.CMD_LOOKUP, sender, args, true), false);
-                return true;
-            } else if (args[0].equalsIgnoreCase("clearlog") && sender.hasPermission("ba.clearlog")) {
-                preExecuteCommand(new ActionRequest(ActionType.CMD_CLEARLOG, sender, args, true), true);
-                return true;
-            } else if (args[0].equalsIgnoreCase("importlogs") && sender.hasPermission("ba.admin")) {
-                if (args.length == 4) {
-                    ImportPlugin pluginName;
-                    try {
-                        pluginName = ImportQueryGen.ImportPlugin.valueOf(args[1].toUpperCase());
-                    } catch (IllegalArgumentException e) {
-                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "There is no option of importing for plugin '"
-                                + args[1].toUpperCase() + "'");
-                        return false;
-                    }
-                    if (ImportQueryGen.createImportFile(pluginName, args[2], args[3])) {
-                        sender.sendMessage(BlockActivity.prefix + ChatColor.GREEN + "File with SQL query was saved in plugin directory!");
+                    } else if (sender.hasPermission("ba.toolitem.spawn")) {
+                        BlockActivity.logItemTool.giveTool(player);
                         return true;
-                    } else {
-                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "There is no logged world called '" + args[3] + "'");
+                    }
+                    sender.sendMessage(BlockActivity.prefix + ChatColor.RED
+                            + "You don't have required permission - ba.toolblock.spawn / ba.toolitem.spawn");
+                    return false;
+                } else if (args[0].equalsIgnoreCase("hide")) {
+                    if (!(sender instanceof Player)) {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You have to be a player.");
                         return false;
                     }
-                } else {
-                    sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You have to specify plugin, old table name and world name!");
-                    sender.sendMessage(BlockActivity.prefix + ChatColor.YELLOW + "Command example: /ba importlogs LOGBLOCK lb-world world");
-                    return false;
+                    if (!sender.hasPermission("ba.hide")) {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You don't have required permission - ba.hide");
+                        return false;
+                    }
+
+                    if (BlockActivity.hidePlayer(sender.getName())) {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.GREEN + "You are now hidden and aren't logged.");
+                    } else {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.GREEN + "You aren't hidden anylonger.");
+                    }
+                    return true;
+                } else if (args[0].equalsIgnoreCase("savequeue") && sender.hasPermission("ba.savequeue")) {
+                    final LogExecuteThread executor = BlockActivity.getLogExecuteThread();
+                    sender.sendMessage(ChatColor.GOLD + "Current queue size: " + executor.getQueueSize());
+                    int lastSize = -1, fails = 0;
+                    while (executor.getQueueSize() > 0) {
+                        fails = (lastSize == executor.getQueueSize()) ? fails + 1 : 0;
+                        if (fails > 10) {
+                            sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "Unable to save queue!");
+                            return false;
+                        }
+                        lastSize = executor.getQueueSize();
+                        executor.notifyLock();
+                    }
+                    sender.sendMessage(BlockActivity.prefix + ChatColor.GREEN + "Queue saved successfully.");
+                    return true;
+                } else if (args[0].equals("rollback") || args[0].equals("undo") || args[0].equals("rb")) {
+                    if (!sender.hasPermission("ba.rollback")) {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You don't have required permission - ba.rollback");
+                        return false;
+                    }
+                    preExecuteCommand(new ActionRequest(ActionType.CMD_ROLLBACK, sender, args, true), true);
+                    return true;
+                } else if (args[0].equals("redo")) {
+                    if (!sender.hasPermission("ba.rollback")) {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You don't have required permission - ba.rollback");
+                        return false;
+                    }
+                    preExecuteCommand(new ActionRequest(ActionType.CMD_REDO, sender, args, true), true);
+                    return true;
+                } else if (args[0].equalsIgnoreCase("page")) {
+                    if (args.length == 2 && isInt(args[1])) {
+                        showPage(sender, Integer.valueOf(args[1]));
+                    } else {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You have to specify a page numer!");
+                    }
+                    return true;
+                } else if (args[0].equalsIgnoreCase("tp")) {
+                    if (!(sender instanceof Player)) {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You have to be a player.");
+                        return false;
+                    }
+                    if (!sender.hasPermission("ba.teleport")) {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You don't have required permission - ba.teleport");
+                        return false;
+                    }
+                    if (args.length != 2 || !isInt(args[1])) {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You have to specify a log ID numer!");
+                        return false;
+                    }
+
+                    final int pos = Integer.parseInt(args[1]) - 1;
+                    final Player player = (Player) sender;
+                    final ActiveSession session = ActiveSession.getSession(player);
+
+                    if (session.lookupCache == null) {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You havn't done a lookup yet!");
+                        return false;
+                    }
+
+                    if (pos >= 0 && pos < session.lookupCache.length) {
+                        final Location loc = session.lookupCache[pos].getLocation();
+                        if (loc != null) {
+                            player.teleport(new Location(loc.getWorld(), loc.getX() + 0.5, saveSpawnHeight(loc), loc.getZ() + 0.5, player
+                                    .getLocation().getYaw(), player.getLocation().getPitch()));
+                            player.sendMessage(BlockActivity.prefix + ChatColor.GOLD + "Teleported to " + loc.getBlockX() + ":" + loc.getBlockY()
+                                    + ":" + loc.getBlockZ());
+                            return true;
+                        } else {
+                            sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "There is no location! Add 'coords' parameter to lookup.");
+                            return false;
+                        }
+                    } else {
+                        sender.sendMessage(ChatColor.RED + "'" + args[1] + " is out of range");
+                        return false;
+                    }
+                } else if (args[0].equalsIgnoreCase("yes") || args[0].equalsIgnoreCase("no")) {
+                    if (!sender.hasPermission("ba.answer")) {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You don't have required permission - ba.answer");
+                        return false;
+                    }
+                    final ActiveSession session = ActiveSession.getSession(sender);
+                    if (session.question == null) {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You are not asked for anything!");
+                        return false;
+                    }
+                    final boolean answer = args[0].equalsIgnoreCase("yes");
+                    if (answer) {
+                        preExecuteCommand(new ActionRequest(ActionType.CMD_CONFIRM, sender, new String[0], true), false);
+                    } else {
+                        answerQuestion(sender, answer);
+                    }
+                    return true;
+                } else if (args[0].equalsIgnoreCase("lookup") && sender.hasPermission("ba.lookup")) {
+                    preExecuteCommand(new ActionRequest(ActionType.CMD_LOOKUP, sender, args, false), true);
+                    return true;
+                } else if (args[0].equalsIgnoreCase("clearlog") && sender.hasPermission("ba.clearlog")) {
+                    preExecuteCommand(new ActionRequest(ActionType.CMD_CLEARLOG, sender, args, true), true);
+                    return true;
+                } else if (args[0].equalsIgnoreCase("importlogs") && sender.hasPermission("ba.admin")) {
+                    if (args.length == 4) {
+                        ImportPlugin pluginName;
+                        try {
+                            pluginName = ImportQueryGen.ImportPlugin.valueOf(args[1].toUpperCase());
+                        } catch (IllegalArgumentException e) {
+                            sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "There is no option of importing for plugin '"
+                                    + args[1].toUpperCase() + "'");
+                            return false;
+                        }
+                        if (ImportQueryGen.createImportFile(pluginName, args[2], args[3])) {
+                            sender.sendMessage(BlockActivity.prefix + ChatColor.GREEN + "File with SQL query was saved in plugin directory!");
+                            return true;
+                        } else {
+                            sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "There is no logged world called '" + args[3] + "'");
+                            return false;
+                        }
+                    } else {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You have to specify plugin, old table name and world name!");
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.YELLOW + "Command example: /ba importlogs LOGBLOCK lb-world world");
+                        return false;
+                    }
                 }
             }
-
+        } catch (final IllegalArgumentException ex) {
+            sender.sendMessage(ChatColor.RED + ex.getMessage());
         }
         sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "Unknown command '" + args[0] + "'.");
         return false;
     }
 
-    public void preExecuteCommand(ActionRequest request, boolean async) {
+    public void preExecuteCommand(ActionRequest request, boolean async) throws IllegalArgumentException {
         if (async) {
             ActionExecuteThread.addRequest(request);
         } else {
