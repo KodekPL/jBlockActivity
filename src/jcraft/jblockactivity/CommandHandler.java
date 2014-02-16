@@ -171,7 +171,7 @@ public class CommandHandler implements CommandExecutor {
                     }
                     final boolean answer = args[0].equalsIgnoreCase("yes");
                     if (answer) {
-                        preExecuteCommand(new ActionRequest(ActionType.CMD_CONFIRM, sender, new String[0], true), false);
+                        preExecuteCommand(new ActionRequest(ActionType.CMD_CONFIRM, sender, new String[0], true), true);
                     } else {
                         answerQuestion(sender, answer);
                     }
