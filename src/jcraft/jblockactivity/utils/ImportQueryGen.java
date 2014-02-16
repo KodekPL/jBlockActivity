@@ -63,7 +63,9 @@ public class ImportQueryGen {
                 + "` (`id`,`time`,`type`,`playerid`, `old_id`,`old_data`,`new_id`,`new_data`, `x`,`y`,`z`) SELECT `" + oldTable + "`.`id`,`"
                 + oldTable + "`.`date`,4,`" + oldTable + "`.`playerid`, `" + oldTable + "`.`replaced`,`" + oldTable + "`.`data`,`" + oldTable
                 + "`.`type`,0, `" + oldTable + "`.`x`,`" + oldTable + "`.`y`,`" + oldTable + "`.`z` FROM `" + oldTable + "` WHERE `" + oldTable
-                + "`.`replaced`!=0 AND `" + oldTable + "`.`type`!=0 AND `" + oldTable + "`.`replaced`=`" + oldTable + "`.`type`;");
+                + "`.`replaced`!=0 AND `" + oldTable + "`.`type`!=0 AND `" + oldTable + "`.`replaced`=`" + oldTable + "`.`type`; ");
+
+        query2.add("OPTIMIZE TABLE `" + config.tableName + "`;");
 
         saveFile(query1, "LogBlockImport_lb-players");
         saveFile(query2, "LogBlockImport_" + oldTable);
