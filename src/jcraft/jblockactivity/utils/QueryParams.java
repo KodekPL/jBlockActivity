@@ -159,11 +159,11 @@ public class QueryParams {
                     where.append(") OR ");
                 }
                 where.delete(where.length() - 4, where.length());
-                where.append(" AND ").append("type = ").append(LoggingType.blockplace.getId()).append(" OR type = ")
-                        .append(LoggingType.blockbreak.getId()).append(") AND ");
+                where.append(" AND ").append("(type = ").append(LoggingType.blockplace.getId()).append(" OR type = ")
+                        .append(LoggingType.blockbreak.getId()).append(")) AND ");
             } else {
-                where.append("type = ").append(LoggingType.blockplace.getId()).append(" OR type = ").append(LoggingType.blockbreak.getId())
-                        .append(" AND ");
+                where.append("(type = ").append(LoggingType.blockplace.getId()).append(" OR type = ").append(LoggingType.blockbreak.getId())
+                        .append(") AND ");
             }
             break;
         case blockplace:
