@@ -21,13 +21,13 @@ lookup:
 tools:
   useCooldown: 3000
   itemtool:
-    params: area 0 all sum none limit 5 desc
+    params: area 0 all sum none limit 5 extra desc
     itemId: 294
     itemData: 0
     leftClickBehavior: TOOL
     rightClickBehavior: BLOCK
   blocktool:
-    params: area 0 all sum none limit 15 desc
+    params: area 0 all sum none limit 15 extra desc
     itemId: 7
     itemData: 0
     leftClickBehavior: TOOL

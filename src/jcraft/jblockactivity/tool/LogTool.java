@@ -10,9 +10,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
 public class LogTool {
-    public final ToolBehavior leftClickBehavior, rightClickBehavior;
-    public final MaterialData itemMaterial;
-    public final QueryParams params;
+    private final ToolBehavior leftClickBehavior, rightClickBehavior;
+    private final MaterialData itemMaterial;
+    private final QueryParams params;
 
     public LogTool(ToolBehavior leftClickBehavior, ToolBehavior rightClickBehavior, int itemId, byte itemData, QueryParams params) {
         this.leftClickBehavior = leftClickBehavior;
@@ -33,6 +33,22 @@ public class LogTool {
         } else {
             player.sendMessage(BlockActivity.prefix + ChatColor.RED + "You have no empty slot in your inventory!");
         }
+    }
+
+    public ToolBehavior getLeftClickBehavior() {
+        return leftClickBehavior;
+    }
+
+    public ToolBehavior getRightClickBehavior() {
+        return rightClickBehavior;
+    }
+
+    public MaterialData getItemMaterial() {
+        return itemMaterial;
+    }
+
+    public QueryParams getParams() {
+        return params;
     }
 
     public static enum ToolBehavior {

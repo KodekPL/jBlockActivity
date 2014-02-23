@@ -39,7 +39,7 @@ public class LogToolListener implements Listener {
             return;
         }
 
-        final ToolBehavior behavior = (action == Action.RIGHT_CLICK_BLOCK) ? tool.rightClickBehavior : tool.leftClickBehavior;
+        final ToolBehavior behavior = (action == Action.RIGHT_CLICK_BLOCK) ? tool.getRightClickBehavior() : tool.getLeftClickBehavior();
         if (behavior == ToolBehavior.NONE) {
             return;
         }
@@ -62,14 +62,13 @@ public class LogToolListener implements Listener {
         }
 
         final Block block = event.getClickedBlock();
-        final QueryParams params = tool.params;
+        final QueryParams params = tool.getParams();
 
         if (behavior == ToolBehavior.BLOCK) {
             params.setLocation(block.getRelative(event.getBlockFace()).getLocation());
         } else {
             params.setLocation(block.getLocation());
         }
-        params.needExtraData = true;
         BlockActivity.getCommandHandler().preExecuteCommand(new ActionRequest(ActionType.CMD_LOOKUP, player, params, false), true);
         event.setCancelled(true);
     }

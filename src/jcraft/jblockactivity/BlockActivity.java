@@ -274,13 +274,13 @@ public class BlockActivity extends JavaPlugin {
 
     public static LogTool getLogItem(MaterialData data) {
         if (logItemTool != null) {
-            final MaterialData material = logItemTool.itemMaterial;
+            final MaterialData material = logItemTool.getItemMaterial();
             if (material.getItemTypeId() == data.getItemTypeId() && material.getData() == data.getData()) {
                 return logItemTool;
             }
         }
         if (logBlockTool != null) {
-            final MaterialData material = logBlockTool.itemMaterial;
+            final MaterialData material = logBlockTool.getItemMaterial();
             if (material.getItemTypeId() == data.getItemTypeId() && material.getData() == data.getData()) {
                 return logBlockTool;
             }

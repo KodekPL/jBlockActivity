@@ -26,7 +26,7 @@ public class QueryParams {
 
     private static final Set<String> validParams = new HashSet<String>(Arrays.asList("player", "area", "block", "entity", "sum", "destroyed",
             "breaked", "created", "placed", "kills", "all", "time", "since", "before", "limit", "worldname", "asc", "desc", "coords", "loc",
-            "location"));
+            "location", "extra"));
 
     public static enum Order {
         ASC, DESC;
@@ -420,6 +420,7 @@ public class QueryParams {
                     needMaterial = false;
                     needData = false;
                     needPlayer = false;
+                    needExtraData = false;
                 } else if (values[0].charAt(0) == 'b') {
                     mode = SummarizationMode.BLOCKS;
                     needTime = false;
@@ -427,6 +428,7 @@ public class QueryParams {
                     needMaterial = false;
                     needData = false;
                     needPlayer = false;
+                    needExtraData = false;
                 } else if (values[0].charAt(0) == 'e') {
                     mode = SummarizationMode.ENTITIES;
                     needTime = false;
@@ -434,6 +436,7 @@ public class QueryParams {
                     needMaterial = false;
                     needData = false;
                     needPlayer = false;
+                    needExtraData = false;
                 } else if (values[0].charAt(0) == 'n') {
                     mode = SummarizationMode.NONE;
                 } else {
@@ -445,6 +448,7 @@ public class QueryParams {
                 logType = LoggingType.blockbreak;
             } else if (param.equals("kills")) {
                 logType = LoggingType.creaturekill;
+                needExtraData = true;
             } else if (param.equals("all")) {
                 logType = LoggingType.all;
                 needExtraData = true;
@@ -471,6 +475,8 @@ public class QueryParams {
                 order = Order.DESC;
             } else if (param.equals("coords")) {
                 needCoords = true;
+            } else if (param.equals("extra")) {
+                needExtraData = true;
             } else if (param.equals("loc") || param.equals("location")) {
                 final String[] vectors = (values.length == 1) ? values[0].split(":") : values;
                 if (vectors.length != 3) {
