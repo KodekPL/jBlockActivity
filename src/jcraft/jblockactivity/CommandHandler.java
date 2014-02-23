@@ -138,13 +138,13 @@ public class CommandHandler implements CommandExecutor {
                     final Player player = (Player) sender;
                     final ActiveSession session = ActiveSession.getSession(player);
 
-                    if (session.lookupCache == null) {
+                    if (session.getLastLookupCache() == null) {
                         sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You havn't done a lookup yet!");
                         return false;
                     }
 
-                    if (pos >= 0 && pos < session.lookupCache.length) {
-                        final Location loc = session.lookupCache[pos].getLocation();
+                    if (pos >= 0 && pos < session.getLastLookupCache().length) {
+                        final Location loc = session.getLastLookupCache()[pos].getLocation();
                         if (loc != null) {
                             player.teleport(new Location(loc.getWorld(), loc.getX() + 0.5, saveSpawnHeight(loc), loc.getZ() + 0.5, player
                                     .getLocation().getYaw(), player.getLocation().getPitch()));
@@ -165,7 +165,7 @@ public class CommandHandler implements CommandExecutor {
                         return false;
                     }
                     final ActiveSession session = ActiveSession.getSession(sender);
-                    if (session.question == null) {
+                    if (session.getQuestion() == null) {
                         sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You are not asked for anything!");
                         return false;
                     }
@@ -207,12 +207,12 @@ public class CommandHandler implements CommandExecutor {
                 } else if (args[0].equalsIgnoreCase("debug") && sender.hasPermission("ba.admin")) {
                     if (args.length == 2 && args[1].equalsIgnoreCase("query")) {
                         final ActiveSession session = ActiveSession.getSession(sender);
-                        if (session.lastParams == null) {
+                        if (session.getLastQueryParams() == null) {
                             sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "No last query params, lookup something first!");
                             return false;
                         }
 
-                        getLogger().log(Level.INFO, "Last query params of " + sender.getName() + ": " + session.lastParams.getQuery());
+                        getLogger().log(Level.INFO, "Last query params of " + sender.getName() + ": " + session.getLastQueryParams().getQuery());
                         sender.sendMessage(BlockActivity.prefix + ChatColor.GREEN + "Printed last query params in console log.");
                         return true;
                     }
@@ -257,24 +257,24 @@ public class CommandHandler implements CommandExecutor {
 
     private void showPage(CommandSender sender, int page) {
         final ActiveSession session = ActiveSession.getSession(sender);
-        if (session.lookupCache != null && session.lookupCache.length > 0) {
-            if (session.lookupCache.length >= BlockActivity.config.linesPerPage) {
-                sender.sendMessage(ChatColor.GOLD.toString() + session.lookupCache.length + " changes found.");
+        if (session.getLastLookupCache() != null && session.getLastLookupCache().length > 0) {
+            if (session.getLastLookupCache().length >= BlockActivity.config.linesPerPage) {
+                sender.sendMessage(ChatColor.GOLD.toString() + session.getLastLookupCache().length + " changes found.");
             }
             final int startpos = (page - 1) * BlockActivity.config.linesPerPage;
-            if (page > 0 && startpos <= session.lookupCache.length - 1) {
-                final int stoppos = (startpos + BlockActivity.config.linesPerPage >= session.lookupCache.length) ? session.lookupCache.length - 1
-                        : startpos + BlockActivity.config.linesPerPage - 1;
-                final int numberOfPages = (int) Math.ceil(session.lookupCache.length / (double) BlockActivity.config.linesPerPage);
+            if (page > 0 && startpos <= session.getLastLookupCache().length - 1) {
+                final int stoppos = (startpos + BlockActivity.config.linesPerPage >= session.getLastLookupCache().length) ? session
+                        .getLastLookupCache().length - 1 : startpos + BlockActivity.config.linesPerPage - 1;
+                final int numberOfPages = (int) Math.ceil(session.getLastLookupCache().length / (double) BlockActivity.config.linesPerPage);
                 if (numberOfPages != 1) {
                     sender.sendMessage(ChatColor.GRAY + "Page " + page + "/" + numberOfPages);
                 }
                 for (int i = startpos; i <= stoppos; i++) {
-                    if (session.lookupCache[i] == null) {
+                    if (session.getLastLookupCache()[i] == null) {
                         continue;
                     }
-                    sender.sendMessage(((session.lookupCache[i].getLocation() != null) ? "[" + (i + 1) + "] " : "")
-                            + session.lookupCache[i].getMessage());
+                    sender.sendMessage(((session.getLastLookupCache()[i].getLocation() != null) ? "[" + (i + 1) + "] " : "")
+                            + session.getLastLookupCache()[i].getMessage());
                 }
                 sender.sendMessage(ChatColor.GOLD + "-------------------");
             } else {
@@ -306,8 +306,8 @@ public class CommandHandler implements CommandExecutor {
                     lookupLogs.add(logsFactory.getLookupCache(result));
                 }
                 final ActiveSession session = ActiveSession.getSession(sender);
-                session.lookupCache = lookupLogs.toArray(new LookupCache[lookupLogs.size()]);
-                session.lastParams = params;
+                session.setLastLookupCache(lookupLogs.toArray(new LookupCache[lookupLogs.size()]));
+                session.setLastQueryParams(params);
 
                 if (params.mode != SummarizationMode.NONE) {
                     if (params.mode == SummarizationMode.BLOCKS) {
@@ -370,7 +370,7 @@ public class CommandHandler implements CommandExecutor {
 
                 final ClearlogQuestion question = new ClearlogQuestion();
                 question.setParams(params);
-                session.question = question;
+                session.setQuestion(question);
 
                 if (askQuestion && BlockActivity.config.askClearlogs) {
                     askQuestion(sender);
@@ -445,7 +445,7 @@ public class CommandHandler implements CommandExecutor {
 
             final RollbackQuestion question = new RollbackQuestion();
             question.setEditor(editor);
-            session.question = question;
+            session.setQuestion(question);
             if (askQuestion && BlockActivity.config.askRollbacks) {
                 askQuestion(sender);
             } else {
@@ -519,7 +519,7 @@ public class CommandHandler implements CommandExecutor {
 
             final RedoQuestion question = new RedoQuestion();
             question.setEditor(editor);
-            session.question = question;
+            session.setQuestion(question);
 
             if (askQuestion && BlockActivity.config.askRedos) {
                 askQuestion(sender);
@@ -556,7 +556,7 @@ public class CommandHandler implements CommandExecutor {
 
     private void answerQuestion(CommandSender sender, boolean answer) {
         final ActiveSession session = ActiveSession.getSession(sender);
-        final QuestionData question = session.question;
+        final QuestionData question = session.getQuestion();
         if (!answer) {
             if (question instanceof RollbackQuestion) {
                 sender.sendMessage(ChatColor.RED + "Rollback aborted!");
@@ -568,9 +568,9 @@ public class CommandHandler implements CommandExecutor {
         } else {
             try {
                 if (question instanceof RollbackQuestion) {
-                    final BlockEditor editor = ((RollbackQuestion) session.question).getEditor();
+                    final BlockEditor editor = ((RollbackQuestion) session.getQuestion()).getEditor();
                     editor.start();
-                    session.lookupCache = editor.errors;
+                    session.setLastLookupCache(editor.errors);
                     sender.sendMessage(ChatColor.GREEN + "Rollback finished successfully (" + editor.getElapsedTime() + " ms"
                             + ((editor.getErrors() > 0) ? ", " + ChatColor.RED + editor.getErrors() + " errors" + ChatColor.GREEN : "") + ")");
 
@@ -602,9 +602,9 @@ public class CommandHandler implements CommandExecutor {
                                 + entityChanges);
                     }
                 } else if (question instanceof RedoQuestion) {
-                    final BlockEditor editor = ((RedoQuestion) session.question).getEditor();
+                    final BlockEditor editor = ((RedoQuestion) session.getQuestion()).getEditor();
                     editor.start();
-                    session.lookupCache = editor.errors;
+                    session.setLastLookupCache(editor.errors);
                     sender.sendMessage(ChatColor.GREEN + "Redo finished successfully (" + editor.getElapsedTime() + " ms"
                             + ((editor.getErrors() > 0) ? ", " + ChatColor.RED + editor.getErrors() + " errors" + ChatColor.GREEN : "") + ")");
 
@@ -636,7 +636,7 @@ public class CommandHandler implements CommandExecutor {
                                 + entityChanges);
                     }
                 } else if (question instanceof ClearlogQuestion) {
-                    final QueryParams params = ((ClearlogQuestion) session.question).getParams();
+                    final QueryParams params = ((ClearlogQuestion) session.getQuestion()).getParams();
                     Connection connection = null;
                     Statement state = null;
                     ResultSet result = null;
@@ -694,6 +694,6 @@ public class CommandHandler implements CommandExecutor {
                 e.printStackTrace();
             }
         }
-        session.question = null;
+        session.setQuestion(null);
     }
 }

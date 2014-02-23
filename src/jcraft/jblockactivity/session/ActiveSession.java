@@ -11,10 +11,33 @@ import org.bukkit.command.CommandSender;
 public class ActiveSession {
     private static final Map<String, ActiveSession> sessions = new HashMap<String, ActiveSession>();
 
-    public QueryParams lastParams = null;
-    public LookupCache[] lookupCache = null;
+    private QueryParams lastParams = null;
+    private LookupCache[] lookupCache = null;
+    private QuestionData question = null;
 
-    public QuestionData question = null;
+    public QueryParams getLastQueryParams() {
+        return lastParams;
+    }
+
+    public void setLastQueryParams(QueryParams params) {
+        this.lastParams = params;
+    }
+
+    public LookupCache[] getLastLookupCache() {
+        return lookupCache;
+    }
+
+    public void setLastLookupCache(LookupCache[] lookupCache) {
+        this.lookupCache = lookupCache;
+    }
+
+    public QuestionData getQuestion() {
+        return question;
+    }
+
+    public void setQuestion(QuestionData question) {
+        this.question = question;
+    }
 
     public static boolean hasSession(CommandSender sender) {
         return sessions.containsKey(sender.getName());
