@@ -204,6 +204,18 @@ public class CommandHandler implements CommandExecutor {
                         sender.sendMessage(BlockActivity.prefix + ChatColor.YELLOW + "Command example: /ba importlogs LOGBLOCK lb-world world");
                         return false;
                     }
+                } else if (args[0].equalsIgnoreCase("debug") && sender.hasPermission("ba.admin")) {
+                    if (args.length == 2 && args[1].equalsIgnoreCase("query")) {
+                        final ActiveSession session = ActiveSession.getSession(sender);
+                        if (session.lastParams == null) {
+                            sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "No last query params, lookup something first!");
+                            return false;
+                        }
+
+                        getLogger().log(Level.INFO, "Last query params of " + sender.getName() + ": " + session.lastParams.getQuery());
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.GREEN + "Printed last query params in console log.");
+                        return true;
+                    }
                 }
             }
         } catch (final IllegalArgumentException ex) {
