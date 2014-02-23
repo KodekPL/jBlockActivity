@@ -80,13 +80,13 @@ public class ActivityConfig {
 
         configDef.put("tools.itemtool.itemId", 294);
         configDef.put("tools.itemtool.itemData", 0);
-        configDef.put("tools.itemtool.params", "area 0 all sum none limit 5 desc");
+        configDef.put("tools.itemtool.params", "area 0 all sum none limit 5 extra desc");
         configDef.put("tools.itemtool.leftClickBehavior", "TOOL");
         configDef.put("tools.itemtool.rightClickBehavior", "BLOCK");
 
         configDef.put("tools.blocktool.itemId", 7);
         configDef.put("tools.blocktool.itemData", 0);
-        configDef.put("tools.blocktool.params", "area 0 all sum none limit 15 desc");
+        configDef.put("tools.blocktool.params", "area 0 all sum none limit 15 extra desc");
         configDef.put("tools.blocktool.leftClickBehavior", "TOOL");
         configDef.put("tools.blocktool.rightClickBehavior", "BLOCK");
 
