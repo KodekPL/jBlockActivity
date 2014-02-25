@@ -2,7 +2,6 @@ package jcraft.jblockactivity.config;
 
 import static jcraft.jblockactivity.utils.ActivityUtil.parseTime;
 import static org.bukkit.Bukkit.getConsoleSender;
-import static org.bukkit.Bukkit.getWorld;
 import static org.bukkit.Bukkit.getWorlds;
 
 import java.io.File;
@@ -22,18 +21,19 @@ import jcraft.jblockactivity.sql.SQLProfile;
 import jcraft.jblockactivity.tool.LogTool;
 import jcraft.jblockactivity.tool.LogTool.ToolBehavior;
 import jcraft.jblockactivity.utils.QueryParams;
+import jcraft.jblockactivity.utils.SQLUpdater;
 
 import org.bukkit.World;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 public class ActivityConfig {
 
-    private final File configFile;
-    private final YamlConfiguration config;
+    public static File CONFIG_FILE;
+    public static YamlConfiguration CONFIG;
 
     public ActivityConfig() {
-        configFile = new File(BlockActivity.dataFolder, "config.yml");
-        config = YamlConfiguration.loadConfiguration(configFile);
+        CONFIG_FILE = new File(BlockActivity.dataFolder, "config.yml");
+        CONFIG = YamlConfiguration.loadConfiguration(CONFIG_FILE);
     }
 
     public String sqlHost, sqlPort, sqlDatabase, sqlUsername, sqlPassword;
@@ -52,6 +52,7 @@ public class ActivityConfig {
         final Map<String, Object> configDef = new LinkedHashMap<String, Object>();
 
         configDef.put("configVersion", 1);
+        configDef.put("autoUpdateTables", true);
 
         configDef.put("mysql.host", "127.0.0.1");
         configDef.put("mysql.port", 3306);
@@ -97,13 +98,13 @@ public class ActivityConfig {
         configDef.put("event.callActionLogQueueEvent", false);
 
         for (Entry<String, Object> e : configDef.entrySet()) {
-            if (!config.contains(e.getKey())) {
-                config.set(e.getKey(), e.getValue());
+            if (!CONFIG.contains(e.getKey())) {
+                CONFIG.set(e.getKey(), e.getValue());
             }
         }
 
         try {
-            config.save(configFile);
+            CONFIG.save(CONFIG_FILE);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -111,60 +112,68 @@ public class ActivityConfig {
 
     public void loadConfig() {
         genConfig();
+        checkConfigVersion();
 
         sqlHost = getStringIncludingInts("mysql.host");
         sqlPort = getStringIncludingInts("mysql.port");
-        sqlDatabase = config.getString("mysql.database");
+        sqlDatabase = CONFIG.getString("mysql.database");
         sqlUsername = getStringIncludingInts("mysql.username");
         sqlPassword = getStringIncludingInts("mysql.password");
         BlockActivity.sqlProfile = new SQLProfile(sqlHost, sqlPort, sqlDatabase, sqlUsername, sqlPassword);
 
-        maxTimePerRun = config.getInt("queue.maxTimePerRun");
-        timeBetweenRuns = config.getInt("queue.timeBetweenRuns");
-        minLogsToProcess = config.getInt("queue.minLogsToProcess");
-        queueWarningSize = config.getInt("queue.queueWarningSize");
+        maxTimePerRun = CONFIG.getInt("queue.maxTimePerRun");
+        timeBetweenRuns = CONFIG.getInt("queue.timeBetweenRuns");
+        minLogsToProcess = CONFIG.getInt("queue.minLogsToProcess");
+        queueWarningSize = CONFIG.getInt("queue.queueWarningSize");
 
-        defaultDistance = config.getInt("lookup.defaultDistance");
-        defaultTime = parseTime(config.getString("lookup.defaultTime").split(" "));
+        defaultDistance = CONFIG.getInt("lookup.defaultDistance");
+        defaultTime = parseTime(CONFIG.getString("lookup.defaultTime").split(" "));
 
-        linesPerPage = config.getInt("lookup.linesPerPage");
+        linesPerPage = CONFIG.getInt("lookup.linesPerPage");
 
-        toolUseCooldown = config.getLong("tools.useCooldown");
+        toolUseCooldown = CONFIG.getLong("tools.useCooldown");
 
-        final int itemId = config.getInt("tools.itemtool.itemId");
+        final int itemId = CONFIG.getInt("tools.itemtool.itemId");
         if (itemId != 0) {
-            final byte itemData = (byte) config.getInt("tools.itemtool.itemData");
-            final QueryParams params = new QueryParams(getConsoleSender(), config.getString("tools.itemtool.params").split(" "), true);
-            final ToolBehavior leftClickBehavior = ToolBehavior.valueOf(config.getString("tools.itemtool.leftClickBehavior").toUpperCase());
-            final ToolBehavior rightClickBehavior = ToolBehavior.valueOf(config.getString("tools.itemtool.rightClickBehavior").toUpperCase());
+            final byte itemData = (byte) CONFIG.getInt("tools.itemtool.itemData");
+            final QueryParams params = new QueryParams(getConsoleSender(), CONFIG.getString("tools.itemtool.params").split(" "), true);
+            final ToolBehavior leftClickBehavior = ToolBehavior.valueOf(CONFIG.getString("tools.itemtool.leftClickBehavior").toUpperCase());
+            final ToolBehavior rightClickBehavior = ToolBehavior.valueOf(CONFIG.getString("tools.itemtool.rightClickBehavior").toUpperCase());
             final LogTool itemTool = new LogTool(leftClickBehavior, rightClickBehavior, itemId, itemData, params);
             BlockActivity.logItemTool = itemTool;
         }
 
-        final int blockId = config.getInt("tools.blocktool.itemId");
+        final int blockId = CONFIG.getInt("tools.blocktool.itemId");
         if (blockId != 0) {
-            final byte itemData = (byte) config.getInt("tools.blocktool.itemData");
-            final QueryParams params = new QueryParams(getConsoleSender(), config.getString("tools.blocktool.params").split(" "), true);
-            final ToolBehavior leftClickBehavior = ToolBehavior.valueOf(config.getString("tools.blocktool.leftClickBehavior").toUpperCase());
-            final ToolBehavior rightClickBehavior = ToolBehavior.valueOf(config.getString("tools.blocktool.rightClickBehavior").toUpperCase());
+            final byte itemData = (byte) CONFIG.getInt("tools.blocktool.itemData");
+            final QueryParams params = new QueryParams(getConsoleSender(), CONFIG.getString("tools.blocktool.params").split(" "), true);
+            final ToolBehavior leftClickBehavior = ToolBehavior.valueOf(CONFIG.getString("tools.blocktool.leftClickBehavior").toUpperCase());
+            final ToolBehavior rightClickBehavior = ToolBehavior.valueOf(CONFIG.getString("tools.blocktool.rightClickBehavior").toUpperCase());
             final LogTool blockTool = new LogTool(leftClickBehavior, rightClickBehavior, blockId, itemData, params);
             BlockActivity.logBlockTool = blockTool;
         }
 
         hiddenPlayers = new HashSet<String>();
-        for (final String playerName : config.getStringList("logging.hiddenPlayers")) {
+        for (final String playerName : CONFIG.getStringList("logging.hiddenPlayers")) {
             hiddenPlayers.add(playerName.trim());
         }
 
-        askRollbacks = config.getBoolean("questioner.askRollbacks");
-        askRedos = config.getBoolean("questioner.askRedos");
-        askClearlogs = config.getBoolean("questioner.askClearlogs");
+        askRollbacks = CONFIG.getBoolean("questioner.askRollbacks");
+        askRedos = CONFIG.getBoolean("questioner.askRedos");
+        askClearlogs = CONFIG.getBoolean("questioner.askClearlogs");
 
-        callActionLogQueueEvent = config.getBoolean("event.callActionLogQueueEvent");
+        callActionLogQueueEvent = CONFIG.getBoolean("event.callActionLogQueueEvent");
+    }
+
+    public void checkConfigVersion() {
+        if (CONFIG.getBoolean("autoUpdateTables")) {
+            final int version = CONFIG.getInt("configVersion");
+            new SQLUpdater(version);
+        }
     }
 
     public void loadWorldConfig() {
-        final List<String> sWorlds = config.getStringList("loggedWorlds");
+        final List<String> sWorlds = CONFIG.getStringList("loggedWorlds");
         for (String worldName : sWorlds) {
             WorldConfig worldConfig = new WorldConfig(worldName);
             if (worldConfig.loadConfig()) {
@@ -188,9 +197,9 @@ public class ActivityConfig {
     }
 
     private String getStringIncludingInts(String key) {
-        String str = config.getString(key);
+        String str = CONFIG.getString(key);
         if (str == null) {
-            str = String.valueOf(config.getInt(key));
+            str = String.valueOf(CONFIG.getInt(key));
         }
         return str;
     }

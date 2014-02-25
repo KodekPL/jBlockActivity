@@ -184,7 +184,7 @@ public class CommandHandler implements CommandExecutor {
                     return true;
                 } else if (args[0].equalsIgnoreCase("importlogs") && sender.hasPermission("ba.admin")) {
                     if (args.length == 4) {
-                        ImportPlugin pluginName;
+                        final ImportPlugin pluginName;
                         try {
                             pluginName = ImportQueryGen.ImportPlugin.valueOf(args[1].toUpperCase());
                         } catch (IllegalArgumentException e) {

@@ -187,13 +187,13 @@ public class EntityActionLog extends ActionLog implements LookupCache {
             if (getExtraData() != null) {
                 String ownerName = null;
                 if (getEntityId() == 95) {
-                    WolfExtraData extraData = (WolfExtraData) getExtraData();
+                    final WolfExtraData extraData = (WolfExtraData) getExtraData();
                     if (extraData.getOwner() != null) ownerName = extraData.getOwner();
                 } else if (getEntityId() == 98) {
-                    OcelotExtraData extraData = (OcelotExtraData) getExtraData();
+                    final OcelotExtraData extraData = (OcelotExtraData) getExtraData();
                     if (extraData.getOwner() != null) ownerName = extraData.getOwner();
                 } else if (getEntityId() == 100) {
-                    HorseExtraData extraData = (HorseExtraData) getExtraData();
+                    final HorseExtraData extraData = (HorseExtraData) getExtraData();
                     if (extraData.getOwner() != null) ownerName = extraData.getOwner();
                 }
                 if (ownerName != null) msg.append(ChatColor.GRAY).append(" [").append(ownerName).append(']');
