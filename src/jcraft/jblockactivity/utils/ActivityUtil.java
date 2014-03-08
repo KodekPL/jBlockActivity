@@ -20,6 +20,7 @@ import org.bukkit.block.BlockState;
 import org.bukkit.block.DoubleChest;
 import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
 import org.bukkit.craftbukkit.libs.com.google.gson.GsonBuilder;
+import org.bukkit.craftbukkit.libs.com.google.gson.JsonSyntaxException;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -40,7 +41,12 @@ public class ActivityUtil {
     }
 
     public static <T> T fromJson(String data, Class<T> clazz) {
-        return gson.fromJson(data, clazz);
+        try {
+            return gson.fromJson(data, clazz);
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public static ItemStack[] packEntityEquipment(EntityEquipment eq) {
