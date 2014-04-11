@@ -16,6 +16,7 @@ import jcraft.jblockactivity.config.WorldConfig;
 import jcraft.jblockactivity.extradata.ExtraLoggingTypes.ItemMetaType;
 
 import org.bukkit.FireworkEffect;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
@@ -98,9 +99,7 @@ public class InventoryExtraData implements ExtraData {
                 sContent[i] = item.getTypeId() + "," + item.getDurability() + "," + item.getAmount();
                 if (item.hasItemMeta()) {
                     SimpleItemMeta itemMeta = new SimpleItemMeta(i, item.getItemMeta());
-                    if (itemMeta.hasItemMeta()) {
-                        meta.add(itemMeta);
-                    }
+                    meta.add(itemMeta);
                 }
             }
         }
@@ -231,16 +230,12 @@ public class InventoryExtraData implements ExtraData {
         }
     }
 
-    public enum MetaType {
-        BOOK, ENCHANT_STORAGE, LEATHER, REPAIR, SKULL, MAP, POTION, FIREWORK, FIREWORK_EFFECT;
-    }
-
     public class SimpleItemMeta {
         private final int id;
         private String D1;
         private String[] L1;
         private Map<String, Integer> E1;
-        private MetaType type;
+        private Map<String, Integer> SE1;
         private String T1;
         private String A1;
         private String[] P1;
@@ -251,67 +246,70 @@ public class InventoryExtraData implements ExtraData {
         private SimplePotionEffect[] P2;
         private SimpleFireworkEffect[] E2;
         private Integer P3;
-        private SimpleFireworkEffect E3;
 
         public void setItemMeta(ItemStack item) {
             final ItemMeta meta = item.getItemMeta();
             if (getDisplayName() != null) meta.setDisplayName(getDisplayName());
             if (getLore() != null) meta.setLore(Arrays.asList(getLore()));
-            if (type != null && type != MetaType.ENCHANT_STORAGE) {
-                final Map<Enchantment, Integer> enchants = getEnchants();
-                if (enchants != null) {
-                    for (Entry<Enchantment, Integer> entry : enchants.entrySet()) {
-                        meta.addEnchant(entry.getKey(), entry.getValue(), true);
+            final Map<Enchantment, Integer> enchants = getEnchants();
+            if (enchants != null) {
+                for (Entry<Enchantment, Integer> entry : enchants.entrySet()) {
+                    meta.addEnchant(entry.getKey(), entry.getValue(), true);
+                }
+            }
+            final Repairable repairMeta = (Repairable) meta;
+            if (getRepairCost() != null) repairMeta.setRepairCost(getRepairCost());
+
+            if (item.getType() == Material.WRITTEN_BOOK || item.getType() == Material.BOOK_AND_QUILL) {
+                final BookMeta bookMeta = (BookMeta) meta;
+                if (getBookTitle() != null) bookMeta.setTitle(getBookTitle());
+                if (getBookAuthor() != null) bookMeta.setAuthor(getBookAuthor());
+                if (getBookPages() != null) bookMeta.setPages(getBookPages());
+            }
+            if (item.getType() == Material.ENCHANTED_BOOK) {
+                final EnchantmentStorageMeta enchantStore = (EnchantmentStorageMeta) meta;
+                final Map<Enchantment, Integer> bookEnchants = getStoreEnchants();
+                if (bookEnchants != null) {
+                    for (Entry<Enchantment, Integer> entry : bookEnchants.entrySet()) {
+                        enchantStore.addStoredEnchant(entry.getKey(), entry.getValue(), true);
                     }
                 }
+            }
+            if (item.getType() == Material.LEATHER_HELMET || item.getType() == Material.LEATHER_CHESTPLATE
+                    || item.getType() == Material.LEATHER_LEGGINGS || item.getType() == Material.LEATHER_BOOTS) {
+                final LeatherArmorMeta leatherMeta = (LeatherArmorMeta) meta;
+                if (getLeatherColor() != null) leatherMeta.setColor(org.bukkit.Color.fromRGB(getLeatherColor()));
+            }
+            if (item.getType() == Material.SKULL_ITEM) {
+                final SkullMeta skullMeta = (SkullMeta) meta;
+                if (getSkullOwner() != null) skullMeta.setOwner(getSkullOwner());
+            }
+            if (item.getType() == Material.MAP) {
+                final MapMeta mapMeta = (MapMeta) meta;
+                if (isMapScaling() != null) mapMeta.setScaling(isMapScaling());
+            }
+            if (item.getType() == Material.POTION) {
+                final PotionMeta potMeta = (PotionMeta) meta;
+                if (getPotionEffects() != null) {
+                    for (SimplePotionEffect effect : getPotionEffects()) {
+                        potMeta.addCustomEffect(effect.getPotionEffect(), true);
+                    }
+                }
+            }
+            if (item.getType() == Material.FIREWORK) {
+                final FireworkMeta fireworkMeta = (FireworkMeta) meta;
+                if (getFireworkEffects() != null) {
+                    for (SimpleFireworkEffect effect : getFireworkEffects()) {
+                        fireworkMeta.addEffects(effect.getFireworkEffect());
+                    }
+                }
+                if (getFireworkPower() != null) fireworkMeta.setPower(getFireworkPower());
+            }
+            if (item.getType() == Material.FIREWORK_CHARGE) {
+                final FireworkEffectMeta fireworkMeta = (FireworkEffectMeta) meta;
+                if (getFireworkEffects() != null) fireworkMeta.setEffect(getFireworkEffects()[0].getFireworkEffect());
             }
 
-            if (type != null) {
-                if (type == MetaType.BOOK) {
-                    final BookMeta bookMeta = (BookMeta) meta;
-                    if (getBookTitle() != null) bookMeta.setTitle(getBookTitle());
-                    if (getBookAuthor() != null) bookMeta.setAuthor(getBookAuthor());
-                    if (getBookPages() != null) bookMeta.setPages(getBookPages());
-                } else if (type == MetaType.ENCHANT_STORAGE) {
-                    final EnchantmentStorageMeta enchantStore = (EnchantmentStorageMeta) meta;
-                    final Map<Enchantment, Integer> bookEnchants = getEnchants();
-                    if (bookEnchants != null) {
-                        for (Entry<Enchantment, Integer> entry : bookEnchants.entrySet()) {
-                            enchantStore.addStoredEnchant(entry.getKey(), entry.getValue(), true);
-                        }
-                    }
-                } else if (type == MetaType.LEATHER) {
-                    final LeatherArmorMeta leatherMeta = (LeatherArmorMeta) meta;
-                    if (getLeatherColor() != null) leatherMeta.setColor(org.bukkit.Color.fromRGB(getLeatherColor()));
-                } else if (type == MetaType.REPAIR) {
-                    final Repairable repairMeta = (Repairable) meta;
-                    if (getRepairCost() != null) repairMeta.setRepairCost(getRepairCost());
-                } else if (type == MetaType.SKULL) {
-                    final SkullMeta skullMeta = (SkullMeta) meta;
-                    if (getSkullOwner() != null) skullMeta.setOwner(getSkullOwner());
-                } else if (type == MetaType.MAP) {
-                    final MapMeta mapMeta = (MapMeta) meta;
-                    if (isMapScaling() != null) mapMeta.setScaling(isMapScaling());
-                } else if (type == MetaType.POTION) {
-                    final PotionMeta potMeta = (PotionMeta) meta;
-                    if (getPotionEffects() != null) {
-                        for (SimplePotionEffect effect : getPotionEffects()) {
-                            potMeta.addCustomEffect(effect.getPotionEffect(), true);
-                        }
-                    }
-                } else if (type == MetaType.FIREWORK) {
-                    final FireworkMeta fireworkMeta = (FireworkMeta) meta;
-                    if (getFireworkEffects() != null) {
-                        for (SimpleFireworkEffect effect : getFireworkEffects()) {
-                            fireworkMeta.addEffects(effect.getFireworkEffect());
-                        }
-                    }
-                    if (getFireworkPower() != null) fireworkMeta.setPower(getFireworkPower());
-                } else if (type == MetaType.FIREWORK_EFFECT) {
-                    final FireworkEffectMeta fireworkMeta = (FireworkEffectMeta) meta;
-                    if (getFireworkEffect() != null) fireworkMeta.setEffect(getFireworkEffect().getFireworkEffect());
-                }
-            }
             item.setItemMeta(meta);
         }
 
@@ -327,14 +325,13 @@ public class InventoryExtraData implements ExtraData {
             }
 
             if (meta instanceof BookMeta) {
-                type = MetaType.BOOK;
                 final BookMeta bookMeta = (BookMeta) meta;
                 if (config.isLoggingExtraItemMeta(ItemMetaType.booktitle) && bookMeta.hasTitle()) T1 = bookMeta.getTitle();
                 if (config.isLoggingExtraItemMeta(ItemMetaType.bookauthor) && bookMeta.hasAuthor()) A1 = bookMeta.getAuthor();
                 if (config.isLoggingExtraItemMeta(ItemMetaType.bookpage) && bookMeta.hasPages()) P1 = bookMeta.getPages().toArray(
-                        new String[meta.getLore().size()]);
-            } else if (meta instanceof EnchantmentStorageMeta) {
-                type = MetaType.ENCHANT_STORAGE;
+                        new String[bookMeta.getPages().size()]);
+            }
+            if (meta instanceof EnchantmentStorageMeta) {
                 final EnchantmentStorageMeta enchantStore = (EnchantmentStorageMeta) meta;
                 if (config.isLoggingExtraItemMeta(ItemMetaType.bookenchant) && enchantStore.hasStoredEnchants()) {
                     E1 = new HashMap<String, Integer>();
@@ -342,26 +339,26 @@ public class InventoryExtraData implements ExtraData {
                         E1.put(entry.getKey().getName(), entry.getValue());
                     }
                 }
-            } else if (meta instanceof LeatherArmorMeta) {
-                type = MetaType.LEATHER;
+            }
+            if (meta instanceof LeatherArmorMeta) {
                 final LeatherArmorMeta leatherMeta = (LeatherArmorMeta) meta;
                 if (config.isLoggingExtraItemMeta(ItemMetaType.leathercolor) && leatherMeta.getColor() != null) C1 = leatherMeta.getColor().asRGB();
-            } else if (meta instanceof Repairable) {
+            }
+            if (meta instanceof Repairable) {
                 final Repairable repairMeta = (Repairable) meta;
                 if (config.isLoggingExtraItemMeta(ItemMetaType.repair) && repairMeta.hasRepairCost()) {
-                    type = MetaType.REPAIR; // Special case
-                    C1 = repairMeta.getRepairCost();
+                    R1 = repairMeta.getRepairCost();
                 }
-            } else if (meta instanceof SkullMeta) {
-                type = MetaType.SKULL;
+            }
+            if (meta instanceof SkullMeta) {
                 final SkullMeta skullMeta = (SkullMeta) meta;
                 if (config.isLoggingExtraItemMeta(ItemMetaType.skull) && skullMeta.hasOwner()) O1 = skullMeta.getOwner();
-            } else if (meta instanceof MapMeta) {
-                type = MetaType.MAP;
+            }
+            if (meta instanceof MapMeta) {
                 final MapMeta mapMeta = (MapMeta) meta;
                 if (config.isLoggingExtraItemMeta(ItemMetaType.map)) S1 = mapMeta.isScaling();
-            } else if (meta instanceof PotionMeta) {
-                type = MetaType.POTION;
+            }
+            if (meta instanceof PotionMeta) {
                 final PotionMeta potMeta = (PotionMeta) meta;
                 if (config.isLoggingExtraItemMeta(ItemMetaType.potion) && potMeta.hasCustomEffects()) {
                     P2 = new SimplePotionEffect[potMeta.getCustomEffects().size()];
@@ -369,8 +366,8 @@ public class InventoryExtraData implements ExtraData {
                         P2[i] = new SimplePotionEffect(potMeta.getCustomEffects().get(i));
                     }
                 }
-            } else if (meta instanceof FireworkMeta) {
-                type = MetaType.FIREWORK;
+            }
+            if (meta instanceof FireworkMeta) {
                 final FireworkMeta fireworkMeta = (FireworkMeta) meta;
                 if (config.isLoggingExtraItemMeta(ItemMetaType.firework) && fireworkMeta.hasEffects()) {
                     E2 = new SimpleFireworkEffect[fireworkMeta.getEffects().size()];
@@ -379,24 +376,16 @@ public class InventoryExtraData implements ExtraData {
                     }
                     P3 = fireworkMeta.getPower();
                 }
-            } else if (meta instanceof FireworkEffectMeta) {
-                type = MetaType.FIREWORK_EFFECT;
-                final FireworkEffectMeta fireworkMeta = (FireworkEffectMeta) meta;
-                if (config.isLoggingExtraItemMeta(ItemMetaType.firework) && fireworkMeta.hasEffect()) E3 = new SimpleFireworkEffect(
-                        fireworkMeta.getEffect());
             }
-        }
-
-        public boolean hasItemMeta() {
-            return getType() != null || getDisplayName() != null || getLore() != null || getEnchants() != null;
+            if (meta instanceof FireworkEffectMeta) {
+                final FireworkEffectMeta fireworkMeta = (FireworkEffectMeta) meta;
+                if (config.isLoggingExtraItemMeta(ItemMetaType.firework) && fireworkMeta.hasEffect()) E2 = new SimpleFireworkEffect[] { new SimpleFireworkEffect(
+                        fireworkMeta.getEffect()) };
+            }
         }
 
         public int getId() {
             return id;
-        }
-
-        public MetaType getType() {
-            return type;
         }
 
         public String getDisplayName() {
@@ -413,6 +402,17 @@ public class InventoryExtraData implements ExtraData {
             }
             final Map<Enchantment, Integer> enchants = new HashMap<Enchantment, Integer>();
             for (Entry<String, Integer> entry : E1.entrySet()) {
+                enchants.put(Enchantment.getByName(entry.getKey()), entry.getValue());
+            }
+            return enchants;
+        }
+
+        public Map<Enchantment, Integer> getStoreEnchants() {
+            if (SE1 == null) {
+                return null;
+            }
+            final Map<Enchantment, Integer> enchants = new HashMap<Enchantment, Integer>();
+            for (Entry<String, Integer> entry : SE1.entrySet()) {
                 enchants.put(Enchantment.getByName(entry.getKey()), entry.getValue());
             }
             return enchants;
@@ -458,18 +458,14 @@ public class InventoryExtraData implements ExtraData {
             return P3;
         }
 
-        public SimpleFireworkEffect getFireworkEffect() {
-            return E3;
-        }
-
     }
 
     public class SimpleFireworkEffect {
-        private final boolean flicker;
-        private final boolean trail;
+        private final Boolean flicker;
+        private final Boolean trail;
         private final Integer[] colors;
         private final Integer[] fadeColors;
-        private final org.bukkit.FireworkEffect.Type type;
+        private final String type;
 
         public SimpleFireworkEffect(FireworkEffect effect) {
             flicker = effect.hasFlicker();
@@ -482,7 +478,7 @@ public class InventoryExtraData implements ExtraData {
             for (int i = 0; i < effect.getFadeColors().size(); i++) {
                 fadeColors[i] = effect.getFadeColors().get(i).asRGB();
             }
-            type = effect.getType();
+            type = effect.getType().name();
         }
 
         public boolean hasFlicker() {
@@ -518,25 +514,25 @@ public class InventoryExtraData implements ExtraData {
         }
 
         public org.bukkit.FireworkEffect.Type getType() {
-            return type;
+            return org.bukkit.FireworkEffect.Type.valueOf(type);
         }
 
         public FireworkEffect getFireworkEffect() {
-            return FireworkEffect.builder().flicker(flicker).trail(trail).withColor(getBukkitColors()).withFade(getBukkitFadeColors()).with(type)
-                    .build();
+            return FireworkEffect.builder().flicker(flicker).trail(trail).withColor(getBukkitColors()).withFade(getBukkitFadeColors())
+                    .with(getType()).build();
         }
     }
 
     public class SimplePotionEffect {
-        private final int amplifier;
-        private final int duration;
-        private final PotionEffectType type;
-        private final boolean ambient;
+        private final Integer amplifier;
+        private final Integer duration;
+        private final String type;
+        private final Boolean ambient;
 
         public SimplePotionEffect(PotionEffect effect) {
             amplifier = effect.getAmplifier();
             duration = effect.getDuration();
-            type = effect.getType();
+            type = effect.getType().getName();
             ambient = effect.isAmbient();
         }
 
@@ -549,7 +545,7 @@ public class InventoryExtraData implements ExtraData {
         }
 
         public PotionEffectType getType() {
-            return type;
+            return PotionEffectType.getByName(type);
         }
 
         public boolean isAmbient() {
@@ -557,7 +553,7 @@ public class InventoryExtraData implements ExtraData {
         }
 
         public PotionEffect getPotionEffect() {
-            return new PotionEffect(type, duration, amplifier, ambient);
+            return new PotionEffect(getType(), duration, amplifier, ambient);
         }
     }
 
