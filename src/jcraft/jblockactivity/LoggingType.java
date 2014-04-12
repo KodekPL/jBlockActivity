@@ -30,4 +30,5 @@ public enum LoggingType {
         }
         return null;
     }
+
 }

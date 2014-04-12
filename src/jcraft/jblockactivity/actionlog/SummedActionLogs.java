@@ -15,6 +15,7 @@ import org.bukkit.Location;
 public class SummedActionLogs {
 
     public static class SummedBlockActionLogs implements LookupCache {
+
         private final String group;
         private final int created, destroyed;
         private final float spaceFactor;
@@ -41,9 +42,11 @@ public class SummedActionLogs {
         public ActionLog getActionLog() {
             return null;
         }
+
     }
 
     public static class SummedEntityActionLogs implements LookupCache {
+
         private final String group;
         private final int kills;
         private final float spaceFactor;
@@ -68,6 +71,7 @@ public class SummedActionLogs {
         public ActionLog getActionLog() {
             return null;
         }
+
     }
 
 }

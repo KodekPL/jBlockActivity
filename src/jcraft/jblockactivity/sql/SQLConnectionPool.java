@@ -27,6 +27,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class SQLConnectionPool implements Closeable {
+
     private final static int poolSize = 10;
     private final static long timeToLive = 300000;
     private final Vector<JDCConnection> connections;
@@ -422,4 +423,5 @@ public class SQLConnectionPool implements Closeable {
             }
         }
     }
+
 }

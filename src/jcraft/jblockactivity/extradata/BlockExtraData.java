@@ -16,6 +16,7 @@ public abstract class BlockExtraData implements ExtraData {
     public abstract String getData();
 
     public static class CommandBlockExtraData extends BlockExtraData {
+
         private final String cmd, name;
 
         public CommandBlockExtraData(String name, String cmd) {
@@ -35,10 +36,12 @@ public abstract class BlockExtraData implements ExtraData {
         public String getData() {
             return toJson(this);
         }
+
     }
 
     @Deprecated
     public static class FlowerPotExtraData extends BlockExtraData { // https://bukkit.atlassian.net/browse/BUKKIT-5316
+
         private final Integer itemId;
         private final Byte itemData;
 
@@ -63,9 +66,11 @@ public abstract class BlockExtraData implements ExtraData {
         public String getData() {
             return toJson(this);
         }
+
     }
 
     public static class MobSpawnerExtraData extends BlockExtraData { // Only naturally generated Mob Spawners
+
         private final EntityType entityType;
 
         public MobSpawnerExtraData(EntityType entityType) {
@@ -80,9 +85,11 @@ public abstract class BlockExtraData implements ExtraData {
         public String getData() {
             return toJson(this);
         }
+
     }
 
     public static class SignExtraData extends BlockExtraData {
+
         private String[] text;
 
         public SignExtraData(String[] text) {
@@ -99,9 +106,11 @@ public abstract class BlockExtraData implements ExtraData {
         public String getData() {
             return toJson(this);
         }
+
     }
 
     public static class SkullExtraData extends BlockExtraData {
+
         private final BlockFace rotation;
         private final String name;
         private final SkullType skullType;
@@ -128,6 +137,7 @@ public abstract class BlockExtraData implements ExtraData {
         public String getData() {
             return toJson(this);
         }
+
     }
 
     public static BlockExtraData getExtraData(BlockState state) {
@@ -147,4 +157,5 @@ public abstract class BlockExtraData implements ExtraData {
             return null;
         }
     }
+
 }

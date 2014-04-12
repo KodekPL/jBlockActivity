@@ -33,7 +33,7 @@ public class HangingListener implements Listener {
             return;
         }
 
-        final String playerName = event.getPlayer().getName();
+        final String playerName = event.getPlayer().getName(); // TODO: Use player UUID instead of name
         final int entityType = event.getEntity().getType().getTypeId();
         if (!config.loggingHangings.contains(entityType)) {
             return;
@@ -226,4 +226,5 @@ public class HangingListener implements Listener {
             }
         }
     }
+
 }

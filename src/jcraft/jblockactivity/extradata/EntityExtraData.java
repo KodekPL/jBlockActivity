@@ -34,6 +34,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
 public abstract class EntityExtraData implements ExtraData {
+
     private String customName;
     private Boolean customNameVisible;
     private Boolean canPickupItems;
@@ -94,6 +95,7 @@ public abstract class EntityExtraData implements ExtraData {
     }
 
     public static class UnknownExtraData extends EntityExtraData {
+
         public UnknownExtraData(WorldConfig config, Entity entity) {
             super(config, entity);
         }
@@ -102,9 +104,11 @@ public abstract class EntityExtraData implements ExtraData {
         public String getData() {
             return toJson(this);
         }
+
     }
 
     public static class SkeletonExtraData extends EntityExtraData {
+
         private SkeletonType type;
 
         public SkeletonExtraData(WorldConfig config, Skeleton entity) {
@@ -121,9 +125,11 @@ public abstract class EntityExtraData implements ExtraData {
         public String getData() {
             return toJson(this);
         }
+
     }
 
     public static class ZombieExtraData extends EntityExtraData {
+
         private Boolean isBaby;
         private Boolean isVillager;
 
@@ -145,9 +151,11 @@ public abstract class EntityExtraData implements ExtraData {
         public String getData() {
             return toJson(this);
         }
+
     }
 
     public static class MagmaCubeExtraData extends EntityExtraData {
+
         private Integer size;
 
         public MagmaCubeExtraData(WorldConfig config, MagmaCube entity) {
@@ -163,9 +171,11 @@ public abstract class EntityExtraData implements ExtraData {
         public String getData() {
             return toJson(this);
         }
+
     }
 
     public static class SlimeExtraData extends EntityExtraData {
+
         private Integer size;
 
         public SlimeExtraData(WorldConfig config, Slime entity) {
@@ -181,9 +191,11 @@ public abstract class EntityExtraData implements ExtraData {
         public String getData() {
             return toJson(this);
         }
+
     }
 
     public static class CreeperExtraData extends EntityExtraData {
+
         private Boolean isPowered;
 
         public CreeperExtraData(WorldConfig config, Creeper entity) {
@@ -199,9 +211,11 @@ public abstract class EntityExtraData implements ExtraData {
         public String getData() {
             return toJson(this);
         }
+
     }
 
     public static class EndermanExtraData extends EntityExtraData {
+
         private Integer blockId;
         private Byte blockData;
 
@@ -238,9 +252,11 @@ public abstract class EntityExtraData implements ExtraData {
         public String getData() {
             return toJson(this);
         }
+
     }
 
     public static class IronGolemExtraData extends EntityExtraData {
+
         private Boolean isPlayerCreated;
 
         public IronGolemExtraData(WorldConfig config, IronGolem entity) {
@@ -256,9 +272,11 @@ public abstract class EntityExtraData implements ExtraData {
         public String getData() {
             return toJson(this);
         }
+
     }
 
     public static class AgeableExtraData extends EntityExtraData {
+
         private Integer age;
         private Boolean ageLock;
         private Boolean isAdult;
@@ -286,9 +304,11 @@ public abstract class EntityExtraData implements ExtraData {
         public String getData() {
             return toJson(this);
         }
+
     }
 
     public static class VillagerExtraData extends AgeableExtraData {
+
         private Profession profession;
 
         public VillagerExtraData(WorldConfig config, Villager entity) {
@@ -305,9 +325,12 @@ public abstract class EntityExtraData implements ExtraData {
         public String getData() {
             return toJson(this);
         }
+
     }
 
+    // TODO: Save player UUID instead of name
     public static class HorseExtraData extends AgeableExtraData {
+
         private Boolean isTamed;
         private String owner;
         private org.bukkit.entity.Horse.Variant variant;
@@ -404,9 +427,12 @@ public abstract class EntityExtraData implements ExtraData {
         public String getData() {
             return toJson(this);
         }
+
     }
 
+    // TODO: Save player UUID instead of name
     public static class WolfExtraData extends AgeableExtraData {
+
         private Boolean isTamed;
         private String owner;
         private Boolean isSitting;
@@ -441,9 +467,12 @@ public abstract class EntityExtraData implements ExtraData {
         public String getData() {
             return toJson(this);
         }
+
     }
 
+    // TODO: Save player UUID instead of name
     public static class OcelotExtraData extends AgeableExtraData {
+
         private Boolean isTamed;
         private String owner;
         private Boolean isSitting;
@@ -478,9 +507,11 @@ public abstract class EntityExtraData implements ExtraData {
         public String getData() {
             return toJson(this);
         }
+
     }
 
     public static class PigExtraData extends AgeableExtraData {
+
         private Boolean saddle;
 
         public PigExtraData(WorldConfig config, Pig entity) {
@@ -496,9 +527,11 @@ public abstract class EntityExtraData implements ExtraData {
         public String getData() {
             return toJson(this);
         }
+
     }
 
     public static class SheepExtraData extends AgeableExtraData {
+
         private DyeColor color;
         private Boolean sheared;
 
@@ -520,9 +553,11 @@ public abstract class EntityExtraData implements ExtraData {
         public String getData() {
             return toJson(this);
         }
+
     }
 
     public static class PaintingExtraData extends EntityExtraData {
+
         private final Art art;
 
         public PaintingExtraData(WorldConfig config, Painting entity) {
@@ -538,6 +573,7 @@ public abstract class EntityExtraData implements ExtraData {
         public String getData() {
             return toJson(this);
         }
+
     }
 
     public static EntityExtraData getExtraData(Entity entity) {
@@ -575,4 +611,5 @@ public abstract class EntityExtraData implements ExtraData {
             return null;
         }
     }
+
 }

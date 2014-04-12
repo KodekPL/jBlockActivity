@@ -282,7 +282,7 @@ public class BlockBreakListener implements Listener {
                     .toVector(), fallingBlock.getState(), null, null);
             BlockActivity.sendActionLog(action);
 
-            // Potancjalna pozycja upadku bloku (eksplozje mogą wpływać na pozycję)
+            // The potential postion of the block after fall (explosions can affect position)
             int x = block.getX();
             int y = block.getY();
             int z = block.getZ();
@@ -332,4 +332,5 @@ public class BlockBreakListener implements Listener {
                 block.getState(), null, null);
         BlockActivity.sendActionLog(action);
     }
+
 }

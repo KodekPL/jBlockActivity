@@ -10,16 +10,7 @@ public class ActionExecuteThread implements Runnable {
 
     private final CommandHandler cmdHandler;
     private final static LinkedBlockingQueue<ActionRequest> queue = new LinkedBlockingQueue<ActionRequest>();
-
-    public static void addRequest(ActionRequest request) {
-        queue.add(request);
-    }
-
     private boolean running = true;
-
-    public void terminate() {
-        running = false;
-    }
 
     public ActionExecuteThread(CommandHandler cmdHandler) {
         this.cmdHandler = cmdHandler;
@@ -45,7 +36,16 @@ public class ActionExecuteThread implements Runnable {
         }
     }
 
+    public static void addRequest(ActionRequest request) {
+        queue.add(request);
+    }
+
+    public void terminate() {
+        running = false;
+    }
+
     public static class ActionRequest {
+
         public enum ActionType {
             CMD_LOOKUP, CMD_CLEARLOG, CMD_ROLLBACK, CMD_REDO, CMD_CONFIRM;
         }
@@ -103,6 +103,7 @@ public class ActionExecuteThread implements Runnable {
             }
             return params;
         }
+
     }
 
 }

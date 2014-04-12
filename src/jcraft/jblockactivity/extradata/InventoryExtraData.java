@@ -231,6 +231,7 @@ public class InventoryExtraData implements ExtraData {
     }
 
     public class SimpleItemMeta {
+
         private final int id;
         private String D1;
         private String[] L1;
@@ -461,6 +462,7 @@ public class InventoryExtraData implements ExtraData {
     }
 
     public class SimpleFireworkEffect {
+
         private final Boolean flicker;
         private final Boolean trail;
         private final Integer[] colors;
@@ -521,9 +523,11 @@ public class InventoryExtraData implements ExtraData {
             return FireworkEffect.builder().flicker(flicker).trail(trail).withColor(getBukkitColors()).withFade(getBukkitFadeColors())
                     .with(getType()).build();
         }
+
     }
 
     public class SimplePotionEffect {
+
         private final Integer amplifier;
         private final Integer duration;
         private final String type;
@@ -555,6 +559,7 @@ public class InventoryExtraData implements ExtraData {
         public PotionEffect getPotionEffect() {
             return new PotionEffect(getType(), duration, amplifier, ambient);
         }
+
     }
 
 }

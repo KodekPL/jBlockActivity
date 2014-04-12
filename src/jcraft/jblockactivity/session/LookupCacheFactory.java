@@ -11,6 +11,7 @@ import jcraft.jblockactivity.utils.QueryParams;
 import jcraft.jblockactivity.utils.QueryParams.SummarizationMode;
 
 public class LookupCacheFactory {
+
     private final QueryParams params;
     private final float spaceFactor;
 
@@ -42,4 +43,5 @@ public class LookupCacheFactory {
             return new SummedActionLogs.SummedEntityActionLogs(result, params, spaceFactor);
         }
     }
+
 }

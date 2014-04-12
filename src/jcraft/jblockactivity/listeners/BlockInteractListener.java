@@ -48,6 +48,6 @@ public class BlockInteractListener implements Listener {
                     typeId, data, typeId, data, null);
             BlockActivity.sendActionLog(action);
         }
-
     }
+
 }

@@ -44,7 +44,7 @@ public class ActivityConfig {
     public int linesPerPage;
     public long toolUseCooldown;
 
-    public Set<String> hiddenPlayers;
+    public Set<String> hiddenPlayers; // TODO: Save player UUID instead of name
     public boolean askRollbacks, askRedos, askClearlogs;
     public boolean callActionLogQueueEvent;
 
@@ -203,4 +203,5 @@ public class ActivityConfig {
         }
         return str;
     }
+
 }

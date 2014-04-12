@@ -34,6 +34,7 @@ public class BlockActionLog extends ActionLog implements LookupCache {
     private int newBlockId, oldBlockId;
     private byte newBlockData, oldBlockData;
 
+    // TODO: Use player UUID instead of name
     public BlockActionLog(LoggingType type, String playerName, World world, Vector location, BlockState oldState, BlockState newState,
             ExtraData extraData) {
         super(type, playerName, world, location, extraData);
@@ -86,6 +87,11 @@ public class BlockActionLog extends ActionLog implements LookupCache {
 
     public byte getOldBlockData() {
         return oldBlockData;
+    }
+
+    @Override
+    public ActionLog getActionLog() {
+        return this;
     }
 
     @Override
@@ -256,11 +262,6 @@ public class BlockActionLog extends ActionLog implements LookupCache {
         }
 
         return msg.toString();
-    }
-
-    @Override
-    public ActionLog getActionLog() {
-        return this;
     }
 
     public static BlockActionLog getBlockActionLog(ResultSet result, QueryParams params) throws SQLException {

@@ -1,6 +1,7 @@
 package jcraft.jblockactivity.sql;
 
 public class SQLProfile {
+
     private final String user;
     private final String database;
     private final String password;

@@ -181,6 +181,6 @@ public class BlockChange extends BlockActionLog {
         } else {
             return BlockEditorResult.NO_BLOCK_ACTION;
         }
-
     }
+
 }

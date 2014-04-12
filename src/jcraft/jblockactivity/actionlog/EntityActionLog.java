@@ -34,6 +34,7 @@ public class EntityActionLog extends ActionLog implements LookupCache {
 
     private int entityId, entityData;
 
+    // TODO: Use player UUID instead of name
     public EntityActionLog(LoggingType type, String playerName, World world, Vector location, int entityId, int dataId, ExtraData extraData) {
         super(type, playerName, world, location, extraData);
         this.entityId = entityId;

@@ -696,4 +696,5 @@ public class CommandHandler implements CommandExecutor {
         }
         session.setQuestion(null);
     }
+
 }

@@ -40,7 +40,7 @@ public class BlockPlaceListener implements Listener {
         final Material material = block.getType();
         final BlockState beforeState = event.getBlockReplacedState();
         final BlockState afterState = event.getBlockPlaced().getState();
-        final String playerName = event.getPlayer().getName();
+        final String playerName = event.getPlayer().getName(); // TODO: Use player UUID instead of name
 
         if (BlockActivity.isHidden(playerName)) {
             return;
@@ -105,7 +105,7 @@ public class BlockPlaceListener implements Listener {
         final Material material = block.getType();
         final BlockState beforeState = event.getBlockReplacedState();
         final BlockState afterState = event.getBlockPlaced().getState();
-        final String playerName = event.getPlayer().getName();
+        final String playerName = event.getPlayer().getName(); // TODO: Use player UUID instead of name
 
         BlockExtraData extraData = null;
         if (afterState.getType() == Material.SKULL) {
@@ -153,7 +153,7 @@ public class BlockPlaceListener implements Listener {
         if (config == null || !config.isLogging(LoggingType.blockplace)) {
             return;
         }
-        final String playerName = event.getPlayer().getName();
+        final String playerName = event.getPlayer().getName(); // TODO: Use player UUID instead of name
 
         if (BlockActivity.isHidden(playerName)) {
             return;
@@ -180,7 +180,7 @@ public class BlockPlaceListener implements Listener {
         if (!config.isLoggingExtraBlockMeta(BlockMetaType.signtext)) {
             return;
         }
-        final String playerName = event.getPlayer().getName();
+        final String playerName = event.getPlayer().getName(); // TODO: Use player UUID instead of name
 
         if (BlockActivity.isHidden(playerName)) {
             return;

@@ -58,7 +58,7 @@ public class BlockActivity extends JavaPlugin {
 
     public static LogTool logItemTool;
     public static LogTool logBlockTool;
-    public final static Map<String, Long> lastToolUse = new HashMap<String, Long>();
+    public final static Map<String, Long> lastToolUse = new HashMap<String, Long>(); // TODO: Save player UUID instead of name
 
     public static BlockActivity getBlockActivity() {
         return blockActivity;

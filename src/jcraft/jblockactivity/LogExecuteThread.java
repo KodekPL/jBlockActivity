@@ -119,4 +119,5 @@ public class LogExecuteThread implements Runnable {
         rs.close();
         return BlockActivity.playerIds.containsKey(playerName);
     }
+
 }

@@ -9,6 +9,7 @@ import jcraft.jblockactivity.utils.question.QuestionData;
 import org.bukkit.command.CommandSender;
 
 public class ActiveSession {
+
     private static final Map<String, ActiveSession> sessions = new HashMap<String, ActiveSession>();
 
     private QueryParams lastParams = null;
@@ -59,4 +60,5 @@ public class ActiveSession {
         }
         return session;
     }
+
 }

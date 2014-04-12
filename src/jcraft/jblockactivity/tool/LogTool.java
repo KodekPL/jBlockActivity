@@ -10,6 +10,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
 public class LogTool {
+
     private final ToolBehavior leftClickBehavior, rightClickBehavior;
     private final MaterialData itemMaterial;
     private final QueryParams params;
@@ -54,4 +55,5 @@ public class LogTool {
     public static enum ToolBehavior {
         TOOL, BLOCK, NONE;
     }
+
 }

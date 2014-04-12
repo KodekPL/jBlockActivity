@@ -22,6 +22,7 @@ public abstract class ActionLog {
     private Vector location;
     private ExtraData extraData;
 
+    // TODO: Use player UUID instead of name
     protected ActionLog(LoggingType type, String playerName, World world, Vector location, ExtraData extraData) {
         this.time = System.currentTimeMillis() / 1000;
         this.type = type;

@@ -7,6 +7,7 @@ import jcraft.jblockactivity.utils.MaterialNames;
 import org.bukkit.Location;
 
 public class BlockEditorException extends Exception implements LookupCache {
+
     private static final long serialVersionUID = 2182077864822995737L;
     private final Location location;
 
