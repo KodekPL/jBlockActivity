@@ -34,7 +34,7 @@ public class InventoryAccessListener implements Listener {
         if (config == null || !config.isLogging(LoggingType.inventoryaccess)) {
             return;
         }
-        if (BlockActivity.isHidden(event.getPlayer().getName())) {
+        if (BlockActivity.isHidden(event.getPlayer().getUniqueId())) {
             return;
         }
         final InventoryHolder holder = event.getInventory().getHolder();
@@ -61,7 +61,7 @@ public class InventoryAccessListener implements Listener {
         if (config == null || !config.isLogging(LoggingType.inventoryaccess)) {
             return;
         }
-        if (BlockActivity.isHidden(event.getPlayer().getName())) {
+        if (BlockActivity.isHidden(event.getPlayer().getUniqueId())) {
             return;
         }
         if (event.getInventory() != null) {

@@ -78,7 +78,7 @@ public class CommandHandler implements CommandExecutor {
                         return false;
                     }
 
-                    if (BlockActivity.hidePlayer(sender.getName())) {
+                    if (BlockActivity.hidePlayer(((Player) sender).getUniqueId().toString())) {
                         sender.sendMessage(BlockActivity.prefix + ChatColor.GREEN + "You are now hidden and aren't logged.");
                     } else {
                         sender.sendMessage(BlockActivity.prefix + ChatColor.GREEN + "You aren't hidden anylonger.");

@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 
 import jcraft.jblockactivity.BlockActivity;
 import jcraft.jblockactivity.LoggingType;
@@ -44,7 +45,7 @@ public class ActivityConfig {
     public int linesPerPage;
     public long toolUseCooldown;
 
-    public Set<String> hiddenPlayers; // TODO: Save player UUID instead of name
+    public Set<String> hiddenPlayers;
     public boolean askRollbacks, askRedos, askClearlogs;
     public boolean callActionLogQueueEvent;
 
@@ -154,8 +155,8 @@ public class ActivityConfig {
         }
 
         hiddenPlayers = new HashSet<String>();
-        for (final String playerName : CONFIG.getStringList("logging.hiddenPlayers")) {
-            hiddenPlayers.add(playerName.trim());
+        for (final String name : CONFIG.getStringList("logging.hiddenPlayers")) {
+            hiddenPlayers.add(name.trim());
         }
 
         askRollbacks = CONFIG.getBoolean("questioner.askRollbacks");

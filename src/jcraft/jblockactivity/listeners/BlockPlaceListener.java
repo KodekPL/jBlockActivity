@@ -5,6 +5,9 @@ import static jcraft.jblockactivity.utils.ActivityUtil.isFallingBlock;
 import static jcraft.jblockactivity.utils.ActivityUtil.isFallingBlockKiller;
 import static jcraft.jblockactivity.utils.ActivityUtil.turnFace;
 import static jcraft.jblockactivity.utils.ActivityUtil.yawToFace;
+
+import java.util.UUID;
+
 import jcraft.jblockactivity.BlockActivity;
 import jcraft.jblockactivity.LoggingType;
 import jcraft.jblockactivity.actionlog.BlockActionLog;
@@ -40,9 +43,10 @@ public class BlockPlaceListener implements Listener {
         final Material material = block.getType();
         final BlockState beforeState = event.getBlockReplacedState();
         final BlockState afterState = event.getBlockPlaced().getState();
-        final String playerName = event.getPlayer().getName(); // TODO: Use player UUID instead of name
+        final UUID playerUUID = event.getPlayer().getUniqueId();
+        final String playerName = event.getPlayer().getName();
 
-        if (BlockActivity.isHidden(playerName)) {
+        if (BlockActivity.isHidden(playerUUID)) {
             return;
         }
 
@@ -153,9 +157,10 @@ public class BlockPlaceListener implements Listener {
         if (config == null || !config.isLogging(LoggingType.blockplace)) {
             return;
         }
-        final String playerName = event.getPlayer().getName(); // TODO: Use player UUID instead of name
+        final UUID playerUUID = event.getPlayer().getUniqueId();
+        final String playerName = event.getPlayer().getName();
 
-        if (BlockActivity.isHidden(playerName)) {
+        if (BlockActivity.isHidden(playerUUID)) {
             return;
         }
 
@@ -180,9 +185,10 @@ public class BlockPlaceListener implements Listener {
         if (!config.isLoggingExtraBlockMeta(BlockMetaType.signtext)) {
             return;
         }
-        final String playerName = event.getPlayer().getName(); // TODO: Use player UUID instead of name
+        final UUID playerUUID = event.getPlayer().getUniqueId();
+        final String playerName = event.getPlayer().getName();
 
-        if (BlockActivity.isHidden(playerName)) {
+        if (BlockActivity.isHidden(playerUUID)) {
             return;
         }
 

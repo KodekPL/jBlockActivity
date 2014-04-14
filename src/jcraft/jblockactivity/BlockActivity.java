@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import jcraft.jblockactivity.actionlog.ActionLog;
@@ -288,16 +289,20 @@ public class BlockActivity extends JavaPlugin {
         return null;
     }
 
-    public static boolean isHidden(String playerName) {
-        return config.hiddenPlayers.contains(playerName);
+    public static boolean isHidden(UUID uuid) {
+        return isHidden(uuid.toString());
     }
 
-    public static boolean hidePlayer(String playerName) {
-        if (config.hiddenPlayers.contains(playerName)) {
-            config.hiddenPlayers.remove(playerName);
+    public static boolean isHidden(String name) {
+        return config.hiddenPlayers.contains(name);
+    }
+
+    public static boolean hidePlayer(String name) {
+        if (config.hiddenPlayers.contains(name)) {
+            config.hiddenPlayers.remove(name);
             return false;
         }
-        config.hiddenPlayers.add(playerName);
+        config.hiddenPlayers.add(name);
         return true;
     }
 

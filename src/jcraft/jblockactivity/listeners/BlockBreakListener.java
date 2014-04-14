@@ -8,6 +8,7 @@ import static jcraft.jblockactivity.utils.ActivityUtil.isFallingBlockKiller;
 import static jcraft.jblockactivity.utils.ActivityUtil.isRelativeTopBreakableBlock;
 
 import java.util.List;
+import java.util.UUID;
 
 import jcraft.jblockactivity.BlockActivity;
 import jcraft.jblockactivity.LoggingType;
@@ -54,9 +55,10 @@ public class BlockBreakListener implements Listener {
         }
         final Block block = event.getBlock();
         final Material material = block.getType();
+        final UUID playerUUID = event.getPlayer().getUniqueId();
         final String playerName = event.getPlayer().getName();
 
-        if (BlockActivity.isHidden(playerName)) {
+        if (BlockActivity.isHidden(playerUUID)) {
             return;
         }
 
@@ -322,9 +324,10 @@ public class BlockBreakListener implements Listener {
         if (config == null || !config.isLogging(LoggingType.blockbreak)) {
             return;
         }
+        final UUID playerUUID = event.getPlayer().getUniqueId();
         final String playerName = event.getPlayer().getName();
 
-        if (BlockActivity.isHidden(playerName)) {
+        if (BlockActivity.isHidden(playerUUID)) {
             return;
         }
 

@@ -140,11 +140,11 @@ public class ActivityUtil {
     public static String getEntityName(Entity remover) {
         final String name;
         if (remover instanceof Player) {
-            name = ((Player) remover).getName();
+            name = ((Player) remover).getUniqueId().toString();
         } else if (remover instanceof Projectile && ((Projectile) remover).getShooter() != null) {
             final LivingEntity shooter = ((Projectile) remover).getShooter();
             if (shooter instanceof Player) {
-                name = ((Player) shooter).getName();
+                name = ((Player) shooter).getUniqueId().toString();
             } else {
                 name = "BA_" + shooter.getType().name().replace('_', ' ').toUpperCase();
             }

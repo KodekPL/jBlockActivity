@@ -1,6 +1,9 @@
 package jcraft.jblockactivity.listeners;
 
 import static jcraft.jblockactivity.utils.ActivityUtil.getEntityName;
+
+import java.util.UUID;
+
 import jcraft.jblockactivity.BlockActivity;
 import jcraft.jblockactivity.LoggingType;
 import jcraft.jblockactivity.actionlog.EntityActionLog;
@@ -33,13 +36,14 @@ public class HangingListener implements Listener {
             return;
         }
 
-        final String playerName = event.getPlayer().getName(); // TODO: Use player UUID instead of name
+        final UUID playerUUID = event.getPlayer().getUniqueId();
+        final String playerName = event.getPlayer().getName();
         final int entityType = event.getEntity().getType().getTypeId();
         if (!config.loggingHangings.contains(entityType)) {
             return;
         }
 
-        if (BlockActivity.isHidden(playerName)) {
+        if (BlockActivity.isHidden(playerUUID)) {
             return;
         }
 

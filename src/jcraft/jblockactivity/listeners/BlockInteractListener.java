@@ -29,7 +29,7 @@ public class BlockInteractListener implements Listener {
 
         final Player player = event.getPlayer();
 
-        if (BlockActivity.isHidden(player.getName())) {
+        if (BlockActivity.isHidden(player.getUniqueId())) {
             return;
         }
 
