@@ -52,7 +52,7 @@ public class ActivityConfig {
     public void genConfig() {
         final Map<String, Object> configDef = new LinkedHashMap<String, Object>();
 
-        configDef.put("configVersion", 1);
+        configDef.put("configVersion", BlockActivity.LATEST_VERSION);
         configDef.put("autoUpdateTables", true);
 
         configDef.put("mysql.host", "127.0.0.1");
@@ -169,7 +169,7 @@ public class ActivityConfig {
     public void checkConfigVersion() {
         if (CONFIG.getBoolean("autoUpdateTables")) {
             final int version = CONFIG.getInt("configVersion");
-            new SQLUpdater(version);
+            new Thread(new SQLUpdater(version)).start();
         }
     }
 
