@@ -37,7 +37,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class BlockActivity extends JavaPlugin {
 
-    public final static int LATEST_VERSION = 1;
+    public final static int LATEST_VERSION = 2;
 
     public static File dataFolder;
     public final static String prefix = ChatColor.GOLD + "[" + ChatColor.WHITE + "jBlockActivity" + ChatColor.GOLD + "] " + ChatColor.WHITE;
@@ -61,7 +61,7 @@ public class BlockActivity extends JavaPlugin {
 
     public static LogTool logItemTool;
     public static LogTool logBlockTool;
-    public final static Map<String, Long> lastToolUse = new HashMap<String, Long>(); // TODO: Save player UUID instead of name
+    public final static Map<String, Long> lastToolUse = new HashMap<String, Long>();
 
     public static BlockActivity getBlockActivity() {
         return blockActivity;
@@ -103,6 +103,7 @@ public class BlockActivity extends JavaPlugin {
         }
 
         config.loadWorldConfig();
+        config.checkConfigVersion();
 
         cmdHandler = new CommandHandler();
         getCommand("ba").setExecutor(cmdHandler);
@@ -178,7 +179,7 @@ public class BlockActivity extends JavaPlugin {
             throw new SQLException("No connection!");
         }
         final Statement state = connection.createStatement();
-        state.executeUpdate("CREATE TABLE IF NOT EXISTS `ba-players` (playerid MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT, playername varchar(32) NOT NULL, primary key (playerid), UNIQUE (playername))");
+        state.executeUpdate("CREATE TABLE IF NOT EXISTS `ba-players` (playerid MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT, playername varchar(32) NOT NULL, uuid varchar(32), primary key (playerid), UNIQUE (playername), UNIQUE (uuid));");
         state.close();
         connection.close();
     }

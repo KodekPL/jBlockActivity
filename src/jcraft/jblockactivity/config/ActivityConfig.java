@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.UUID;
 
 import jcraft.jblockactivity.BlockActivity;
 import jcraft.jblockactivity.LoggingType;
@@ -113,7 +112,6 @@ public class ActivityConfig {
 
     public void loadConfig() {
         genConfig();
-        checkConfigVersion();
 
         sqlHost = getStringIncludingInts("mysql.host");
         sqlPort = getStringIncludingInts("mysql.port");
@@ -169,7 +167,7 @@ public class ActivityConfig {
     public void checkConfigVersion() {
         if (CONFIG.getBoolean("autoUpdateTables")) {
             final int version = CONFIG.getInt("configVersion");
-            new Thread(new SQLUpdater(version)).start();
+            new Thread(new SQLUpdater(version), "jBA-Updater").start();
         }
     }
 
