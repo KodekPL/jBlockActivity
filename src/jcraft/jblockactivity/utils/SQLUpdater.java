@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 
 import jcraft.jblockactivity.BlockActivity;
@@ -73,12 +74,13 @@ public class SQLUpdater implements Runnable {
                                             + profile.getId() + ").");
                     playerIds.remove(profile.getName());
                 }
-                connection.commit();
 
-                for (String name : playerIds.keySet()) {
-                    getLogger().log(Level.WARNING, "[jBlockActivity] Could not find UUID for player " + name + ".");
+                for (Entry<String, Integer> entry : playerIds.entrySet()) {
+                    state3.executeUpdate("UPDATE `ba-players` SET `uuid` = '" + entry.getKey() + "' WHERE `playerid` = " + entry.getValue());
+                    getLogger().log(Level.WARNING, "[jBlockActivity] Could not find UUID for player " + entry.getKey() + ".");
                 }
 
+                connection.commit();
                 state3.close();
                 connection.close();
 
