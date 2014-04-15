@@ -26,6 +26,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
+import org.bukkit.entity.TNTPrimed;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -47,6 +48,14 @@ public class ActivityUtil {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public static String fixUUID(String uuid) {
+        if (uuid.length() != 32) {
+            return uuid;
+        }
+        return uuid.substring(0, 8) + "-" + uuid.substring(8, 12) + "-" + uuid.substring(12, 16) + "-" + uuid.substring(16, 20) + "-"
+                + uuid.substring(20, 32);
     }
 
     public static ItemStack[] packEntityEquipment(EntityEquipment eq) {
@@ -137,19 +146,33 @@ public class ActivityUtil {
         return item1.getType() == item2.getType() && item2.getDurability() == item2.getDurability();
     }
 
-    public static String getEntityName(Entity remover) {
+    public static String getEntityName(Entity entity) {
         final String name;
-        if (remover instanceof Player) {
-            name = ((Player) remover).getUniqueId().toString();
-        } else if (remover instanceof Projectile && ((Projectile) remover).getShooter() != null) {
-            final LivingEntity shooter = ((Projectile) remover).getShooter();
+        if (entity instanceof Player) {
+            name = ((Player) entity).getUniqueId().toString();
+        } else if (entity instanceof Projectile && ((Projectile) entity).getShooter() != null) {
+            final LivingEntity shooter = ((Projectile) entity).getShooter();
             if (shooter instanceof Player) {
                 name = ((Player) shooter).getUniqueId().toString();
             } else {
                 name = "BA_" + shooter.getType().name().replace('_', ' ').toUpperCase();
             }
+        } else if (entity instanceof TNTPrimed && ((TNTPrimed) entity).getSource() != null) {
+            final Entity source = ((TNTPrimed) entity).getSource();
+            if (source instanceof Player) {
+                name = ((Player) entity).getUniqueId().toString();
+            } else if (source instanceof Projectile && ((Projectile) entity).getShooter() != null) {
+                final LivingEntity shooter = ((Projectile) source).getShooter();
+                if (shooter instanceof Player) {
+                    name = ((Player) entity).getUniqueId().toString();
+                } else {
+                    name = "BA_" + shooter.getType().name().replace('_', ' ').toUpperCase();
+                }
+            } else {
+                name = "BA_" + source.getType().name().replace('_', ' ').toUpperCase();
+            }
         } else {
-            name = "BA_" + remover.getType().name().replace('_', ' ').toUpperCase();
+            name = "BA_" + entity.getType().name().replace('_', ' ').toUpperCase();
         }
         return name;
     }
@@ -350,15 +373,15 @@ public class ActivityUtil {
         }
     }
 
-    public static String getPlayerId(String playerName) {
-        if (playerName == null) {
+    public static String getPlayerId(String identifier) {
+        if (identifier == null) {
             return "NULL";
         }
-        final Integer id = BlockActivity.playerIds.get(playerName);
+        final Integer id = BlockActivity.playerIds.get(identifier);
         if (id != null) {
             return id.toString();
         }
-        return "(SELECT playerid FROM `ba-players` WHERE playername = '" + playerName + "')";
+        return "(SELECT playerid FROM `ba-players` WHERE uuid = '" + identifier + "')";
     }
 
     public static boolean isFallingBlock(Material material) {

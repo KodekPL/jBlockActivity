@@ -1,5 +1,6 @@
 package jcraft.jblockactivity.actionlog;
 
+import static jcraft.jblockactivity.utils.ActivityUtil.fixUUID;
 import static jcraft.jblockactivity.utils.ActivityUtil.formatTime;
 import static jcraft.jblockactivity.utils.ActivityUtil.fromJson;
 import static jcraft.jblockactivity.utils.ActivityUtil.getPlayerId;
@@ -10,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import jcraft.jblockactivity.LoggingType;
@@ -34,9 +36,12 @@ public class EntityActionLog extends ActionLog implements LookupCache {
 
     private int entityId, entityData;
 
-    // TODO: Use player UUID instead of name
     public EntityActionLog(LoggingType type, String playerName, World world, Vector location, int entityId, int dataId, ExtraData extraData) {
-        super(type, playerName, world, location, extraData);
+        this(type, playerName, null, world, location, entityId, dataId, extraData);
+    }
+
+    public EntityActionLog(LoggingType type, String playerName, UUID uuid, World world, Vector location, int entityId, int dataId, ExtraData extraData) {
+        super(type, playerName, uuid, world, location, extraData);
         this.entityId = entityId;
         this.entityData = dataId;
     }
@@ -64,7 +69,7 @@ public class EntityActionLog extends ActionLog implements LookupCache {
         try {
             state = connection.prepareStatement("INSERT INTO `" + getWorldTableName()
                     + "` (time, type, playerid, old_id, old_data, new_id, new_data, x, y, z) VALUES (FROM_UNIXTIME(?), ?, "
-                    + getPlayerId(getPlayerName()) + ", ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                    + getPlayerId(getIdentifier()) + ", ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
             state.setLong(1, getTime());
             state.setInt(2, getLoggingType().getId());
             state.setInt(3, (getLoggingType() == LoggingType.hangingbreak || getLoggingType() == LoggingType.creaturekill) ? getEntityId() : 0);
@@ -216,6 +221,8 @@ public class EntityActionLog extends ActionLog implements LookupCache {
         final LoggingType logType = params.needLogType ? LoggingType.getTypeById(result.getInt("type")) : null;
         final Vector location = params.needCoords ? new Vector(result.getInt("x"), result.getInt("y"), result.getInt("z")) : null;
         final String playerName = params.needPlayer ? result.getString("playername") : " ";
+        final String sUUID = params.needPlayer ? result.getString("uuid") : null;
+        final String data = params.needExtraData ? result.getString("data") : null;
 
         int entity_id = 0;
         int entity_data = 0;
@@ -227,7 +234,6 @@ public class EntityActionLog extends ActionLog implements LookupCache {
             entity_data = params.needData ? result.getByte("new_data") : (byte) 0;
         }
 
-        final String data = params.needExtraData ? result.getString("data") : null;
         ExtraData extraData = null;
         if (data != null) {
             if (logType == LoggingType.hangingplace || logType == LoggingType.hangingbreak) {
@@ -266,7 +272,15 @@ public class EntityActionLog extends ActionLog implements LookupCache {
                 }
             }
         }
-        final EntityActionLog log = new EntityActionLog(logType, playerName, params.getWorld(), location, entity_id, entity_data, extraData);
+
+        UUID uuid;
+        try {
+            uuid = UUID.fromString(fixUUID(sUUID));
+        } catch (IllegalArgumentException e) {
+            uuid = null;
+        }
+
+        final EntityActionLog log = new EntityActionLog(logType, playerName, uuid, params.getWorld(), location, entity_id, entity_data, extraData);
         log.setId(id);
         log.setTime(time);
         return log;

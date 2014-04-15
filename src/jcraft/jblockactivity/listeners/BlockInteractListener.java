@@ -44,8 +44,8 @@ public class BlockInteractListener implements Listener {
                 return;
             }
 
-            final BlockActionLog action = new BlockActionLog(LoggingType.blockinteract, player.getName(), location.getWorld(), location.toVector(),
-                    typeId, data, typeId, data, null);
+            final BlockActionLog action = new BlockActionLog(LoggingType.blockinteract, player.getName(), player.getUniqueId(), location.getWorld(),
+                    location.toVector(), typeId, data, typeId, data, null);
             BlockActivity.sendActionLog(action);
         }
     }

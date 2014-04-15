@@ -328,7 +328,7 @@ public abstract class EntityExtraData implements ExtraData {
 
     }
 
-    // TODO: Save player UUID instead of name
+    // TODO: Next update to save owners as UUID - Minecraft 1.7.8
     public static class HorseExtraData extends AgeableExtraData {
 
         private Boolean isTamed;
@@ -430,7 +430,7 @@ public abstract class EntityExtraData implements ExtraData {
 
     }
 
-    // TODO: Save player UUID instead of name
+    // TODO: Next update to save owners as UUID - Minecraft 1.7.8
     public static class WolfExtraData extends AgeableExtraData {
 
         private Boolean isTamed;
@@ -470,7 +470,7 @@ public abstract class EntityExtraData implements ExtraData {
 
     }
 
-    // TODO: Save player UUID instead of name
+    // TODO: Next update to save owners as UUID - Minecraft 1.7.8
     public static class OcelotExtraData extends AgeableExtraData {
 
         private Boolean isTamed;

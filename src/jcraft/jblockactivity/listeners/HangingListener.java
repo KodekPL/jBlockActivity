@@ -52,24 +52,24 @@ public class HangingListener implements Listener {
             final int face = frame.getFacing().ordinal();
             final Location location = frame.getLocation();
 
-            final EntityActionLog action = new EntityActionLog(LoggingType.hangingplace, playerName, location.getWorld(), location.toVector(),
-                    entityType, face, null);
+            final EntityActionLog action = new EntityActionLog(LoggingType.hangingplace, playerName, playerUUID, location.getWorld(),
+                    location.toVector(), entityType, face, null);
             BlockActivity.sendActionLog(action);
         } else if (event.getEntity() instanceof Painting) {
             final Painting painting = (Painting) event.getEntity();
             final int face = painting.getFacing().ordinal();
             final Location location = painting.getLocation();
 
-            final EntityActionLog action = new EntityActionLog(LoggingType.hangingplace, playerName, location.getWorld(), location.toVector(),
-                    entityType, face, EntityExtraData.getExtraData(painting));
+            final EntityActionLog action = new EntityActionLog(LoggingType.hangingplace, playerName, playerUUID, location.getWorld(),
+                    location.toVector(), entityType, face, EntityExtraData.getExtraData(painting));
             BlockActivity.sendActionLog(action);
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onHangingBreak(HangingBreakEvent event) {
-        // HangingBreakByEntityEvent
         if (event.getCause() == RemoveCause.ENTITY) {
+            // HangingBreakByEntityEvent
             return;
         }
 
@@ -83,19 +83,19 @@ public class HangingListener implements Listener {
             return;
         }
 
-        final String removername;
+        final String removerName;
         switch (event.getCause()) {
         case EXPLOSION:
         case PHYSICS:
         case OBSTRUCTION:
-            removername = "BA_" + event.getCause().name();
+            removerName = "BA_" + event.getCause().name();
             break;
         default:
-            removername = "unknown";
+            removerName = "unknown";
             break;
         }
 
-        if (BlockActivity.isHidden(removername)) {
+        if (BlockActivity.isHidden(removerName)) {
             return;
         }
 
@@ -106,12 +106,12 @@ public class HangingListener implements Listener {
 
             if (config.isLogging(LoggingType.hanginginteract) && frame.getItem().getType() != Material.AIR) {
                 final InventoryExtraData extraData = new InventoryExtraData(new ItemStack[] { frame.getItem() }, false, location.getWorld());
-                final EntityActionLog action = new EntityActionLog(LoggingType.hanginginteract, removername, location.getWorld(),
+                final EntityActionLog action = new EntityActionLog(LoggingType.hanginginteract, removerName, location.getWorld(),
                         location.toVector(), entityType, face, extraData);
                 BlockActivity.sendActionLog(action);
             }
 
-            final EntityActionLog action = new EntityActionLog(LoggingType.hangingbreak, removername, location.getWorld(), location.toVector(),
+            final EntityActionLog action = new EntityActionLog(LoggingType.hangingbreak, removerName, location.getWorld(), location.toVector(),
                     entityType, face, null);
             BlockActivity.sendActionLog(action);
         } else if (event.getEntity() instanceof Painting) {
@@ -119,7 +119,7 @@ public class HangingListener implements Listener {
             final int face = painting.getFacing().ordinal();
             final Location location = painting.getLocation();
 
-            final EntityActionLog action = new EntityActionLog(LoggingType.hangingbreak, removername, location.getWorld(), location.toVector(),
+            final EntityActionLog action = new EntityActionLog(LoggingType.hangingbreak, removerName, location.getWorld(), location.toVector(),
                     entityType, face, EntityExtraData.getExtraData(painting));
             BlockActivity.sendActionLog(action);
         }
@@ -137,10 +137,17 @@ public class HangingListener implements Listener {
             return;
         }
 
-        final String removername = getEntityName(event.getRemover());
+        final String removerName = getEntityName(event.getRemover());
 
-        if (BlockActivity.isHidden(removername)) {
+        if (BlockActivity.isHidden(removerName)) {
             return;
+        }
+
+        UUID removerUUID;
+        try {
+            removerUUID = UUID.fromString(removerName);
+        } catch (IllegalArgumentException e) {
+            removerUUID = null;
         }
 
         if (event.getEntity() instanceof ItemFrame) {
@@ -150,21 +157,21 @@ public class HangingListener implements Listener {
 
             if (config.isLogging(LoggingType.hanginginteract) && frame.getItem().getType() != Material.AIR) {
                 final InventoryExtraData extraData = new InventoryExtraData(new ItemStack[] { frame.getItem() }, false, location.getWorld());
-                final EntityActionLog action = new EntityActionLog(LoggingType.hanginginteract, removername, location.getWorld(),
+                final EntityActionLog action = new EntityActionLog(LoggingType.hanginginteract, removerName, removerUUID, location.getWorld(),
                         location.toVector(), entityType, face, extraData);
                 BlockActivity.sendActionLog(action);
             }
 
-            final EntityActionLog action = new EntityActionLog(LoggingType.hangingbreak, removername, location.getWorld(), location.toVector(),
-                    entityType, face, null);
+            final EntityActionLog action = new EntityActionLog(LoggingType.hangingbreak, removerName, removerUUID, location.getWorld(),
+                    location.toVector(), entityType, face, null);
             BlockActivity.sendActionLog(action);
         } else if (event.getEntity() instanceof Painting) {
             final Painting painting = (Painting) event.getEntity();
             final int face = painting.getFacing().ordinal();
             final Location location = painting.getLocation();
 
-            final EntityActionLog action = new EntityActionLog(LoggingType.hangingbreak, removername, location.getWorld(), location.toVector(),
-                    entityType, face, EntityExtraData.getExtraData(painting));
+            final EntityActionLog action = new EntityActionLog(LoggingType.hangingbreak, removerName, removerUUID, location.getWorld(),
+                    location.toVector(), entityType, face, EntityExtraData.getExtraData(painting));
             BlockActivity.sendActionLog(action);
         }
     }
@@ -193,8 +200,8 @@ public class HangingListener implements Listener {
                 item.setAmount(1);
 
                 final InventoryExtraData extraData = new InventoryExtraData(new ItemStack[] { item }, false, location.getWorld());
-                final EntityActionLog action = new EntityActionLog(LoggingType.hanginginteract, player.getName(), location.getWorld(),
-                        location.toVector(), entityType, face, extraData);
+                final EntityActionLog action = new EntityActionLog(LoggingType.hanginginteract, player.getName(), player.getUniqueId(),
+                        location.getWorld(), location.toVector(), entityType, face, extraData);
                 BlockActivity.sendActionLog(action);
             }
         }
@@ -216,7 +223,15 @@ public class HangingListener implements Listener {
             final ItemFrame frame = (ItemFrame) event.getEntity();
 
             if (frame.getItem().getType() != Material.AIR) {
-                final String removername = getEntityName(event.getDamager());
+                final String removerName = getEntityName(event.getDamager());
+
+                UUID removerUUID;
+                try {
+                    removerUUID = UUID.fromString(removerName);
+                } catch (IllegalArgumentException e) {
+                    removerUUID = null;
+                }
+
                 final int face = frame.getFacing().ordinal();
                 final Location location = frame.getLocation();
 
@@ -224,7 +239,7 @@ public class HangingListener implements Listener {
                 item.setAmount(-1);
 
                 final InventoryExtraData extraData = new InventoryExtraData(new ItemStack[] { item }, false, location.getWorld());
-                final EntityActionLog action = new EntityActionLog(LoggingType.hanginginteract, removername, location.getWorld(),
+                final EntityActionLog action = new EntityActionLog(LoggingType.hanginginteract, removerName, removerUUID, location.getWorld(),
                         location.toVector(), entityType, face, extraData);
                 BlockActivity.sendActionLog(action);
             }

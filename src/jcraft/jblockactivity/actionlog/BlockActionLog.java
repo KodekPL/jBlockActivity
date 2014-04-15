@@ -1,5 +1,6 @@
 package jcraft.jblockactivity.actionlog;
 
+import static jcraft.jblockactivity.utils.ActivityUtil.fixUUID;
 import static jcraft.jblockactivity.utils.ActivityUtil.formatTime;
 import static jcraft.jblockactivity.utils.ActivityUtil.fromJson;
 import static jcraft.jblockactivity.utils.ActivityUtil.getPlayerId;
@@ -10,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import jcraft.jblockactivity.LoggingType;
@@ -34,10 +36,14 @@ public class BlockActionLog extends ActionLog implements LookupCache {
     private int newBlockId, oldBlockId;
     private byte newBlockData, oldBlockData;
 
-    // TODO: Use player UUID instead of name
     public BlockActionLog(LoggingType type, String playerName, World world, Vector location, BlockState oldState, BlockState newState,
             ExtraData extraData) {
-        super(type, playerName, world, location, extraData);
+        this(type, playerName, null, world, location, oldState, newState, extraData);
+    }
+
+    public BlockActionLog(LoggingType type, String playerName, UUID uuid, World world, Vector location, BlockState oldState, BlockState newState,
+            ExtraData extraData) {
+        super(type, playerName, uuid, world, location, extraData);
         if (oldState != null) {
             this.oldBlockId = oldState.getTypeId();
             this.oldBlockData = oldState.getRawData();
@@ -50,7 +56,12 @@ public class BlockActionLog extends ActionLog implements LookupCache {
 
     public BlockActionLog(LoggingType type, String playerName, World world, Vector location, int oldBlockId, byte oldBlockData, int newBlockId,
             byte newBlockData, ExtraData extraData) {
-        super(type, playerName, world, location, extraData);
+        this(type, playerName, null, world, location, oldBlockId, oldBlockData, newBlockId, newBlockData, extraData);
+    }
+
+    public BlockActionLog(LoggingType type, String playerName, UUID uuid, World world, Vector location, int oldBlockId, byte oldBlockData,
+            int newBlockId, byte newBlockData, ExtraData extraData) {
+        super(type, playerName, uuid, world, location, extraData);
         this.oldBlockId = oldBlockId;
         this.oldBlockData = oldBlockData;
         this.newBlockId = newBlockId;
@@ -101,7 +112,7 @@ public class BlockActionLog extends ActionLog implements LookupCache {
         try {
             state = connection.prepareStatement("INSERT INTO `" + getWorldTableName()
                     + "` (time, type, playerid, old_id, old_data, new_id, new_data, x, y, z) VALUES (FROM_UNIXTIME(?), ?, "
-                    + getPlayerId(getPlayerName()) + ", ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                    + getPlayerId(getIdentifier()) + ", ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
             state.setLong(1, getTime());
             state.setInt(2, getLoggingType().getId());
             state.setInt(3, getOldBlockId());
@@ -270,11 +281,13 @@ public class BlockActionLog extends ActionLog implements LookupCache {
         final LoggingType logType = params.needLogType ? LoggingType.getTypeById(result.getInt("type")) : null;
         final Vector location = params.needCoords ? new Vector(result.getInt("x"), result.getInt("y"), result.getInt("z")) : null;
         final String playerName = params.needPlayer ? result.getString("playername") : " ";
+        final String sUUID = params.needPlayer ? result.getString("uuid") : null;
         final int old_id = params.needMaterial ? result.getInt("old_id") : 0;
         final int new_id = params.needMaterial ? result.getInt("new_id") : 0;
         final byte old_data = params.needData ? result.getByte("old_data") : (byte) 0;
         final byte new_data = params.needData ? result.getByte("new_data") : (byte) 0;
         final String data = params.needExtraData ? result.getString("data") : null;
+
         ExtraData extraData = null;
         if (data != null) {
             if (logType == LoggingType.blockbreak || logType == LoggingType.blockplace) {
@@ -293,7 +306,16 @@ public class BlockActionLog extends ActionLog implements LookupCache {
                 extraData = fromJson(data, InventoryExtraData.class);
             }
         }
-        final BlockActionLog log = new BlockActionLog(logType, playerName, params.getWorld(), location, old_id, old_data, new_id, new_data, extraData);
+
+        UUID uuid;
+        try {
+            uuid = UUID.fromString(fixUUID(sUUID));
+        } catch (IllegalArgumentException e) {
+            uuid = null;
+        }
+
+        final BlockActionLog log = new BlockActionLog(logType, playerName, uuid, params.getWorld(), location, old_id, old_data, new_id, new_data,
+                extraData);
         log.setId(id);
         log.setTime(time);
         return log;

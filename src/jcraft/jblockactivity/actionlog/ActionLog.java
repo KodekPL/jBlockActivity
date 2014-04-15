@@ -2,6 +2,7 @@ package jcraft.jblockactivity.actionlog;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.UUID;
 
 import jcraft.jblockactivity.BlockActivity;
 import jcraft.jblockactivity.LoggingType;
@@ -18,15 +19,20 @@ public abstract class ActionLog {
 
     private long id, time;
     private LoggingType type;
+    private UUID uuid;
     private String playerName, worldName;
     private Vector location;
     private ExtraData extraData;
 
-    // TODO: Use player UUID instead of name
     protected ActionLog(LoggingType type, String playerName, World world, Vector location, ExtraData extraData) {
+        this(type, playerName, null, world, location, extraData);
+    }
+
+    protected ActionLog(LoggingType type, String playerName, UUID uuid, World world, Vector location, ExtraData extraData) {
         this.time = System.currentTimeMillis() / 1000;
         this.type = type;
         this.playerName = playerName;
+        this.uuid = uuid;
         this.worldName = world.getName();
         this.location = location;
         this.extraData = extraData;
@@ -62,6 +68,21 @@ public abstract class ActionLog {
 
     public String getPlayerName() {
         return playerName;
+    }
+
+    public void setUUID(UUID uuid) {
+        this.uuid = uuid;
+    }
+
+    public UUID getUUID() {
+        return uuid;
+    }
+
+    public String getIdentifier() {
+        if (uuid == null) {
+            return playerName;
+        }
+        return uuid.toString().replace("-", "");
     }
 
     public String getColoredPlayerName() {

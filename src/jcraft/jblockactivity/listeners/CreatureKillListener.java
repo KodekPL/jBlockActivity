@@ -1,6 +1,9 @@
 package jcraft.jblockactivity.listeners;
 
 import static jcraft.jblockactivity.utils.ActivityUtil.getEntityName;
+
+import java.util.UUID;
+
 import jcraft.jblockactivity.BlockActivity;
 import jcraft.jblockactivity.LoggingType;
 import jcraft.jblockactivity.actionlog.EntityActionLog;
@@ -33,6 +36,14 @@ public class CreatureKillListener implements Listener {
 
             final Entity killer = ((EntityDamageByEntityEvent) event.getEntity().getLastDamageCause()).getDamager();
             final String killerName = getEntityName(killer);
+
+            UUID killerUUID;
+            try {
+                killerUUID = UUID.fromString(killerName);
+            } catch (IllegalArgumentException e) {
+                killerUUID = null;
+            }
+
             final Location location = event.getEntity().getLocation();
 
             if (BlockActivity.isHidden(killerName)) {
@@ -40,8 +51,8 @@ public class CreatureKillListener implements Listener {
             }
 
             final ExtraData extraData = EntityExtraData.getExtraData(event.getEntity());
-            final EntityActionLog action = new EntityActionLog(LoggingType.creaturekill, killerName, location.getWorld(), location.toVector(),
-                    entityType, 0, extraData);
+            final EntityActionLog action = new EntityActionLog(LoggingType.creaturekill, killerName, killerUUID, location.getWorld(),
+                    location.toVector(), entityType, 0, extraData);
             BlockActivity.sendActionLog(action);
         }
     }

@@ -58,8 +58,8 @@ public class BlockPlaceListener implements Listener {
         /** FALLING BLOCK **/
         if (isFallingBlock(material)) {
             if (beforeState.getType() != Material.AIR) {
-                final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, afterState.getWorld(), afterState.getLocation()
-                        .toVector(), beforeState, afterState, null);
+                final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, afterState.getWorld(), afterState
+                        .getLocation().toVector(), beforeState, afterState, null);
                 BlockActivity.sendActionLog(action);
             }
 
@@ -79,11 +79,11 @@ public class BlockPlaceListener implements Listener {
                     return;
                 }
                 if (finalBlock.getType() == Material.AIR || finalLocation.equals(block.getLocation())) {
-                    final BlockActionLog action = new BlockActionLog(LoggingType.blockplace, playerName, finalLocation.getWorld(),
+                    final BlockActionLog action = new BlockActionLog(LoggingType.blockplace, playerName, playerUUID, finalLocation.getWorld(),
                             finalLocation.toVector(), null, block.getState(), null);
                     BlockActivity.sendActionLog(action);
                 } else {
-                    final BlockActionLog action = new BlockActionLog(LoggingType.blockplace, playerName, finalLocation.getWorld(),
+                    final BlockActionLog action = new BlockActionLog(LoggingType.blockplace, playerName, playerUUID, finalLocation.getWorld(),
                             finalLocation.toVector(), finalBlock.getState(), block.getState(), null);
                     BlockActivity.sendActionLog(action);
                 }
@@ -109,7 +109,8 @@ public class BlockPlaceListener implements Listener {
         final Material material = block.getType();
         final BlockState beforeState = event.getBlockReplacedState();
         final BlockState afterState = event.getBlockPlaced().getState();
-        final String playerName = event.getPlayer().getName(); // TODO: Use player UUID instead of name
+        final UUID playerUUID = event.getPlayer().getUniqueId();
+        final String playerName = event.getPlayer().getName();
 
         BlockExtraData extraData = null;
         if (afterState.getType() == Material.SKULL) {
@@ -118,12 +119,12 @@ public class BlockPlaceListener implements Listener {
         }
 
         if (beforeState.getType() == Material.AIR) {
-            final BlockActionLog action = new BlockActionLog(LoggingType.blockplace, playerName, afterState.getWorld(), afterState.getLocation()
-                    .toVector(), null, afterState, extraData);
+            final BlockActionLog action = new BlockActionLog(LoggingType.blockplace, playerName, playerUUID, afterState.getWorld(), afterState
+                    .getLocation().toVector(), null, afterState, extraData);
             BlockActivity.sendActionLog(action);
         } else {
-            final BlockActionLog action = new BlockActionLog(LoggingType.blockplace, playerName, afterState.getWorld(), afterState.getLocation()
-                    .toVector(), beforeState, block.getState(), extraData);
+            final BlockActionLog action = new BlockActionLog(LoggingType.blockplace, playerName, playerUUID, afterState.getWorld(), afterState
+                    .getLocation().toVector(), beforeState, block.getState(), extraData);
             BlockActivity.sendActionLog(action);
         }
 
@@ -132,19 +133,19 @@ public class BlockPlaceListener implements Listener {
             if (afterState.getRawData() <= 3) {
                 final BlockFace doorFace = yawToFace(event.getPlayer().getEyeLocation().getYaw()).getOppositeFace();
                 final boolean doubleDoor = afterState.getBlock().getRelative(turnFace(doorFace, false)).getType() == afterState.getType();
-                action = new BlockActionLog(LoggingType.blockplace, playerName, afterState.getWorld(), afterState.getLocation().add(0, 1, 0)
-                        .toVector(), 0, (byte) 0, material.getId(), doubleDoor ? (byte) 9 : (byte) 8, null);
+                action = new BlockActionLog(LoggingType.blockplace, playerName, playerUUID, afterState.getWorld(), afterState.getLocation()
+                        .add(0, 1, 0).toVector(), 0, (byte) 0, material.getId(), doubleDoor ? (byte) 9 : (byte) 8, null);
             }
         } else if (material == Material.BED_BLOCK) {
             final Bed bed = (Bed) afterState.getData();
             if (bed.getData() <= 3) {
-                action = new BlockActionLog(LoggingType.blockplace, playerName, afterState.getWorld(), afterState.getBlock()
+                action = new BlockActionLog(LoggingType.blockplace, playerName, playerUUID, afterState.getWorld(), afterState.getBlock()
                         .getRelative(bed.getFacing()).getLocation().toVector(), 0, (byte) 0, material.getId(), (byte) (bed.getData() + 8), null);
             }
         } else if (material == Material.DOUBLE_PLANT) {
             if (afterState.getRawData() <= 5) {
-                action = new BlockActionLog(LoggingType.blockplace, playerName, afterState.getWorld(), afterState.getLocation().add(0, 1, 0)
-                        .toVector(), 0, (byte) 0, material.getId(), (byte) 11, null);
+                action = new BlockActionLog(LoggingType.blockplace, playerName, playerUUID, afterState.getWorld(), afterState.getLocation()
+                        .add(0, 1, 0).toVector(), 0, (byte) 0, material.getId(), (byte) 11, null);
             }
         }
         BlockActivity.sendActionLog(action);
@@ -170,8 +171,8 @@ public class BlockPlaceListener implements Listener {
         } else {
             material = Material.STATIONARY_LAVA;
         }
-        final BlockActionLog action = new BlockActionLog(LoggingType.blockplace, playerName, block.getWorld(), block.getLocation().toVector(), 0,
-                (byte) 0, material.getId(), (byte) 0, null);
+        final BlockActionLog action = new BlockActionLog(LoggingType.blockplace, playerName, playerUUID, block.getWorld(), block.getLocation()
+                .toVector(), 0, (byte) 0, material.getId(), (byte) 0, null);
         BlockActivity.sendActionLog(action);
     }
 
@@ -193,8 +194,8 @@ public class BlockPlaceListener implements Listener {
         }
 
         final SignExtraData extraData = new SignExtraData(event.getLines());
-        final BlockActionLog action = new BlockActionLog(LoggingType.blockplace, playerName, block.getWorld(), block.getLocation().toVector(), null,
-                block.getState(), extraData);
+        final BlockActionLog action = new BlockActionLog(LoggingType.blockplace, playerName, playerUUID, block.getWorld(), block.getLocation()
+                .toVector(), null, block.getState(), extraData);
         BlockActivity.sendActionLog(action);
     }
 

@@ -46,8 +46,8 @@ public class InventoryAccessListener implements Listener {
                 final InventoryExtraData newContent = new InventoryExtraData(event.getInventory().getContents(), true, location.getWorld());
                 lastContent.compareInventories(newContent);
                 if (!lastContent.isEmpty()) {
-                    final BlockActionLog action = new BlockActionLog(LoggingType.inventoryaccess, player.getName(), location.getWorld(),
-                            location.toVector(), location.getBlock().getState(), location.getBlock().getState(), lastContent);
+                    final BlockActionLog action = new BlockActionLog(LoggingType.inventoryaccess, player.getName(), player.getUniqueId(),
+                            location.getWorld(), location.toVector(), location.getBlock().getState(), location.getBlock().getState(), lastContent);
                     BlockActivity.sendActionLog(action);
                 }
                 invExtraData.remove(player);

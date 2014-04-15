@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -68,9 +69,9 @@ public class LogExecuteThread implements Runnable {
                         if (log == null) {
                             continue;
                         }
-                        if (!BlockActivity.playerIds.containsKey(log.getPlayerName())) {
-                            if (!addPlayer(state, log.getPlayerName())) {
-                                getLogger().warning("[Executor] Failed to add new player: " + log.getPlayerName());
+                        if (!BlockActivity.playerIds.containsKey(log.getIdentifier())) {
+                            if (!addPlayer(state, log.getPlayerName(), log.getUUID())) {
+                                getLogger().warning("[Executor] Failed to add new player: " + log.getPlayerName() + " (" + log.getUUID() + ")");
                                 continue;
                             }
                         }
@@ -109,15 +110,22 @@ public class LogExecuteThread implements Runnable {
         }
     }
 
-    private boolean addPlayer(Statement state, String playerName) throws SQLException {
-        state.execute("INSERT INTO `ba-players` (playername) SELECT '" + playerName
-                + "' FROM DUAL WHERE NOT EXISTS (SELECT * FROM `ba-players` WHERE `playername` = '" + playerName + "') LIMIT 1;");
-        final ResultSet rs = state.executeQuery("SELECT playerid FROM `ba-players` WHERE playername = '" + playerName + "'");
+    private boolean addPlayer(Statement state, String playerName, UUID uuid) throws SQLException {
+        final String stripUUID;
+        if (uuid != null) {
+            stripUUID = uuid.toString().replace("-", "");
+        } else {
+            stripUUID = playerName;
+        }
+
+        state.execute("INSERT INTO `ba-players` (playername, uuid) SELECT '" + playerName + "', '" + stripUUID
+                + "' FROM DUAL WHERE NOT EXISTS (SELECT * FROM `ba-players` WHERE uuid = '" + stripUUID + "') LIMIT 1;");
+        final ResultSet rs = state.executeQuery("SELECT playerid FROM `ba-players` WHERE uuid = '" + stripUUID + "'");
         if (rs.next()) {
-            BlockActivity.playerIds.put(playerName, rs.getInt(1));
+            BlockActivity.playerIds.put(stripUUID, rs.getInt(1));
         }
         rs.close();
-        return BlockActivity.playerIds.containsKey(playerName);
+        return BlockActivity.playerIds.containsKey(stripUUID);
     }
 
 }

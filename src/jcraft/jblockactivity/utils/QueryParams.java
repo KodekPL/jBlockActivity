@@ -74,7 +74,7 @@ public class QueryParams {
                 if (needLogType) select += "type, ";
                 if (needMaterial) select += "old_id, new_id, ";
                 if (needData) select += "old_data, new_data, ";
-                if (needPlayer) select += "playername, ";
+                if (needPlayer) select += "playername, uuid, ";
                 if (needCoords) select += "x, y, z, ";
                 if (needExtraData) select += "data, ";
                 select = select.substring(0, select.length() - 2);
@@ -232,8 +232,9 @@ public class QueryParams {
         if (!players.isEmpty() && mode != SummarizationMode.PLAYERS) {
             if (!excludePlayersMode) {
                 where.append('(');
-                for (final String playerName : players)
+                for (final String playerName : players) {
                     where.append("playername = '").append(playerName).append("' OR ");
+                }
                 where.delete(where.length() - 4, where.length());
                 where.append(") AND ");
             } else {
