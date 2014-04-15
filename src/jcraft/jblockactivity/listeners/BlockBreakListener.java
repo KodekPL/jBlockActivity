@@ -2,10 +2,10 @@ package jcraft.jblockactivity.listeners;
 
 import static jcraft.jblockactivity.utils.ActivityUtil.canFall;
 import static jcraft.jblockactivity.utils.ActivityUtil.getSideRelativeBreakableBlocks;
+import static jcraft.jblockactivity.utils.ActivityUtil.isBottomRelativeBreakableBlock;
 import static jcraft.jblockactivity.utils.ActivityUtil.isContainerBlock;
 import static jcraft.jblockactivity.utils.ActivityUtil.isFallingBlock;
 import static jcraft.jblockactivity.utils.ActivityUtil.isFallingBlockKiller;
-import static jcraft.jblockactivity.utils.ActivityUtil.isRelativeTopBreakableBlock;
 
 import java.util.List;
 import java.util.UUID;
@@ -109,168 +109,162 @@ public class BlockBreakListener implements Listener {
                 BlockActivity.sendActionLog(action);
             }
         } else {
-            final BlockActionLog mainaction = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, block.getWorld(), block
+            final BlockActionLog mainAction = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, block.getWorld(), block
                     .getLocation().toVector(), block.getState(), null, null);
-            BlockActivity.sendActionLog(mainaction);
+            BlockActivity.sendActionLog(mainAction);
+        }
 
-            /** DOUBLE BLOCKS **/
-            Block checkBlock = null;
-            final Block aboveBlock = block.getRelative(BlockFace.UP);
-            if (isRelativeTopBreakableBlock(block.getType())) {
-                checkBlock = block;
-            } else if (isRelativeTopBreakableBlock(aboveBlock.getType())) {
-                checkBlock = aboveBlock;
-                final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, aboveBlock.getWorld(), aboveBlock
-                        .getLocation().toVector(), aboveBlock.getState(), null, null);
-                BlockActivity.sendActionLog(action);
-            }
-            if (checkBlock != null) {
-                final Material checkMaterial = checkBlock.getType();
+        /** DOUBLE BLOCKS **/
+        Block doubleBlock = null;
+        if (isBottomRelativeBreakableBlock(block.getType())) {
+            doubleBlock = block;
+        } else if (isBottomRelativeBreakableBlock(block.getRelative(BlockFace.UP).getType())) {
+            doubleBlock = block.getRelative(BlockFace.UP);
+            final BlockActionLog upperPartAction = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, doubleBlock.getWorld(),
+                    doubleBlock.getLocation().toVector(), doubleBlock.getState(), null, BlockExtraData.getExtraData(doubleBlock.getState()));
+            BlockActivity.sendActionLog(upperPartAction);
+        }
 
-                if (checkMaterial == Material.WOODEN_DOOR || checkMaterial == Material.IRON_DOOR_BLOCK) {
-                    /** DOOR **/
-                    if (checkBlock.getData() == 8 || checkBlock.getData() == 9) {
-                        final BlockState bottomDoor = checkBlock.getRelative(BlockFace.DOWN).getState();
-                        if (bottomDoor.getType() == checkMaterial) {
-                            final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, bottomDoor.getWorld(),
-                                    bottomDoor.getLocation().toVector(), bottomDoor, null, null);
-                            BlockActivity.sendActionLog(action);
-                        }
-                    } else {
-                        final BlockState aboveDoor = checkBlock.getRelative(BlockFace.UP).getState();
-                        if (aboveDoor.getType() == checkMaterial) {
-                            final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, aboveDoor.getWorld(),
-                                    aboveDoor.getLocation().toVector(), aboveDoor, null, null);
-                            BlockActivity.sendActionLog(action);
-                        }
+        if (doubleBlock != null) {
+            if (doubleBlock.getType() == Material.WOODEN_DOOR || doubleBlock.getType() == Material.IRON_DOOR_BLOCK) {
+                /** DOOR **/
+                if (doubleBlock.getData() == 8 || doubleBlock.getData() == 9) {
+                    final BlockState bottomDoor = doubleBlock.getRelative(BlockFace.DOWN).getState();
+                    if (bottomDoor.getType() == doubleBlock.getType()) {
+                        final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, bottomDoor.getWorld(),
+                                bottomDoor.getLocation().toVector(), bottomDoor, null, null);
+                        BlockActivity.sendActionLog(action);
                     }
-                } else if (checkMaterial == Material.DOUBLE_PLANT) {
-                    /** DOUBLE PLANT **/
-                    if (checkBlock.getData() > 5) {
-                        final BlockState bottomPart = checkBlock.getRelative(BlockFace.DOWN).getState();
-                        if (bottomPart.getType() == checkMaterial) {
-                            final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, bottomPart.getWorld(),
-                                    bottomPart.getLocation().toVector(), bottomPart, null, null);
-                            BlockActivity.sendActionLog(action);
-                        }
-                    } else {
-                        final BlockState abovePart = checkBlock.getRelative(BlockFace.UP).getState();
-                        if (abovePart.getType() == checkMaterial) {
-                            final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, abovePart.getWorld(),
-                                    abovePart.getLocation().toVector(), abovePart, null, null);
-                            BlockActivity.sendActionLog(action);
-                        }
+                } else {
+                    final BlockState aboveDoor = doubleBlock.getRelative(BlockFace.UP).getState();
+                    if (aboveDoor.getType() == doubleBlock.getType()) {
+                        final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, aboveDoor.getWorld(),
+                                aboveDoor.getLocation().toVector(), aboveDoor, null, null);
+                        BlockActivity.sendActionLog(action);
                     }
-                } else if (aboveBlock.getType() == Material.SIGN_POST || aboveBlock.getType() == Material.WALL_SIGN) {
-                    /** SIGN **/
-                    final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, aboveBlock.getWorld(),
-                            aboveBlock.getLocation().toVector(), aboveBlock.getState(), null, BlockExtraData.getExtraData(aboveBlock.getState()));
-                    BlockActivity.sendActionLog(action);
-                } // TODO: Flower Pot contents
+                }
+            } else if (doubleBlock.getType() == Material.DOUBLE_PLANT) {
+                /** DOUBLE PLANT **/
+                if (doubleBlock.getData() > 5) {
+                    final BlockState bottomPart = doubleBlock.getRelative(BlockFace.DOWN).getState();
+                    if (bottomPart.getType() == doubleBlock.getType()) {
+                        final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, bottomPart.getWorld(),
+                                bottomPart.getLocation().toVector(), bottomPart, null, null);
+                        BlockActivity.sendActionLog(action);
+                    }
+                } else {
+                    final BlockState abovePart = doubleBlock.getRelative(BlockFace.UP).getState();
+                    if (abovePart.getType() == doubleBlock.getType()) {
+                        final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, abovePart.getWorld(),
+                                abovePart.getLocation().toVector(), abovePart, null, null);
+                        BlockActivity.sendActionLog(action);
+                    }
+                }
             }
+            // TODO: Flower Pot contents
+        }
 
-            /** RELATIVE SIDE BLOCKS **/
-            final List<Block> relativeBlocks = getSideRelativeBreakableBlocks(block);
-            if (!relativeBlocks.isEmpty()) {
-                for (Block relativeBlock : relativeBlocks) {
-                    final Material relativeMaterial = relativeBlock.getType();
-                    final MaterialData materialData = relativeBlock.getState().getData();
-                    BlockActionLog action = null;
-                    switch (relativeMaterial) {
-                    case REDSTONE_TORCH_ON:
-                    case REDSTONE_TORCH_OFF:
-                        if (relativeBlock.getRelative(((RedstoneTorch) materialData).getAttachedFace()).equals(block)) {
-                            action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, relativeBlock.getWorld(), relativeBlock
-                                    .getLocation().toVector(), relativeBlock.getState(), null, null);
-                        }
-                        break;
-                    case TORCH:
-                        if (relativeBlock.getRelative(((Torch) materialData).getAttachedFace()).equals(block)) {
-                            action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, relativeBlock.getWorld(), relativeBlock
-                                    .getLocation().toVector(), relativeBlock.getState(), null, null);
-                        }
-                        break;
-                    case COCOA:
-                        if (relativeBlock.getRelative(((CocoaPlant) materialData).getAttachedFace()).equals(block)) {
-                            action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, relativeBlock.getWorld(), relativeBlock
-                                    .getLocation().toVector(), relativeBlock.getState(), null, null);
-                        }
-                        break;
-                    case LADDER:
-                        if (relativeBlock.getRelative(((Ladder) materialData).getAttachedFace()).equals(block)) {
-                            action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, relativeBlock.getWorld(), relativeBlock
-                                    .getLocation().toVector(), relativeBlock.getState(), null, null);
-                        }
-                        break;
-                    case LEVER:
-                        if (relativeBlock.getRelative(((Lever) materialData).getAttachedFace()).equals(block)) {
-                            action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, relativeBlock.getWorld(), relativeBlock
-                                    .getLocation().toVector(), relativeBlock.getState(), null, null);
-                        }
-                        break;
-                    case TRIPWIRE_HOOK:
-                        if (relativeBlock.getRelative(((TripwireHook) materialData).getAttachedFace()).equals(block)) {
-                            action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, relativeBlock.getWorld(), relativeBlock
-                                    .getLocation().toVector(), relativeBlock.getState(), null, null);
-                        }
-                        break;
-                    case WOOD_BUTTON:
-                    case STONE_BUTTON:
-                        if (relativeBlock.getRelative(((Button) materialData).getAttachedFace()).equals(block)) {
-                            action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, relativeBlock.getWorld(), relativeBlock
-                                    .getLocation().toVector(), relativeBlock.getState(), null, null);
-                        }
-                        break;
-                    case WALL_SIGN:
-                        if (relativeBlock.getRelative(((org.bukkit.material.Sign) materialData).getAttachedFace()).equals(block)) {
-                            action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, relativeBlock.getWorld(), relativeBlock
-                                    .getLocation().toVector(), relativeBlock.getState(), null, BlockExtraData.getExtraData(relativeBlock.getState()));
-                        }
-                        break;
-                    case TRAP_DOOR:
-                        if (relativeBlock.getRelative(((TrapDoor) materialData).getAttachedFace()).equals(block)) {
-                            action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, relativeBlock.getWorld(), relativeBlock
-                                    .getLocation().toVector(), relativeBlock.getState(), null, null);
-                        }
-                        break;
-                    case BED_BLOCK:
-                        Bed bed = (Bed) materialData;
-                        if (bed.isHeadOfBed()) {
-                            if (relativeBlock.getRelative(bed.getFacing().getOppositeFace()).getType() == Material.BED_BLOCK) {
-                                action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, relativeBlock.getWorld(), relativeBlock
-                                        .getLocation().toVector(), relativeBlock.getState(), null, null);
-                            }
-                        } else {
-                            if (relativeBlock.getRelative(bed.getFacing()).getType() == Material.BED_BLOCK) {
-                                action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, relativeBlock.getWorld(), relativeBlock
-                                        .getLocation().toVector(), relativeBlock.getState(), null, null);
-                            }
-                        }
-                        break;
-                    case PISTON_BASE:
-                    case PISTON_STICKY_BASE:
-                        PistonBaseMaterial piston = (PistonBaseMaterial) materialData;
-                        if (piston.isPowered()) {
-                            if (relativeBlock.getRelative(piston.getFacing()).getType() == Material.PISTON_EXTENSION) {
-                                action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, relativeBlock.getWorld(), relativeBlock
-                                        .getLocation().toVector(), relativeBlock.getState(), null, null);
-                            }
-                        }
-                        break;
-                    case PISTON_EXTENSION:
-                        PistonExtensionMaterial extension = (PistonExtensionMaterial) materialData;
-                        if (relativeBlock.getRelative(extension.getAttachedFace()).getType() == Material.PISTON_EXTENSION) {
-                            action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, relativeBlock.getWorld(), relativeBlock
-                                    .getLocation().toVector(), relativeBlock.getState(), null, null);
-                        }
-                        break;
-                    default:
+        /** RELATIVE SIDE BLOCKS **/
+        final List<Block> relativeBlocks = getSideRelativeBreakableBlocks(block);
+        if (!relativeBlocks.isEmpty()) {
+            for (Block relativeBlock : relativeBlocks) {
+                final Material relativeMaterial = relativeBlock.getType();
+                final MaterialData materialData = relativeBlock.getState().getData();
+                BlockActionLog action = null;
+                switch (relativeMaterial) {
+                case REDSTONE_TORCH_ON:
+                case REDSTONE_TORCH_OFF:
+                    if (relativeBlock.getRelative(((RedstoneTorch) materialData).getAttachedFace()).equals(block)) {
                         action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, relativeBlock.getWorld(), relativeBlock
                                 .getLocation().toVector(), relativeBlock.getState(), null, null);
-                        break;
                     }
-                    BlockActivity.sendActionLog(action);
+                    break;
+                case TORCH:
+                    if (relativeBlock.getRelative(((Torch) materialData).getAttachedFace()).equals(block)) {
+                        action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, relativeBlock.getWorld(), relativeBlock
+                                .getLocation().toVector(), relativeBlock.getState(), null, null);
+                    }
+                    break;
+                case COCOA:
+                    if (relativeBlock.getRelative(((CocoaPlant) materialData).getAttachedFace()).equals(block)) {
+                        action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, relativeBlock.getWorld(), relativeBlock
+                                .getLocation().toVector(), relativeBlock.getState(), null, null);
+                    }
+                    break;
+                case LADDER:
+                    if (relativeBlock.getRelative(((Ladder) materialData).getAttachedFace()).equals(block)) {
+                        action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, relativeBlock.getWorld(), relativeBlock
+                                .getLocation().toVector(), relativeBlock.getState(), null, null);
+                    }
+                    break;
+                case LEVER:
+                    if (relativeBlock.getRelative(((Lever) materialData).getAttachedFace()).equals(block)) {
+                        action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, relativeBlock.getWorld(), relativeBlock
+                                .getLocation().toVector(), relativeBlock.getState(), null, null);
+                    }
+                    break;
+                case TRIPWIRE_HOOK:
+                    if (relativeBlock.getRelative(((TripwireHook) materialData).getAttachedFace()).equals(block)) {
+                        action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, relativeBlock.getWorld(), relativeBlock
+                                .getLocation().toVector(), relativeBlock.getState(), null, null);
+                    }
+                    break;
+                case WOOD_BUTTON:
+                case STONE_BUTTON:
+                    if (relativeBlock.getRelative(((Button) materialData).getAttachedFace()).equals(block)) {
+                        action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, relativeBlock.getWorld(), relativeBlock
+                                .getLocation().toVector(), relativeBlock.getState(), null, null);
+                    }
+                    break;
+                case WALL_SIGN:
+                    if (relativeBlock.getRelative(((org.bukkit.material.Sign) materialData).getAttachedFace()).equals(block)) {
+                        action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, relativeBlock.getWorld(), relativeBlock
+                                .getLocation().toVector(), relativeBlock.getState(), null, BlockExtraData.getExtraData(relativeBlock.getState()));
+                    }
+                    break;
+                case TRAP_DOOR:
+                    if (relativeBlock.getRelative(((TrapDoor) materialData).getAttachedFace()).equals(block)) {
+                        action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, relativeBlock.getWorld(), relativeBlock
+                                .getLocation().toVector(), relativeBlock.getState(), null, null);
+                    }
+                    break;
+                case BED_BLOCK:
+                    Bed bed = (Bed) materialData;
+                    if (bed.isHeadOfBed()) {
+                        if (relativeBlock.getRelative(bed.getFacing().getOppositeFace()).getType() == Material.BED_BLOCK) {
+                            action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, relativeBlock.getWorld(), relativeBlock
+                                    .getLocation().toVector(), relativeBlock.getState(), null, null);
+                        }
+                    } else {
+                        if (relativeBlock.getRelative(bed.getFacing()).getType() == Material.BED_BLOCK) {
+                            action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, relativeBlock.getWorld(), relativeBlock
+                                    .getLocation().toVector(), relativeBlock.getState(), null, null);
+                        }
+                    }
+                    break;
+                case PISTON_BASE:
+                case PISTON_STICKY_BASE:
+                    PistonBaseMaterial piston = (PistonBaseMaterial) materialData;
+                    if (piston.isPowered()) {
+                        if (relativeBlock.getRelative(piston.getFacing()).getType() == Material.PISTON_EXTENSION) {
+                            action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, relativeBlock.getWorld(), relativeBlock
+                                    .getLocation().toVector(), relativeBlock.getState(), null, null);
+                        }
+                    }
+                    break;
+                case PISTON_EXTENSION:
+                    PistonExtensionMaterial extension = (PistonExtensionMaterial) materialData;
+                    if (relativeBlock.getRelative(extension.getAttachedFace()).getType() == Material.PISTON_EXTENSION) {
+                        action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, relativeBlock.getWorld(), relativeBlock
+                                .getLocation().toVector(), relativeBlock.getState(), null, null);
+                    }
+                    break;
+                default:
+                    action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, relativeBlock.getWorld(), relativeBlock.getLocation()
+                            .toVector(), relativeBlock.getState(), null, null);
+                    break;
                 }
+                BlockActivity.sendActionLog(action);
             }
         }
 

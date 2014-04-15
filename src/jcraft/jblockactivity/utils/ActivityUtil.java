@@ -479,7 +479,7 @@ public class ActivityUtil {
         }
     }
 
-    public static boolean isRelativeTopBreakableBlock(Material material) {
+    public static boolean isBottomRelativeBreakableBlock(Material material) {
         switch (material) {
         case SAPLING:
         case LONG_GRASS:
