@@ -118,13 +118,30 @@ public class LogExecuteThread implements Runnable {
             stripUUID = playerName;
         }
 
-        state.execute("INSERT INTO `ba-players` (playername, uuid) SELECT '" + playerName + "', '" + stripUUID
-                + "' FROM DUAL WHERE NOT EXISTS (SELECT * FROM `ba-players` WHERE uuid = '" + stripUUID + "') LIMIT 1;");
-        final ResultSet rs = state.executeQuery("SELECT playerid FROM `ba-players` WHERE uuid = '" + stripUUID + "'");
-        if (rs.next()) {
-            BlockActivity.playerIds.put(stripUUID, rs.getInt(1));
+        final ResultSet result1 = state.executeQuery("SELECT playerid FROM `ba-players` WHERE uuid = '" + stripUUID + "'");
+        if (result1.next()) {
+            BlockActivity.playerIds.put(stripUUID, result1.getInt(1));
+        } else {
+            final ResultSet result2 = state.executeQuery("SELECT `playername`, `uuid` FROM `ba-players` WHERE `playername` LIKE CONCAT('"
+                    + playerName + "%', '%') ORDER BY `playername` ASC");
+            String takenName = playerName;
+            int nameCount = 0;
+            while (result2.next()) {
+                if (result2.getString(1).equalsIgnoreCase(takenName)) {
+                    nameCount++;
+                    takenName = playerName + nameCount;
+                }
+            }
+            state.execute("INSERT INTO `ba-players` (playername, uuid) SELECT '" + takenName + "', '" + stripUUID
+                    + "' FROM DUAL WHERE NOT EXISTS (SELECT * FROM `ba-players` WHERE uuid = '" + stripUUID + "') LIMIT 1;");
+
+            final ResultSet result3 = state.executeQuery("SELECT playerid FROM `ba-players` WHERE uuid = '" + stripUUID + "'");
+            if (result3.next()) {
+                BlockActivity.playerIds.put(stripUUID, result3.getInt(1));
+            }
         }
-        rs.close();
+        result1.close();
+        state.close();
         return BlockActivity.playerIds.containsKey(stripUUID);
     }
 
