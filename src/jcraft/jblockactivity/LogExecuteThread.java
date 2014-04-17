@@ -139,6 +139,8 @@ public class LogExecuteThread implements Runnable {
             if (result3.next()) {
                 BlockActivity.playerIds.put(stripUUID, result3.getInt(1));
             }
+            result2.close();
+            result3.close();
         }
         result1.close();
         state.close();
