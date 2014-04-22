@@ -40,6 +40,7 @@ public class WorldConfig {
 
     private Set<Integer> interactBlocks;
     public int limitEntitiesPerChunk;
+    public boolean farmlandForCrops;
     public Set<Integer> blockBlacklist, replaceAnyway, loggingCreatures, loggingHangings;
 
     public WorldConfig(String worldName) {
@@ -73,6 +74,7 @@ public class WorldConfig {
         configDef.put("special.rollback.limitEntitiesPerChunk", 16);
         configDef.put("special.rollback.replaceAnyway", Arrays.asList(8, 9, 10, 11, 51));
         configDef.put("special.rollback.blockBlacklist", Arrays.asList(10, 11, 46, 51));
+        configDef.put("special.rollback.farmlandForCrops", true);
         configDef.put("special.logging.interactBlocks",
                 Arrays.asList(23, 25, 54, 61, 62, 64, 69, 77, 84, 92, 93, 94, 96, 107, 117, 138, 143, 145, 146, 149, 150, 154, 158));
         configDef.put("special.logging.creatures", Arrays.asList(90, 91, 92, 93, 95, 96, 98, 100, 120));
@@ -135,6 +137,7 @@ public class WorldConfig {
         }
 
         limitEntitiesPerChunk = config.getInt("special.rollback.limitEntitiesPerChunk");
+        farmlandForCrops = config.getBoolean("special.rollback.farmlandForCrops");
         replaceAnyway = new HashSet<Integer>(config.getIntegerList("special.rollback.replaceAnyway"));
         blockBlacklist = new HashSet<Integer>(config.getIntegerList("special.rollback.blockBlacklist"));
 

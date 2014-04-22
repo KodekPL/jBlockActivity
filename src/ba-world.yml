@@ -59,6 +59,7 @@ logExtraData:
 special:
   rollback:
     limitEntitiesPerChunk: 16
+    farmlandForCrops: true
     replaceAnyway:
     - 8
     - 9

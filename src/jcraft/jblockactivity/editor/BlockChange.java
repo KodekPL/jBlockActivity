@@ -123,6 +123,11 @@ public class BlockChange extends BlockActionLog {
             }
 
             final int currentType = block.getTypeId();
+            if (currentType == 59 || currentType == 104 || currentType == 105 || currentType == 141 || currentType == 142) {
+                if (blockEditor.getWorldConfig().farmlandForCrops) {
+                    block.getRelative(BlockFace.DOWN).setTypeId(60);
+                }
+            }
             if (getExtraData() != null) {
                 if (currentType == 63 || currentType == 68) {
                     final Sign sign = (Sign) block.getState();
