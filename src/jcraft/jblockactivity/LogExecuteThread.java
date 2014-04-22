@@ -143,7 +143,6 @@ public class LogExecuteThread implements Runnable {
             result3.close();
         }
         result1.close();
-        state.close();
         return BlockActivity.playerIds.containsKey(stripUUID);
     }
 
