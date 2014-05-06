@@ -190,6 +190,7 @@ public class EntityActionLog extends ActionLog implements LookupCache {
         } else if (getLoggingType() == LoggingType.creaturekill) {
             msg.append(ChatColor.GRAY).append(formatTime(getTime())).append(' ').append(sub).append("killed ")
                     .append(MaterialNames.entityName(getEntityId()));
+            /* Skip showing owner name, plugin is now saving only owner UUID and it is not worth asking database for addition names
             if (getExtraData() != null) {
                 String ownerName = null;
                 if (getEntityId() == 95) {
@@ -204,6 +205,7 @@ public class EntityActionLog extends ActionLog implements LookupCache {
                 }
                 if (ownerName != null) msg.append(ChatColor.GRAY).append(" [").append(ownerName).append(']');
             }
+            */
             msg.append(" (").append(getTimeSince()).append(')');
         }
 

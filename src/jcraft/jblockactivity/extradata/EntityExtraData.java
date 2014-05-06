@@ -3,6 +3,9 @@ package jcraft.jblockactivity.extradata;
 import static jcraft.jblockactivity.utils.ActivityUtil.packEntityEquipment;
 import static jcraft.jblockactivity.utils.ActivityUtil.packEntityEquipmentChance;
 import static jcraft.jblockactivity.utils.ActivityUtil.toJson;
+
+import java.util.UUID;
+
 import jcraft.jblockactivity.BlockActivity;
 import jcraft.jblockactivity.config.WorldConfig;
 import jcraft.jblockactivity.extradata.ExtraLoggingTypes.EntityMetaType;
@@ -328,7 +331,6 @@ public abstract class EntityExtraData implements ExtraData {
 
     }
 
-    // TODO: Next update to save owners as UUID - Minecraft 1.7.8
     public static class HorseExtraData extends AgeableExtraData {
 
         private Boolean isTamed;
@@ -346,7 +348,8 @@ public abstract class EntityExtraData implements ExtraData {
         public HorseExtraData(WorldConfig config, Horse entity) {
             super(config, entity);
             if (config.isLoggingExtraEntityMeta(EntityMetaType.horseowner)) isTamed = entity.isTamed() ? true : null;
-            if (config.isLoggingExtraEntityMeta(EntityMetaType.horseowner)) owner = (entity.getOwner() != null) ? entity.getOwner().getName() : null;
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.horseowner)) owner = (entity.getOwner() != null) ? entity.getOwner().getUniqueId()
+                    .toString() : null;
             if (config.isLoggingExtraEntityMeta(EntityMetaType.horselook)) variant = entity.getVariant();
             if (config.isLoggingExtraEntityMeta(EntityMetaType.horselook)) color = entity.getColor();
             if (config.isLoggingExtraEntityMeta(EntityMetaType.horselook)) style = entity.getStyle();
@@ -411,6 +414,17 @@ public abstract class EntityExtraData implements ExtraData {
             return owner;
         }
 
+        public UUID getOwnerUUID() {
+            if (owner == null) {
+                return null;
+            }
+            try {
+                return UUID.fromString(owner);
+            } catch (IllegalArgumentException e) {
+                return null;
+            }
+        }
+
         public Boolean isCarryingChest() {
             return isCarryingChest;
         }
@@ -430,7 +444,6 @@ public abstract class EntityExtraData implements ExtraData {
 
     }
 
-    // TODO: Next update to save owners as UUID - Minecraft 1.7.8
     public static class WolfExtraData extends AgeableExtraData {
 
         private Boolean isTamed;
@@ -441,7 +454,8 @@ public abstract class EntityExtraData implements ExtraData {
         public WolfExtraData(WorldConfig config, Wolf entity) {
             super(config, entity);
             if (config.isLoggingExtraEntityMeta(EntityMetaType.wolfowner)) isTamed = entity.isTamed() ? true : null;
-            if (config.isLoggingExtraEntityMeta(EntityMetaType.wolfowner)) owner = (entity.getOwner() != null) ? entity.getOwner().getName() : null;
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.wolfowner)) owner = (entity.getOwner() != null) ? entity.getOwner().getUniqueId()
+                    .toString() : null;
             if (config.isLoggingExtraEntityMeta(EntityMetaType.wolfowner)) isSitting = entity.isSitting() ? true : null;
             if (config.isLoggingExtraEntityMeta(EntityMetaType.wolfcollar)) collarColor = (entity.getCollarColor() == DyeColor.RED) ? null : entity
                     .getCollarColor();
@@ -453,6 +467,17 @@ public abstract class EntityExtraData implements ExtraData {
 
         public String getOwner() {
             return owner;
+        }
+
+        public UUID getOwnerUUID() {
+            if (owner == null) {
+                return null;
+            }
+            try {
+                return UUID.fromString(owner);
+            } catch (IllegalArgumentException e) {
+                return null;
+            }
         }
 
         public Boolean isSitting() {
@@ -470,7 +495,6 @@ public abstract class EntityExtraData implements ExtraData {
 
     }
 
-    // TODO: Next update to save owners as UUID - Minecraft 1.7.8
     public static class OcelotExtraData extends AgeableExtraData {
 
         private Boolean isTamed;
@@ -481,7 +505,8 @@ public abstract class EntityExtraData implements ExtraData {
         public OcelotExtraData(WorldConfig config, Ocelot entity) {
             super(config, entity);
             if (config.isLoggingExtraEntityMeta(EntityMetaType.catowner)) isTamed = entity.isTamed() ? true : null;
-            if (config.isLoggingExtraEntityMeta(EntityMetaType.catowner)) owner = (entity.getOwner() != null) ? entity.getOwner().getName() : null;
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.catowner)) owner = (entity.getOwner() != null) ? entity.getOwner().getUniqueId()
+                    .toString() : null;
             if (config.isLoggingExtraEntityMeta(EntityMetaType.catowner)) isSitting = entity.isSitting() ? true : null;
             if (config.isLoggingExtraEntityMeta(EntityMetaType.cattype)) catType = (entity.getCatType() == org.bukkit.entity.Ocelot.Type.WILD_OCELOT) ? null
                     : entity.getCatType();
@@ -493,6 +518,17 @@ public abstract class EntityExtraData implements ExtraData {
 
         public String getOwner() {
             return owner;
+        }
+
+        public UUID getOwnerUUID() {
+            if (owner == null) {
+                return null;
+            }
+            try {
+                return UUID.fromString(owner);
+            } catch (IllegalArgumentException e) {
+                return null;
+            }
         }
 
         public Boolean isSitting() {

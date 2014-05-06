@@ -7,6 +7,7 @@ import static org.bukkit.Bukkit.getOfflinePlayer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import jcraft.jblockactivity.LoggingType;
 import jcraft.jblockactivity.actionlog.EntityActionLog;
@@ -243,7 +244,8 @@ public class EntityChange extends EntityActionLog {
                         final Wolf wolf = (Wolf) entity;
                         if (data.isTamed() != null) wolf.setTamed(data.isTamed());
                         if (data.getOwner() != null) {
-                            wolf.setOwner(getOfflinePlayer(data.getOwner()));
+                            final UUID ownerUUID = data.getOwnerUUID();
+                            wolf.setOwner((ownerUUID == null) ? getOfflinePlayer(data.getOwner()) : getOfflinePlayer(ownerUUID));
                         }
                         if (data.getCollarColor() != null) wolf.setCollarColor(data.getCollarColor());
                     } else if (getEntityId() == 98) {
@@ -251,7 +253,8 @@ public class EntityChange extends EntityActionLog {
                         final Ocelot ocelot = (Ocelot) entity;
                         if (data.isTamed() != null) ocelot.setTamed(data.isTamed());
                         if (data.getOwner() != null) {
-                            ocelot.setOwner(getOfflinePlayer(data.getOwner()));
+                            final UUID ownerUUID = data.getOwnerUUID();
+                            ocelot.setOwner((ownerUUID == null) ? getOfflinePlayer(data.getOwner()) : getOfflinePlayer(ownerUUID));
                         }
                         if (data.getCatType() != null) ocelot.setCatType(data.getCatType());
                     } else if (getEntityId() == 99) {
@@ -283,7 +286,8 @@ public class EntityChange extends EntityActionLog {
 
                         if (data.isTamed() != null) horse.setTamed(data.isTamed());
                         if (data.getOwner() != null) {
-                            horse.setOwner(getOfflinePlayer(data.getOwner()));
+                            final UUID ownerUUID = data.getOwnerUUID();
+                            horse.setOwner((ownerUUID == null) ? getOfflinePlayer(data.getOwner()) : getOfflinePlayer(ownerUUID));
                         }
                     } else if (getEntityId() == 120) {
                         final VillagerExtraData data = (VillagerExtraData) getExtraData();

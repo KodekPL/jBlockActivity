@@ -109,7 +109,6 @@ public abstract class BlockExtraData implements ExtraData {
 
     }
 
-    // TODO: Next update to save skull name as UUID - Minecraft 1.7.8
     public static class SkullExtraData extends BlockExtraData {
 
         private final BlockFace rotation;
