@@ -69,6 +69,8 @@ public abstract class EntityExtraData implements ExtraData {
 
     public abstract String getData();
 
+    public abstract boolean isNull();
+
     public String getCustomName() {
         return customName;
     }
@@ -108,6 +110,11 @@ public abstract class EntityExtraData implements ExtraData {
             return toJson(this);
         }
 
+        @Override
+        public boolean isNull() {
+            return false;
+        }
+
     }
 
     public static class SkeletonExtraData extends EntityExtraData {
@@ -127,6 +134,11 @@ public abstract class EntityExtraData implements ExtraData {
         @Override
         public String getData() {
             return toJson(this);
+        }
+
+        @Override
+        public boolean isNull() {
+            return type == null;
         }
 
     }
@@ -155,6 +167,11 @@ public abstract class EntityExtraData implements ExtraData {
             return toJson(this);
         }
 
+        @Override
+        public boolean isNull() {
+            return isBaby == null && isVillager == null;
+        }
+
     }
 
     public static class MagmaCubeExtraData extends EntityExtraData {
@@ -173,6 +190,11 @@ public abstract class EntityExtraData implements ExtraData {
         @Override
         public String getData() {
             return toJson(this);
+        }
+
+        @Override
+        public boolean isNull() {
+            return size == null;
         }
 
     }
@@ -195,6 +217,11 @@ public abstract class EntityExtraData implements ExtraData {
             return toJson(this);
         }
 
+        @Override
+        public boolean isNull() {
+            return size == null;
+        }
+
     }
 
     public static class CreeperExtraData extends EntityExtraData {
@@ -213,6 +240,11 @@ public abstract class EntityExtraData implements ExtraData {
         @Override
         public String getData() {
             return toJson(this);
+        }
+
+        @Override
+        public boolean isNull() {
+            return isPowered == null;
         }
 
     }
@@ -256,6 +288,11 @@ public abstract class EntityExtraData implements ExtraData {
             return toJson(this);
         }
 
+        @Override
+        public boolean isNull() {
+            return blockId == null || blockData == null;
+        }
+
     }
 
     public static class IronGolemExtraData extends EntityExtraData {
@@ -276,9 +313,14 @@ public abstract class EntityExtraData implements ExtraData {
             return toJson(this);
         }
 
+        @Override
+        public boolean isNull() {
+            return isPlayerCreated == null;
+        }
+
     }
 
-    public static class AgeableExtraData extends EntityExtraData {
+    public static abstract class AgeableExtraData extends EntityExtraData {
 
         private Integer age;
         private Boolean ageLock;
@@ -308,6 +350,8 @@ public abstract class EntityExtraData implements ExtraData {
             return toJson(this);
         }
 
+        public abstract boolean isNull();
+
     }
 
     public static class VillagerExtraData extends AgeableExtraData {
@@ -327,6 +371,11 @@ public abstract class EntityExtraData implements ExtraData {
         @Override
         public String getData() {
             return toJson(this);
+        }
+
+        @Override
+        public boolean isNull() {
+            return profession == null;
         }
 
     }
@@ -442,6 +491,11 @@ public abstract class EntityExtraData implements ExtraData {
             return toJson(this);
         }
 
+        @Override
+        public boolean isNull() {
+            return false;
+        }
+
     }
 
     public static class WolfExtraData extends AgeableExtraData {
@@ -491,6 +545,11 @@ public abstract class EntityExtraData implements ExtraData {
         @Override
         public String getData() {
             return toJson(this);
+        }
+
+        @Override
+        public boolean isNull() {
+            return isTamed == null && owner == null && isSitting == null && collarColor == null;
         }
 
     }
@@ -544,6 +603,11 @@ public abstract class EntityExtraData implements ExtraData {
             return toJson(this);
         }
 
+        @Override
+        public boolean isNull() {
+            return isTamed == null && owner == null && isSitting == null && catType == null;
+        }
+
     }
 
     public static class PigExtraData extends AgeableExtraData {
@@ -562,6 +626,11 @@ public abstract class EntityExtraData implements ExtraData {
         @Override
         public String getData() {
             return toJson(this);
+        }
+
+        @Override
+        public boolean isNull() {
+            return saddle == null;
         }
 
     }
@@ -590,6 +659,11 @@ public abstract class EntityExtraData implements ExtraData {
             return toJson(this);
         }
 
+        @Override
+        public boolean isNull() {
+            return color == null && sheared == null;
+        }
+
     }
 
     public static class PaintingExtraData extends EntityExtraData {
@@ -608,6 +682,11 @@ public abstract class EntityExtraData implements ExtraData {
         @Override
         public String getData() {
             return toJson(this);
+        }
+
+        @Override
+        public boolean isNull() {
+            return art == null;
         }
 
     }

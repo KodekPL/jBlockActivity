@@ -96,7 +96,7 @@ public class EntityChange extends EntityActionLog {
                                 .spawn(hangBlock.getLocation(), EntityType.fromId(getEntityId()).getEntityClass());
                         hanging.teleport(block.getLocation());
                         hanging.setFacingDirection(face, true);
-                        if (getExtraData() != null && hanging instanceof Painting) {
+                        if (getExtraData() != null && !getExtraData().isNull() && hanging instanceof Painting) {
                             final PaintingExtraData extraData = (PaintingExtraData) getExtraData();
                             ((Painting) hanging).setArt(extraData.getArt(), true);
                         }
@@ -108,7 +108,7 @@ public class EntityChange extends EntityActionLog {
                 } else {
                     for (Hanging hanging : hangings) {
                         if (hanging.getFacing().ordinal() == getEntityData()) {
-                            if (getExtraData() != null && getEntityId() == 9) { // Painting
+                            if (getExtraData() != null && !getExtraData().isNull() && getEntityId() == 9) { // Painting
                                 PaintingExtraData extraData = (PaintingExtraData) getExtraData();
                                 if (((Painting) hanging).getArt() == extraData.getArt()) {
                                     hanging.remove();
@@ -213,85 +213,87 @@ public class EntityChange extends EntityActionLog {
                         }
                     }
 
-                    if (getEntityId() == 50) {
-                        final CreeperExtraData data = (CreeperExtraData) getExtraData();
-                        if (data.isPowered() != null) ((Creeper) entity).setPowered(data.isPowered());
-                    } else if (getEntityId() == 51) {
-                        final SkeletonExtraData data = (SkeletonExtraData) getExtraData();
-                        if (data.getType() != null) ((Skeleton) entity).setSkeletonType(data.getType());
-                    } else if (getEntityId() == 54) {
-                        final ZombieExtraData data = (ZombieExtraData) getExtraData();
-                        final Zombie zombie = (Zombie) entity;
-                        if (data.isBaby() != null) zombie.setBaby(data.isBaby());
-                        if (data.isVillager() != null) zombie.setVillager(data.isVillager());
-                    } else if (getEntityId() == 55) {
-                        final SlimeExtraData data = (SlimeExtraData) getExtraData();
-                        if (data.getSize() != null) ((Slime) entity).setSize(data.getSize());
-                    } else if (getEntityId() == 58) {
-                        final EndermanExtraData data = (EndermanExtraData) getExtraData();
-                        if (data.getMaterialData() != null) ((Enderman) entity).setCarriedMaterial(data.getMaterialData());
-                    } else if (getEntityId() == 62) {
-                        final MagmaCubeExtraData data = (MagmaCubeExtraData) getExtraData();
-                        if (data.getSize() != null) ((MagmaCube) entity).setSize(data.getSize());
-                    } else if (getEntityId() == 90) {
-                        final PigExtraData data = (PigExtraData) getExtraData();
-                        if (data.hasSaddle() != null) ((Pig) entity).setSaddle(data.hasSaddle());
-                    } else if (getEntityId() == 91) {
-                        final SheepExtraData data = (SheepExtraData) getExtraData();
-                        if (data.getColor() != null) ((Sheep) entity).setColor(data.getColor());
-                    } else if (getEntityId() == 95) {
-                        final WolfExtraData data = (WolfExtraData) getExtraData();
-                        final Wolf wolf = (Wolf) entity;
-                        if (data.isTamed() != null) wolf.setTamed(data.isTamed());
-                        if (data.getOwner() != null) {
-                            final UUID ownerUUID = data.getOwnerUUID();
-                            wolf.setOwner((ownerUUID == null) ? getOfflinePlayer(data.getOwner()) : getOfflinePlayer(ownerUUID));
-                        }
-                        if (data.getCollarColor() != null) wolf.setCollarColor(data.getCollarColor());
-                    } else if (getEntityId() == 98) {
-                        final OcelotExtraData data = (OcelotExtraData) getExtraData();
-                        final Ocelot ocelot = (Ocelot) entity;
-                        if (data.isTamed() != null) ocelot.setTamed(data.isTamed());
-                        if (data.getOwner() != null) {
-                            final UUID ownerUUID = data.getOwnerUUID();
-                            ocelot.setOwner((ownerUUID == null) ? getOfflinePlayer(data.getOwner()) : getOfflinePlayer(ownerUUID));
-                        }
-                        if (data.getCatType() != null) ocelot.setCatType(data.getCatType());
-                    } else if (getEntityId() == 99) {
-                        final IronGolemExtraData data = (IronGolemExtraData) getExtraData();
-                        if (data.isPlayerCreated() != null) ((IronGolem) entity).setPlayerCreated(data.isPlayerCreated());
-                    } else if (getEntityId() == 100) {
-                        final HorseExtraData data = (HorseExtraData) getExtraData();
-                        final Horse horse = (Horse) entity;
-                        if (data.getVariant() != null) horse.setVariant(data.getVariant());
-                        if (data.getColor() != null) horse.setColor(data.getColor());
-                        if (data.getStyle() != null) horse.setStyle(data.getStyle());
-                        if (data.getMaxDomestication() != null) horse.setMaxDomestication(data.getMaxDomestication());
-                        if (data.getDomestication() != null) horse.setDomestication(data.getDomestication());
-                        if (data.getJumpStrength() != null) horse.setJumpStrength(data.getJumpStrength());
-                        if (data.isCarryingChest() != null) horse.setCarryingChest(data.isCarryingChest());
+                    if (!getExtraData().isNull()) {
+                        if (getEntityId() == 50) {
+                            final CreeperExtraData data = (CreeperExtraData) getExtraData();
+                            ((Creeper) entity).setPowered(data.isPowered());
+                        } else if (getEntityId() == 51) {
+                            final SkeletonExtraData data = (SkeletonExtraData) getExtraData();
+                            ((Skeleton) entity).setSkeletonType(data.getType());
+                        } else if (getEntityId() == 54) {
+                            final ZombieExtraData data = (ZombieExtraData) getExtraData();
+                            final Zombie zombie = (Zombie) entity;
+                            if (data.isBaby() != null) zombie.setBaby(data.isBaby());
+                            if (data.isVillager() != null) zombie.setVillager(data.isVillager());
+                        } else if (getEntityId() == 55) {
+                            final SlimeExtraData data = (SlimeExtraData) getExtraData();
+                            ((Slime) entity).setSize(data.getSize());
+                        } else if (getEntityId() == 58) {
+                            final EndermanExtraData data = (EndermanExtraData) getExtraData();
+                            ((Enderman) entity).setCarriedMaterial(data.getMaterialData());
+                        } else if (getEntityId() == 62) {
+                            final MagmaCubeExtraData data = (MagmaCubeExtraData) getExtraData();
+                            ((MagmaCube) entity).setSize(data.getSize());
+                        } else if (getEntityId() == 90) {
+                            final PigExtraData data = (PigExtraData) getExtraData();
+                            ((Pig) entity).setSaddle(data.hasSaddle());
+                        } else if (getEntityId() == 91) {
+                            final SheepExtraData data = (SheepExtraData) getExtraData();
+                            ((Sheep) entity).setColor(data.getColor());
+                        } else if (getEntityId() == 95) {
+                            final WolfExtraData data = (WolfExtraData) getExtraData();
+                            final Wolf wolf = (Wolf) entity;
+                            if (data.isTamed() != null) wolf.setTamed(data.isTamed());
+                            if (data.getOwner() != null) {
+                                final UUID ownerUUID = data.getOwnerUUID();
+                                wolf.setOwner((ownerUUID == null) ? getOfflinePlayer(data.getOwner()) : getOfflinePlayer(ownerUUID));
+                            }
+                            if (data.getCollarColor() != null) wolf.setCollarColor(data.getCollarColor());
+                        } else if (getEntityId() == 98) {
+                            final OcelotExtraData data = (OcelotExtraData) getExtraData();
+                            final Ocelot ocelot = (Ocelot) entity;
+                            if (data.isTamed() != null) ocelot.setTamed(data.isTamed());
+                            if (data.getOwner() != null) {
+                                final UUID ownerUUID = data.getOwnerUUID();
+                                ocelot.setOwner((ownerUUID == null) ? getOfflinePlayer(data.getOwner()) : getOfflinePlayer(ownerUUID));
+                            }
+                            if (data.getCatType() != null) ocelot.setCatType(data.getCatType());
+                        } else if (getEntityId() == 99) {
+                            final IronGolemExtraData data = (IronGolemExtraData) getExtraData();
+                            ((IronGolem) entity).setPlayerCreated(data.isPlayerCreated());
+                        } else if (getEntityId() == 100) {
+                            final HorseExtraData data = (HorseExtraData) getExtraData();
+                            final Horse horse = (Horse) entity;
+                            if (data.getVariant() != null) horse.setVariant(data.getVariant());
+                            if (data.getColor() != null) horse.setColor(data.getColor());
+                            if (data.getStyle() != null) horse.setStyle(data.getStyle());
+                            if (data.getMaxDomestication() != null) horse.setMaxDomestication(data.getMaxDomestication());
+                            if (data.getDomestication() != null) horse.setDomestication(data.getDomestication());
+                            if (data.getJumpStrength() != null) horse.setJumpStrength(data.getJumpStrength());
+                            if (data.isCarryingChest() != null) horse.setCarryingChest(data.isCarryingChest());
 
-                        final ItemStack[] invContent = data.getInventory(getWorld());
-                        if (invContent != null) {
-                            if (invContent[0] != null) horse.getInventory().setSaddle(invContent[0]);
-                            if (invContent[1] != null) horse.getInventory().setArmor(invContent[1]);
-                            if (horse.isCarryingChest() && invContent.length > 2) {
-                                for (int i = 2; i < horse.getInventory().getSize() + 2; i++) {
-                                    if (invContent[i] != null) {
-                                        horse.getInventory().setItem(i - 2, invContent[i]);
+                            final ItemStack[] invContent = data.getInventory(getWorld());
+                            if (invContent != null) {
+                                if (invContent[0] != null) horse.getInventory().setSaddle(invContent[0]);
+                                if (invContent[1] != null) horse.getInventory().setArmor(invContent[1]);
+                                if (horse.isCarryingChest() && invContent.length > 2) {
+                                    for (int i = 2; i < horse.getInventory().getSize() + 2; i++) {
+                                        if (invContent[i] != null) {
+                                            horse.getInventory().setItem(i - 2, invContent[i]);
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        if (data.isTamed() != null) horse.setTamed(data.isTamed());
-                        if (data.getOwner() != null) {
-                            final UUID ownerUUID = data.getOwnerUUID();
-                            horse.setOwner((ownerUUID == null) ? getOfflinePlayer(data.getOwner()) : getOfflinePlayer(ownerUUID));
+                            if (data.isTamed() != null) horse.setTamed(data.isTamed());
+                            if (data.getOwner() != null) {
+                                final UUID ownerUUID = data.getOwnerUUID();
+                                horse.setOwner((ownerUUID == null) ? getOfflinePlayer(data.getOwner()) : getOfflinePlayer(ownerUUID));
+                            }
+                        } else if (getEntityId() == 120) {
+                            final VillagerExtraData data = (VillagerExtraData) getExtraData();
+                            ((Villager) entity).setProfession(data.getProfession());
                         }
-                    } else if (getEntityId() == 120) {
-                        final VillagerExtraData data = (VillagerExtraData) getExtraData();
-                        if (data.getProfession() != null) ((Villager) entity).setProfession(data.getProfession());
                     }
                 }
                 return BlockEditorResult.ENTITY_SPAWNED;

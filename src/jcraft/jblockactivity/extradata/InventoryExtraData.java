@@ -130,6 +130,11 @@ public class InventoryExtraData implements ExtraData {
         return toJson(this);
     }
 
+    @Override
+    public boolean isNull() {
+        return isEmpty();
+    }
+
     public void compareInventories(InventoryExtraData invExtraData) {
         final ItemStackComparator comperator = new ItemStackComparator();
         final ArrayList<ItemStack> diff = new ArrayList<ItemStack>();

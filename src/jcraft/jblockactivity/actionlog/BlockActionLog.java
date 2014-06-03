@@ -216,7 +216,7 @@ public class BlockActionLog extends ActionLog implements LookupCache {
                         }
                     } else if (newBlockId == 144 || oldBlockId == 144) {
                         final BlockExtraData.SkullExtraData data = (SkullExtraData) extraData;
-                        if (!data.getName().equals("")) {
+                        if (data.getName() != null && !data.getName().equals("")) {
                             msg.append(ChatColor.GRAY).append(" [").append(data.getName()).append(']');
                         }
                     } else if (oldBlockId == 137) {

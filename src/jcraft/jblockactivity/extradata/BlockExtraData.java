@@ -15,6 +15,8 @@ public abstract class BlockExtraData implements ExtraData {
 
     public abstract String getData();
 
+    public abstract boolean isNull();
+
     public static class CommandBlockExtraData extends BlockExtraData {
 
         private final String cmd, name;
@@ -35,6 +37,11 @@ public abstract class BlockExtraData implements ExtraData {
         @Override
         public String getData() {
             return toJson(this);
+        }
+
+        @Override
+        public boolean isNull() {
+            return name == null && cmd == null;
         }
 
     }
@@ -67,6 +74,11 @@ public abstract class BlockExtraData implements ExtraData {
             return toJson(this);
         }
 
+        @Override
+        public boolean isNull() {
+            return itemId == null || itemData == null;
+        }
+
     }
 
     public static class MobSpawnerExtraData extends BlockExtraData { // Only naturally generated Mob Spawners
@@ -84,6 +96,11 @@ public abstract class BlockExtraData implements ExtraData {
         @Override
         public String getData() {
             return toJson(this);
+        }
+
+        @Override
+        public boolean isNull() {
+            return entityType == null;
         }
 
     }
@@ -105,6 +122,11 @@ public abstract class BlockExtraData implements ExtraData {
         @Override
         public String getData() {
             return toJson(this);
+        }
+
+        @Override
+        public boolean isNull() {
+            return text == null;
         }
 
     }
@@ -136,6 +158,11 @@ public abstract class BlockExtraData implements ExtraData {
         @Override
         public String getData() {
             return toJson(this);
+        }
+
+        @Override
+        public boolean isNull() {
+            return skullType == null || rotation == null;
         }
 
     }

@@ -60,7 +60,7 @@ public class BlockChange extends BlockActionLog {
             }
 
             if (getLoggingType() == LoggingType.inventoryaccess) {
-                if (getExtraData() != null && isContainerBlock(Material.getMaterial(blockId))) {
+                if (getExtraData() != null && !getExtraData().isNull() && isContainerBlock(Material.getMaterial(blockId))) {
                     final InventoryExtraData extraData = (InventoryExtraData) getExtraData();
                     for (ItemStack item : extraData.getContent()) {
                         int leftover;
@@ -128,7 +128,7 @@ public class BlockChange extends BlockActionLog {
                     block.getRelative(BlockFace.DOWN).setTypeId(60);
                 }
             }
-            if (getExtraData() != null) {
+            if (getExtraData() != null && !getExtraData().isNull()) {
                 if (currentType == 63 || currentType == 68) {
                     final Sign sign = (Sign) block.getState();
                     final String[] lines = ((SignExtraData) getExtraData()).getText();
