@@ -1,4 +1,4 @@
-jBlockActivity 0.8.7
+jBlockActivity 0.8.8
 ==============
 
 My idea of better and simpler LogBlock!

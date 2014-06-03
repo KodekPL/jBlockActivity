@@ -20,7 +20,7 @@ import org.bukkit.material.MaterialData;
 
 public class LogToolListener implements Listener {
 
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGH)
     public void onToolInteract(PlayerInteractEvent event) {
         if (event.getItem() == null) {
             return;

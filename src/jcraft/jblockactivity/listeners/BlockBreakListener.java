@@ -47,7 +47,7 @@ import org.bukkit.material.TripwireHook;
 
 public class BlockBreakListener implements Listener {
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
         final WorldConfig config = BlockActivity.getWorldConfig(event.getPlayer().getWorld().getName());
         if (config == null || !config.isLogging(LoggingType.blockbreak)) {
@@ -311,7 +311,7 @@ public class BlockBreakListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBucketFill(PlayerBucketFillEvent event) {
         final Block block = event.getBlockClicked();
         final WorldConfig config = BlockActivity.getWorldConfig(block.getWorld().getName());

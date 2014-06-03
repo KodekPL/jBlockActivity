@@ -35,7 +35,7 @@ import org.bukkit.material.Bed;
 
 public class BlockPlaceListener implements Listener {
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockPlace(final BlockPlaceEvent event) {
         final WorldConfig config = BlockActivity.getWorldConfig(event.getPlayer().getWorld().getName());
         if (config == null || !config.isLogging(LoggingType.blockplace)) {
@@ -172,7 +172,7 @@ public class BlockPlaceListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBucketEmpty(PlayerBucketEmptyEvent event) {
         final Block block = event.getBlockClicked().getRelative(event.getBlockFace());
         final WorldConfig config = BlockActivity.getWorldConfig(block.getWorld().getName());
@@ -197,7 +197,7 @@ public class BlockPlaceListener implements Listener {
         BlockActivity.sendActionLog(action);
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onSignChange(SignChangeEvent event) {
         final Block block = event.getBlock();
         final WorldConfig config = BlockActivity.getWorldConfig(block.getWorld().getName());
