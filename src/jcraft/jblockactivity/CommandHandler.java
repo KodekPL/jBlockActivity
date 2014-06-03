@@ -258,6 +258,15 @@ public class CommandHandler implements CommandExecutor {
     private void showPage(CommandSender sender, int page) {
         final ActiveSession session = ActiveSession.getSession(sender);
         if (session.getLastLookupCache() != null && session.getLastLookupCache().length > 0) {
+            if (session.getLastQueryParams().mode != SummarizationMode.NONE) {
+                if (session.getLastQueryParams().mode == SummarizationMode.BLOCKS) {
+                    sender.sendMessage(ChatColor.GOLD + "Created - Destroyed - Block");
+                } else if (session.getLastQueryParams().mode == SummarizationMode.ENTITIES) {
+                    sender.sendMessage(ChatColor.GOLD + "Kills - Entity");
+                } else {
+                    sender.sendMessage(ChatColor.GOLD + "Created - Destroyed - Player");
+                }
+            }
             if (session.getLastLookupCache().length >= BlockActivity.config.linesPerPage) {
                 sender.sendMessage(ChatColor.GOLD.toString() + session.getLastLookupCache().length + " changes found.");
             }
@@ -308,16 +317,6 @@ public class CommandHandler implements CommandExecutor {
                 final ActiveSession session = ActiveSession.getSession(sender);
                 session.setLastLookupCache(lookupLogs.toArray(new LookupCache[lookupLogs.size()]));
                 session.setLastQueryParams(params);
-
-                if (params.mode != SummarizationMode.NONE) {
-                    if (params.mode == SummarizationMode.BLOCKS) {
-                        sender.sendMessage(ChatColor.GOLD + "Created - Destroyed - Block");
-                    } else if (params.mode == SummarizationMode.ENTITIES) {
-                        sender.sendMessage(ChatColor.GOLD + "Kills - Entity");
-                    } else {
-                        sender.sendMessage(ChatColor.GOLD + "Created - Destroyed - Player");
-                    }
-                }
 
                 showPage(sender, 1);
             } else {
