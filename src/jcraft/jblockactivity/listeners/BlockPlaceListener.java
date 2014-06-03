@@ -160,8 +160,8 @@ public class BlockPlaceListener implements Listener {
                     public void run() {
                         for (BlockState block : blocks) {
                             if (block.getLocation().getBlock().getType() != block.getType()) {
-                                new BlockActionLog(LoggingType.blockplace, playerName, playerUUID, block.getWorld(), block.getLocation().toVector(),
-                                        block, block.getLocation().getBlock().getState(), null);
+                                BlockActivity.sendActionLog(new BlockActionLog(LoggingType.blockplace, playerName, playerUUID, block.getWorld(),
+                                        block.getLocation().toVector(), block, block.getLocation().getBlock().getState(), null));
                             }
                         }
                     }
