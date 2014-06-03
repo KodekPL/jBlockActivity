@@ -6,6 +6,7 @@ import static jcraft.jblockactivity.utils.ActivityUtil.isFallingBlockKiller;
 import static jcraft.jblockactivity.utils.ActivityUtil.turnFace;
 import static jcraft.jblockactivity.utils.ActivityUtil.yawToFace;
 
+import java.util.List;
 import java.util.UUID;
 
 import jcraft.jblockactivity.BlockActivity;
@@ -26,6 +27,7 @@ import org.bukkit.block.Skull;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockMultiPlaceEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
@@ -41,17 +43,18 @@ public class BlockPlaceListener implements Listener {
         }
         final Block block = event.getBlock();
         final Material material = block.getType();
+
+        // SignChangeEvent
+        if (config.isLoggingExtraBlockMeta(BlockMetaType.signtext) && (material == Material.SIGN_POST || material == Material.WALL_SIGN)) {
+            return;
+        }
+
         final BlockState beforeState = event.getBlockReplacedState();
         final BlockState afterState = event.getBlockPlaced().getState();
         final UUID playerUUID = event.getPlayer().getUniqueId();
         final String playerName = event.getPlayer().getName();
 
         if (BlockActivity.isHidden(playerUUID)) {
-            return;
-        }
-
-        // SignChangeEvent
-        if (config.isLoggingExtraBlockMeta(BlockMetaType.signtext) && (material == Material.SIGN_POST || material == Material.WALL_SIGN)) {
             return;
         }
 
@@ -128,27 +131,45 @@ public class BlockPlaceListener implements Listener {
             BlockActivity.sendActionLog(action);
         }
 
-        BlockActionLog action = null;
-        if (material == Material.WOODEN_DOOR || material == Material.IRON_DOOR_BLOCK) {
-            if (afterState.getRawData() <= 3) {
-                final BlockFace doorFace = yawToFace(event.getPlayer().getEyeLocation().getYaw()).getOppositeFace();
-                final boolean doubleDoor = afterState.getBlock().getRelative(turnFace(doorFace, false)).getType() == afterState.getType();
-                action = new BlockActionLog(LoggingType.blockplace, playerName, playerUUID, afterState.getWorld(), afterState.getLocation()
-                        .add(0, 1, 0).toVector(), 0, (byte) 0, material.getId(), doubleDoor ? (byte) 9 : (byte) 8, null);
+        if (event instanceof BlockMultiPlaceEvent) {
+            BlockActionLog action = null;
+            if (material == Material.WOODEN_DOOR || material == Material.IRON_DOOR_BLOCK) {
+                if (afterState.getRawData() <= 3) {
+                    final BlockFace doorFace = yawToFace(event.getPlayer().getEyeLocation().getYaw()).getOppositeFace();
+                    final boolean doubleDoor = afterState.getBlock().getRelative(turnFace(doorFace, false)).getType() == afterState.getType();
+                    action = new BlockActionLog(LoggingType.blockplace, playerName, playerUUID, afterState.getWorld(), afterState.getLocation()
+                            .add(0, 1, 0).toVector(), 0, (byte) 0, material.getId(), doubleDoor ? (byte) 9 : (byte) 8, null);
+                }
+            } else if (material == Material.BED_BLOCK) {
+                final Bed bed = (Bed) afterState.getData();
+                if (bed.getData() <= 3) {
+                    action = new BlockActionLog(LoggingType.blockplace, playerName, playerUUID, afterState.getWorld(), afterState.getBlock()
+                            .getRelative(bed.getFacing()).getLocation().toVector(), 0, (byte) 0, material.getId(), (byte) (bed.getData() + 8), null);
+                }
+            } else if (material == Material.DOUBLE_PLANT) {
+                if (afterState.getRawData() <= 5) {
+                    action = new BlockActionLog(LoggingType.blockplace, playerName, playerUUID, afterState.getWorld(), afterState.getLocation()
+                            .add(0, 1, 0).toVector(), 0, (byte) 0, material.getId(), (byte) 11, null);
+                }
+            } else {
+                // Handle custom multi blocks
+                final BlockMultiPlaceEvent multiEvent = (BlockMultiPlaceEvent) event;
+                final List<BlockState> blocks = multiEvent.getReplacedBlockStates();
+                BlockActivity.getBlockActivity().getServer().getScheduler().scheduleSyncDelayedTask(BlockActivity.getBlockActivity(), new Runnable() {
+                    @Override
+                    public void run() {
+                        for (BlockState block : blocks) {
+                            if (block.getLocation().getBlock().getType() != block.getType()) {
+                                new BlockActionLog(LoggingType.blockplace, playerName, playerUUID, block.getWorld(), block.getLocation().toVector(),
+                                        block, block.getLocation().getBlock().getState(), null);
+                            }
+                        }
+                    }
+                }, 1L);
+                return;
             }
-        } else if (material == Material.BED_BLOCK) {
-            final Bed bed = (Bed) afterState.getData();
-            if (bed.getData() <= 3) {
-                action = new BlockActionLog(LoggingType.blockplace, playerName, playerUUID, afterState.getWorld(), afterState.getBlock()
-                        .getRelative(bed.getFacing()).getLocation().toVector(), 0, (byte) 0, material.getId(), (byte) (bed.getData() + 8), null);
-            }
-        } else if (material == Material.DOUBLE_PLANT) {
-            if (afterState.getRawData() <= 5) {
-                action = new BlockActionLog(LoggingType.blockplace, playerName, playerUUID, afterState.getWorld(), afterState.getLocation()
-                        .add(0, 1, 0).toVector(), 0, (byte) 0, material.getId(), (byte) 11, null);
-            }
+            BlockActivity.sendActionLog(action);
         }
-        BlockActivity.sendActionLog(action);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
