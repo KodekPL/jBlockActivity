@@ -192,7 +192,7 @@ public class BlockActionLog extends ActionLog implements LookupCache {
 
         final StringBuilder msg = new StringBuilder();
 
-        if (getLoggingType() == LoggingType.blockplace || getLoggingType() == LoggingType.blockbreak) {
+        if (getLoggingType() == LoggingType.blockplace || getLoggingType() == LoggingType.blockbreak || getLoggingType() == LoggingType.explosions) {
             msg.append(ChatColor.GRAY).append(formatTime(getTime())).append(' ');
             if (getLoggingType() == LoggingType.blockplace) {
                 if (oldBlockId == 0) {
@@ -201,7 +201,7 @@ public class BlockActionLog extends ActionLog implements LookupCache {
                     msg.append(sub).append("replaced ").append(MaterialNames.materialName(oldBlockId, oldBlockData)).append(" with ")
                             .append(MaterialNames.materialName(newBlockId, newBlockData));
                 }
-            } else if (getLoggingType() == LoggingType.blockbreak) {
+            } else if (getLoggingType() == LoggingType.blockbreak || getLoggingType() == LoggingType.explosions) {
                 msg.append(sub).append("destroyed ").append(MaterialNames.materialName(oldBlockId, oldBlockData));
             }
 

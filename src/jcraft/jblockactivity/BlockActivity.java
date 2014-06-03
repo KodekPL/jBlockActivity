@@ -20,6 +20,7 @@ import jcraft.jblockactivity.listeners.BlockBreakListener;
 import jcraft.jblockactivity.listeners.BlockInteractListener;
 import jcraft.jblockactivity.listeners.BlockPlaceListener;
 import jcraft.jblockactivity.listeners.CreatureKillListener;
+import jcraft.jblockactivity.listeners.ExplosionListener;
 import jcraft.jblockactivity.listeners.HangingListener;
 import jcraft.jblockactivity.listeners.InventoryAccessListener;
 import jcraft.jblockactivity.listeners.LogToolListener;
@@ -135,6 +136,9 @@ public class BlockActivity extends JavaPlugin {
         }
         if (config.isWorldsLogging(LoggingType.creaturekill)) {
             manager.registerEvents(new CreatureKillListener(), this);
+        }
+        if (config.isWorldsLogging(LoggingType.explosions)) {
+            manager.registerEvents(new ExplosionListener(), this);
         }
         manager.registerEvents(new LogToolListener(), this);
     }

@@ -21,6 +21,7 @@ import org.bukkit.block.DoubleChest;
 import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
 import org.bukkit.craftbukkit.libs.com.google.gson.GsonBuilder;
 import org.bukkit.craftbukkit.libs.com.google.gson.JsonSyntaxException;
+import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -147,7 +148,16 @@ public class ActivityUtil {
     }
 
     public static String getEntityName(Entity entity) {
+        return getEntityName(entity, false);
+    }
+
+    public static String getEntityName(Entity entity, boolean explosion) {
+        if (entity == null) {
+            return "unknown";
+        }
+
         final String name;
+
         if (entity instanceof Player) {
             name = ((Player) entity).getUniqueId().toString();
         } else if (entity instanceof Projectile && ((Projectile) entity).getShooter() != null) {
@@ -160,16 +170,23 @@ public class ActivityUtil {
         } else if (entity instanceof TNTPrimed && ((TNTPrimed) entity).getSource() != null) {
             final Entity source = ((TNTPrimed) entity).getSource();
             if (source instanceof Player) {
-                name = ((Player) entity).getUniqueId().toString();
+                name = ((Player) source).getUniqueId().toString();
             } else if (source instanceof Projectile && ((Projectile) entity).getShooter() != null) {
                 final LivingEntity shooter = ((Projectile) source).getShooter();
                 if (shooter instanceof Player) {
-                    name = ((Player) entity).getUniqueId().toString();
+                    name = ((Player) shooter).getUniqueId().toString();
                 } else {
                     name = "BA_" + shooter.getType().name().replace('_', ' ').toUpperCase();
                 }
             } else {
                 name = "BA_" + source.getType().name().replace('_', ' ').toUpperCase();
+            }
+        } else if (entity instanceof Creeper && explosion && ((Creeper) entity).getTarget() != null) {
+            final LivingEntity target = ((Creeper) entity).getTarget();
+            if (target instanceof Player) {
+                name = ((Player) target).getUniqueId().toString();
+            } else {
+                name = "BA_" + entity.getType().name().replace('_', ' ').toUpperCase();
             }
         } else {
             name = "BA_" + entity.getType().name().replace('_', ' ').toUpperCase();

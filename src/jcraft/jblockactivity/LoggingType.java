@@ -1,6 +1,7 @@
 package jcraft.jblockactivity;
 
 public enum LoggingType {
+
     bothblocks(-2),
     all(-1),
     blockbreak(1),
@@ -10,7 +11,8 @@ public enum LoggingType {
     hangingbreak(5),
     hangingplace(6),
     hanginginteract(7),
-    creaturekill(8);
+    creaturekill(8),
+    explosions(9);
 
     private final int id;
 
