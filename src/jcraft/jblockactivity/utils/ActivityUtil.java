@@ -32,6 +32,7 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.Vector;
 
 public class ActivityUtil {
@@ -161,22 +162,22 @@ public class ActivityUtil {
         if (entity instanceof Player) {
             name = ((Player) entity).getUniqueId().toString();
         } else if (entity instanceof Projectile && ((Projectile) entity).getShooter() != null) {
-            final LivingEntity shooter = ((Projectile) entity).getShooter();
+            final ProjectileSource shooter = ((Projectile) entity).getShooter();
             if (shooter instanceof Player) {
                 name = ((Player) shooter).getUniqueId().toString();
             } else {
-                name = "BA_" + shooter.getType().name().replace('_', ' ').toUpperCase();
+                name = "BA_" + ((Entity) shooter).getType().name().replace('_', ' ').toUpperCase();
             }
         } else if (entity instanceof TNTPrimed && ((TNTPrimed) entity).getSource() != null) {
             final Entity source = ((TNTPrimed) entity).getSource();
             if (source instanceof Player) {
                 name = ((Player) source).getUniqueId().toString();
             } else if (source instanceof Projectile && ((Projectile) entity).getShooter() != null) {
-                final LivingEntity shooter = ((Projectile) source).getShooter();
+                final ProjectileSource shooter = ((Projectile) source).getShooter();
                 if (shooter instanceof Player) {
                     name = ((Player) shooter).getUniqueId().toString();
                 } else {
-                    name = "BA_" + shooter.getType().name().replace('_', ' ').toUpperCase();
+                    name = "BA_" + ((Entity) shooter).getType().name().replace('_', ' ').toUpperCase();
                 }
             } else {
                 name = "BA_" + source.getType().name().replace('_', ' ').toUpperCase();
