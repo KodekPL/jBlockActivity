@@ -38,6 +38,9 @@ import org.bukkit.material.MaterialData;
 
 public abstract class EntityExtraData implements ExtraData {
 
+    private Double maxHealth;
+    private Double health;
+
     private String customName;
     private Boolean customNameVisible;
     private Boolean canPickupItems;
@@ -50,6 +53,8 @@ public abstract class EntityExtraData implements ExtraData {
     protected EntityExtraData(WorldConfig config, Entity entity) {
         if (entity instanceof LivingEntity) {
             final LivingEntity lEntity = (LivingEntity) entity;
+            this.maxHealth = lEntity.getMaxHealth();
+            this.health = lEntity.getHealth();
             if (config.isLoggingExtraEntityMeta(EntityMetaType.customname)) this.customName = lEntity.getCustomName();
             if (config.isLoggingExtraEntityMeta(EntityMetaType.customname)) this.customNameVisible = lEntity.isCustomNameVisible() ? true : null;
             this.canPickupItems = lEntity.getCanPickupItems() ? true : null;
@@ -70,6 +75,14 @@ public abstract class EntityExtraData implements ExtraData {
     public abstract String getData();
 
     public abstract boolean isNull();
+
+    public Double getMaxHealth() {
+        return maxHealth;
+    }
+
+    public Double getHealth() {
+        return health;
+    }
 
     public String getCustomName() {
         return customName;

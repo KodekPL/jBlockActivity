@@ -178,6 +178,9 @@ public class EntityChange extends EntityActionLog {
                     if (entity instanceof LivingEntity) {
                         final EntityExtraData data = (EntityExtraData) getExtraData();
                         final LivingEntity lEntity = (LivingEntity) entity;
+                        if (data.getMaxHealth() != null) lEntity.setMaxHealth(data.getMaxHealth());
+                        if (data.getHealth() != null) lEntity.setHealth((data.getHealth() > lEntity.getMaxHealth()) ? lEntity.getMaxHealth() : data
+                                .getHealth());
                         if (data.getCustomName() != null) lEntity.setCustomName(data.getCustomName());
                         if (data.isCustomNameVisible() != null) lEntity.setCustomNameVisible(data.isCustomNameVisible());
                         if (data.getCanPickupItems() != null) lEntity.setCanPickupItems(data.getCanPickupItems());
