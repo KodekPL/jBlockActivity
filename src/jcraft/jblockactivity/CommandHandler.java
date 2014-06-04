@@ -258,15 +258,6 @@ public class CommandHandler implements CommandExecutor {
     private void showPage(CommandSender sender, int page) {
         final ActiveSession session = ActiveSession.getSession(sender);
         if (session.getLastLookupCache() != null && session.getLastLookupCache().length > 0) {
-            if (session.getLastQueryParams().mode != SummarizationMode.NONE) {
-                if (session.getLastQueryParams().mode == SummarizationMode.BLOCKS) {
-                    sender.sendMessage(ChatColor.GOLD + "Created - Destroyed - Block");
-                } else if (session.getLastQueryParams().mode == SummarizationMode.ENTITIES) {
-                    sender.sendMessage(ChatColor.GOLD + "Kills - Entity");
-                } else {
-                    sender.sendMessage(ChatColor.GOLD + "Created - Destroyed - Player");
-                }
-            }
             if (session.getLastLookupCache().length >= BlockActivity.config.linesPerPage) {
                 sender.sendMessage(ChatColor.GOLD.toString() + session.getLastLookupCache().length + " changes found.");
             }
@@ -277,6 +268,15 @@ public class CommandHandler implements CommandExecutor {
                 final int numberOfPages = (int) Math.ceil(session.getLastLookupCache().length / (double) BlockActivity.config.linesPerPage);
                 if (numberOfPages != 1) {
                     sender.sendMessage(ChatColor.GRAY + "Page " + page + "/" + numberOfPages);
+                }
+                if (session.getLastQueryParams().mode != SummarizationMode.NONE) {
+                    if (session.getLastQueryParams().mode == SummarizationMode.BLOCKS) {
+                        sender.sendMessage(ChatColor.GOLD + "Created - Destroyed - Block");
+                    } else if (session.getLastQueryParams().mode == SummarizationMode.ENTITIES) {
+                        sender.sendMessage(ChatColor.GOLD + "Kills - Entity");
+                    } else {
+                        sender.sendMessage(ChatColor.GOLD + "Created - Destroyed - Player");
+                    }
                 }
                 for (int i = startpos; i <= stoppos; i++) {
                     if (session.getLastLookupCache()[i] == null) {
