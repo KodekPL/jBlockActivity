@@ -3,10 +3,10 @@ package jcraft.jblockactivity.listeners;
 import java.util.UUID;
 
 import jcraft.jblockactivity.BlockActivity;
+import jcraft.jblockactivity.LoggingMaker;
 import jcraft.jblockactivity.LoggingType;
 import jcraft.jblockactivity.actionlog.BlockActionLog;
 import jcraft.jblockactivity.config.WorldConfig;
-import jcraft.jblockactivity.utils.ActivityUtil;
 
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
@@ -23,7 +23,7 @@ public class ExplosionListener implements Listener {
             return;
         }
 
-        final String destroyerName = ActivityUtil.getEntityName(event.getEntity(), true);
+        final String destroyerName = LoggingMaker.getLoggingMaker(event.getEntity(), true);
         UUID destroyerUUID;
         try {
             destroyerUUID = UUID.fromString(destroyerName);

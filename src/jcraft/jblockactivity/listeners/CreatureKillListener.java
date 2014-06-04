@@ -1,10 +1,9 @@
 package jcraft.jblockactivity.listeners;
 
-import static jcraft.jblockactivity.utils.ActivityUtil.getEntityName;
-
 import java.util.UUID;
 
 import jcraft.jblockactivity.BlockActivity;
+import jcraft.jblockactivity.LoggingMaker;
 import jcraft.jblockactivity.LoggingType;
 import jcraft.jblockactivity.actionlog.EntityActionLog;
 import jcraft.jblockactivity.config.WorldConfig;
@@ -35,7 +34,7 @@ public class CreatureKillListener implements Listener {
             }
 
             final Entity killer = ((EntityDamageByEntityEvent) event.getEntity().getLastDamageCause()).getDamager();
-            final String killerName = getEntityName(killer);
+            final String killerName = LoggingMaker.getLoggingMaker(killer);
 
             UUID killerUUID;
             try {

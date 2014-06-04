@@ -16,10 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 import jcraft.jblockactivity.LoggingType;
 import jcraft.jblockactivity.extradata.EntityExtraData;
-import jcraft.jblockactivity.extradata.EntityExtraData.HorseExtraData;
-import jcraft.jblockactivity.extradata.EntityExtraData.OcelotExtraData;
 import jcraft.jblockactivity.extradata.EntityExtraData.PaintingExtraData;
-import jcraft.jblockactivity.extradata.EntityExtraData.WolfExtraData;
 import jcraft.jblockactivity.extradata.ExtraData;
 import jcraft.jblockactivity.extradata.InventoryExtraData;
 import jcraft.jblockactivity.session.LookupCache;
@@ -190,22 +187,23 @@ public class EntityActionLog extends ActionLog implements LookupCache {
         } else if (getLoggingType() == LoggingType.creaturekill) {
             msg.append(ChatColor.GRAY).append(formatTime(getTime())).append(' ').append(sub).append("killed ")
                     .append(MaterialNames.entityName(getEntityId()));
-            /* Skip showing owner name, plugin is now saving only owner UUID and it is not worth asking database for addition names
-            if (getExtraData() != null) {
-                String ownerName = null;
-                if (getEntityId() == 95) {
-                    final WolfExtraData extraData = (WolfExtraData) getExtraData();
-                    if (extraData.getOwner() != null) ownerName = extraData.getOwner();
-                } else if (getEntityId() == 98) {
-                    final OcelotExtraData extraData = (OcelotExtraData) getExtraData();
-                    if (extraData.getOwner() != null) ownerName = extraData.getOwner();
-                } else if (getEntityId() == 100) {
-                    final HorseExtraData extraData = (HorseExtraData) getExtraData();
-                    if (extraData.getOwner() != null) ownerName = extraData.getOwner();
-                }
-                if (ownerName != null) msg.append(ChatColor.GRAY).append(" [").append(ownerName).append(']');
-            }
-            */
+            /*
+             * Skip showing owner name, plugin is now saving only owner UUID and it is not worth asking database for addition names
+             * if (getExtraData() != null) {
+             * String ownerName = null;
+             * if (getEntityId() == 95) {
+             * final WolfExtraData extraData = (WolfExtraData) getExtraData();
+             * if (extraData.getOwner() != null) ownerName = extraData.getOwner();
+             * } else if (getEntityId() == 98) {
+             * final OcelotExtraData extraData = (OcelotExtraData) getExtraData();
+             * if (extraData.getOwner() != null) ownerName = extraData.getOwner();
+             * } else if (getEntityId() == 100) {
+             * final HorseExtraData extraData = (HorseExtraData) getExtraData();
+             * if (extraData.getOwner() != null) ownerName = extraData.getOwner();
+             * }
+             * if (ownerName != null) msg.append(ChatColor.GRAY).append(" [").append(ownerName).append(']');
+             * }
+             */
             msg.append(" (").append(getTimeSince()).append(')');
         }
 

@@ -1,10 +1,9 @@
 package jcraft.jblockactivity.listeners;
 
-import static jcraft.jblockactivity.utils.ActivityUtil.getEntityName;
-
 import java.util.UUID;
 
 import jcraft.jblockactivity.BlockActivity;
+import jcraft.jblockactivity.LoggingMaker;
 import jcraft.jblockactivity.LoggingType;
 import jcraft.jblockactivity.actionlog.EntityActionLog;
 import jcraft.jblockactivity.config.WorldConfig;
@@ -83,18 +82,7 @@ public class HangingListener implements Listener {
             return;
         }
 
-        final String removerName;
-        switch (event.getCause()) {
-        case EXPLOSION:
-        case PHYSICS:
-        case OBSTRUCTION:
-            removerName = "BA_" + event.getCause().name();
-            break;
-        default:
-            removerName = "unknown";
-            break;
-        }
-
+        final String removerName = LoggingMaker.getLoggingMaker(event.getCause()).getName();
         if (BlockActivity.isHidden(removerName)) {
             return;
         }
@@ -137,7 +125,7 @@ public class HangingListener implements Listener {
             return;
         }
 
-        final String removerName = getEntityName(event.getRemover());
+        final String removerName = LoggingMaker.getLoggingMaker(event.getRemover());
 
         if (BlockActivity.isHidden(removerName)) {
             return;
@@ -223,7 +211,7 @@ public class HangingListener implements Listener {
             final ItemFrame frame = (ItemFrame) event.getEntity();
 
             if (frame.getItem().getType() != Material.AIR) {
-                final String removerName = getEntityName(event.getDamager());
+                final String removerName = LoggingMaker.getLoggingMaker(event.getDamager());
 
                 UUID removerUUID;
                 try {

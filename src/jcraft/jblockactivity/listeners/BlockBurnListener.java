@@ -1,6 +1,7 @@
 package jcraft.jblockactivity.listeners;
 
 import jcraft.jblockactivity.BlockActivity;
+import jcraft.jblockactivity.LoggingMaker;
 import jcraft.jblockactivity.LoggingType;
 import jcraft.jblockactivity.config.WorldConfig;
 
@@ -23,11 +24,11 @@ public class BlockBurnListener implements Listener {
         final Block block = event.getBlock();
         final Material material = block.getType();
 
-        if (BlockActivity.isHidden("BA_FIRE")) {
+        if (BlockActivity.isHidden(LoggingMaker.FIRE.getName())) {
             return;
         }
 
-        BlockBreakListener.blockBreak(config, block, material, "BA_FIRE", null);
+        BlockBreakListener.blockBreak(config, block, material, LoggingMaker.FIRE.getName(), null);
     }
 
 }

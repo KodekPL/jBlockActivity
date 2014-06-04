@@ -21,18 +21,11 @@ import org.bukkit.block.DoubleChest;
 import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
 import org.bukkit.craftbukkit.libs.com.google.gson.GsonBuilder;
 import org.bukkit.craftbukkit.libs.com.google.gson.JsonSyntaxException;
-import org.bukkit.entity.Creeper;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
-import org.bukkit.entity.TNTPrimed;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.Vector;
 
 public class ActivityUtil {
@@ -146,53 +139,6 @@ public class ActivityUtil {
 
     public static boolean isItemSimilar(ItemStack item1, ItemStack item2) {
         return item1.getType() == item2.getType() && item2.getDurability() == item2.getDurability();
-    }
-
-    public static String getEntityName(Entity entity) {
-        return getEntityName(entity, false);
-    }
-
-    public static String getEntityName(Entity entity, boolean explosion) {
-        if (entity == null) {
-            return "unknown";
-        }
-
-        final String name;
-
-        if (entity instanceof Player) {
-            name = ((Player) entity).getUniqueId().toString();
-        } else if (entity instanceof Projectile && ((Projectile) entity).getShooter() != null) {
-            final ProjectileSource shooter = ((Projectile) entity).getShooter();
-            if (shooter instanceof Player) {
-                name = ((Player) shooter).getUniqueId().toString();
-            } else {
-                name = "BA_" + ((Entity) shooter).getType().name().replace('_', ' ').toUpperCase();
-            }
-        } else if (entity instanceof TNTPrimed && ((TNTPrimed) entity).getSource() != null) {
-            final Entity source = ((TNTPrimed) entity).getSource();
-            if (source instanceof Player) {
-                name = ((Player) source).getUniqueId().toString();
-            } else if (source instanceof Projectile && ((Projectile) entity).getShooter() != null) {
-                final ProjectileSource shooter = ((Projectile) source).getShooter();
-                if (shooter instanceof Player) {
-                    name = ((Player) shooter).getUniqueId().toString();
-                } else {
-                    name = "BA_" + ((Entity) shooter).getType().name().replace('_', ' ').toUpperCase();
-                }
-            } else {
-                name = "BA_" + source.getType().name().replace('_', ' ').toUpperCase();
-            }
-        } else if (entity instanceof Creeper && explosion && ((Creeper) entity).getTarget() != null) {
-            final LivingEntity target = ((Creeper) entity).getTarget();
-            if (target instanceof Player) {
-                name = ((Player) target).getUniqueId().toString();
-            } else {
-                name = "BA_" + entity.getType().name().replace('_', ' ').toUpperCase();
-            }
-        } else {
-            name = "BA_" + entity.getType().name().replace('_', ' ').toUpperCase();
-        }
-        return name;
     }
 
     public static boolean isSameLocation(Vector v1, Vector v2) {
