@@ -12,7 +12,8 @@ public enum LoggingType {
     hangingplace(6),
     hanginginteract(7),
     creaturekill(8),
-    explosions(9);
+    explosions(9),
+    blockburn(10);
 
     private final int id;
 

@@ -17,6 +17,7 @@ import jcraft.jblockactivity.config.ActivityConfig;
 import jcraft.jblockactivity.config.WorldConfig;
 import jcraft.jblockactivity.event.ActionLogQueueEvent;
 import jcraft.jblockactivity.listeners.BlockBreakListener;
+import jcraft.jblockactivity.listeners.BlockBurnListener;
 import jcraft.jblockactivity.listeners.BlockInteractListener;
 import jcraft.jblockactivity.listeners.BlockPlaceListener;
 import jcraft.jblockactivity.listeners.CreatureKillListener;
@@ -139,6 +140,9 @@ public class BlockActivity extends JavaPlugin {
         }
         if (config.isWorldsLogging(LoggingType.explosions)) {
             manager.registerEvents(new ExplosionListener(), this);
+        }
+        if (config.isWorldsLogging(LoggingType.blockburn)) {
+            manager.registerEvents(new BlockBurnListener(), this);
         }
         manager.registerEvents(new LogToolListener(), this);
     }

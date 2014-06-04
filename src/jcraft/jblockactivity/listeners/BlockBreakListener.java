@@ -62,6 +62,24 @@ public class BlockBreakListener implements Listener {
             return;
         }
 
+        if (material == Material.ICE) {
+            /** ICE **/
+            if (event.getPlayer().getGameMode() == GameMode.CREATIVE || event.getPlayer().getItemInHand().containsEnchantment(Enchantment.SILK_TOUCH)) {
+                final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, block.getWorld(), block
+                        .getLocation().toVector(), block.getState(), null, null);
+                BlockActivity.sendActionLog(action);
+            } else {
+                final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, block.getWorld(), block
+                        .getLocation().toVector(), block.getTypeId(), block.getData(), Material.STATIONARY_WATER.getId(), (byte) 0, null);
+                BlockActivity.sendActionLog(action);
+            }
+            return;
+        }
+
+        blockBreak(config, block, material, playerName, playerUUID);
+    }
+
+    public static void blockBreak(WorldConfig config, Block block, Material material, String playerName, UUID playerUUID) {
         // TODO: Flower Pot contents
         if (config.isLoggingExtraBlockMeta(BlockMetaType.signtext) && (material == Material.WALL_SIGN || material == Material.SIGN_POST)) {
             /** SIGN **/
@@ -97,17 +115,6 @@ public class BlockBreakListener implements Listener {
             final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, block.getWorld(), block.getLocation()
                     .toVector(), block.getState(), null, null);
             BlockActivity.sendActionLog(action);
-        } else if (material == Material.ICE) {
-            /** ICE **/
-            if (event.getPlayer().getGameMode() == GameMode.CREATIVE || event.getPlayer().getItemInHand().containsEnchantment(Enchantment.SILK_TOUCH)) {
-                final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, block.getWorld(), block
-                        .getLocation().toVector(), block.getState(), null, null);
-                BlockActivity.sendActionLog(action);
-            } else {
-                final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, block.getWorld(), block
-                        .getLocation().toVector(), block.getTypeId(), block.getData(), Material.STATIONARY_WATER.getId(), (byte) 0, null);
-                BlockActivity.sendActionLog(action);
-            }
         } else {
             final BlockActionLog mainAction = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, block.getWorld(), block
                     .getLocation().toVector(), block.getState(), null, null);
