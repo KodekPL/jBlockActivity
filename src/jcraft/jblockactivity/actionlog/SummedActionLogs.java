@@ -1,11 +1,10 @@
 package jcraft.jblockactivity.actionlog;
 
-import static jcraft.jblockactivity.utils.ActivityUtil.makeSpaces;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import jcraft.jblockactivity.session.LookupCache;
+import jcraft.jblockactivity.utils.ActivityUtil;
 import jcraft.jblockactivity.utils.MaterialNames;
 import jcraft.jblockactivity.utils.QueryParams;
 import jcraft.jblockactivity.utils.QueryParams.SummarizationMode;
@@ -29,8 +28,8 @@ public class SummedActionLogs {
 
         @Override
         public String getMessage() {
-            return created + makeSpaces((int) ((10 - String.valueOf(created).length()) / spaceFactor)) + destroyed
-                    + makeSpaces((int) ((10 - String.valueOf(destroyed).length()) / spaceFactor)) + group;
+            return created + ActivityUtil.makeSpaces((int) ((10 - String.valueOf(created).length()) / spaceFactor)) + destroyed
+                    + ActivityUtil.makeSpaces((int) ((10 - String.valueOf(destroyed).length()) / spaceFactor)) + group;
         }
 
         @Override
@@ -59,7 +58,7 @@ public class SummedActionLogs {
 
         @Override
         public String getMessage() {
-            return kills + makeSpaces((int) ((10 - String.valueOf(kills).length()) / spaceFactor)) + group;
+            return kills + ActivityUtil.makeSpaces((int) ((10 - String.valueOf(kills).length()) / spaceFactor)) + group;
         }
 
         @Override

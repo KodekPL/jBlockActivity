@@ -317,4 +317,15 @@ public class BlockActivity extends JavaPlugin {
         return true;
     }
 
+    public static String getPlayerId(String identifier) {
+        if (identifier == null) {
+            return "NULL";
+        }
+        final Integer id = BlockActivity.playerIds.get(identifier);
+        if (id != null) {
+            return id.toString();
+        }
+        return "(SELECT playerid FROM `ba-players` WHERE uuid = '" + identifier + "')";
+    }
+
 }

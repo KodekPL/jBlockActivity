@@ -1,6 +1,6 @@
 package jcraft.jblockactivity.extradata;
 
-import static jcraft.jblockactivity.utils.ActivityUtil.toJson;
+import jcraft.jblockactivity.utils.ActivityUtil;
 
 import org.bukkit.SkullType;
 import org.bukkit.block.BlockFace;
@@ -36,7 +36,7 @@ public abstract class BlockExtraData implements ExtraData {
 
         @Override
         public String getData() {
-            return toJson(this);
+            return ActivityUtil.toJson(this);
         }
 
         @Override
@@ -71,7 +71,7 @@ public abstract class BlockExtraData implements ExtraData {
 
         @Override
         public String getData() {
-            return toJson(this);
+            return ActivityUtil.toJson(this);
         }
 
         @Override
@@ -95,7 +95,7 @@ public abstract class BlockExtraData implements ExtraData {
 
         @Override
         public String getData() {
-            return toJson(this);
+            return ActivityUtil.toJson(this);
         }
 
         @Override
@@ -121,7 +121,7 @@ public abstract class BlockExtraData implements ExtraData {
 
         @Override
         public String getData() {
-            return toJson(this);
+            return ActivityUtil.toJson(this);
         }
 
         @Override
@@ -157,7 +157,7 @@ public abstract class BlockExtraData implements ExtraData {
 
         @Override
         public String getData() {
-            return toJson(this);
+            return ActivityUtil.toJson(this);
         }
 
         @Override

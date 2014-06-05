@@ -1,10 +1,5 @@
 package jcraft.jblockactivity.actionlog;
 
-import static jcraft.jblockactivity.utils.ActivityUtil.fixUUID;
-import static jcraft.jblockactivity.utils.ActivityUtil.formatTime;
-import static jcraft.jblockactivity.utils.ActivityUtil.fromJson;
-import static jcraft.jblockactivity.utils.ActivityUtil.getPlayerId;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,6 +9,7 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import jcraft.jblockactivity.BlockActivity;
 import jcraft.jblockactivity.LoggingType;
 import jcraft.jblockactivity.extradata.BlockExtraData;
 import jcraft.jblockactivity.extradata.BlockExtraData.CommandBlockExtraData;
@@ -22,6 +18,7 @@ import jcraft.jblockactivity.extradata.BlockExtraData.SkullExtraData;
 import jcraft.jblockactivity.extradata.ExtraData;
 import jcraft.jblockactivity.extradata.InventoryExtraData;
 import jcraft.jblockactivity.session.LookupCache;
+import jcraft.jblockactivity.utils.ActivityUtil;
 import jcraft.jblockactivity.utils.MaterialNames;
 import jcraft.jblockactivity.utils.QueryParams;
 
@@ -110,9 +107,10 @@ public class BlockActionLog extends ActionLog implements LookupCache {
         PreparedStatement state = null;
         PreparedStatement extraState = null;
         try {
-            state = connection.prepareStatement("INSERT INTO `" + getWorldTableName()
-                    + "` (time, type, playerid, old_id, old_data, new_id, new_data, x, y, z) VALUES (FROM_UNIXTIME(?), ?, "
-                    + getPlayerId(getIdentifier()) + ", ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+            state = connection.prepareStatement(
+                    "INSERT INTO `" + getWorldTableName()
+                            + "` (time, type, playerid, old_id, old_data, new_id, new_data, x, y, z) VALUES (FROM_UNIXTIME(?), ?, "
+                            + BlockActivity.getPlayerId(getIdentifier()) + ", ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
             state.setLong(1, getTime());
             state.setInt(2, getLoggingType().getId());
             state.setInt(3, getOldBlockId());
@@ -193,7 +191,7 @@ public class BlockActionLog extends ActionLog implements LookupCache {
         final StringBuilder msg = new StringBuilder();
 
         if (getLoggingType() == LoggingType.blockplace || getLoggingType() == LoggingType.blockbreak || getLoggingType() == LoggingType.explosions) {
-            msg.append(ChatColor.GRAY).append(formatTime(getTime())).append(' ');
+            msg.append(ChatColor.GRAY).append(ActivityUtil.formatTime(getTime())).append(' ');
             if (getLoggingType() == LoggingType.blockplace) {
                 if (oldBlockId == 0) {
                     msg.append(add).append("created ").append(MaterialNames.materialName(newBlockId, newBlockData));
@@ -238,7 +236,7 @@ public class BlockActionLog extends ActionLog implements LookupCache {
             }
             msg.append(ChatColor.GRAY).append(" (").append(getTimeSince()).append(')');
         } else if (getLoggingType() == LoggingType.inventoryaccess && getExtraData() != null) {
-            final String prefixTime = ChatColor.GRAY + formatTime(getTime()) + " ";
+            final String prefixTime = ChatColor.GRAY + ActivityUtil.formatTime(getTime()) + " ";
             final String suffixTime = ChatColor.GRAY + " (" + getTimeSince() + ")";
             if (getExtraData() instanceof InventoryExtraData) {
                 final InventoryExtraData extraData = (InventoryExtraData) getExtraData();
@@ -262,7 +260,7 @@ public class BlockActionLog extends ActionLog implements LookupCache {
                 }
             }
         } else if (getLoggingType() == LoggingType.blockinteract) {
-            msg.append(ChatColor.GRAY).append(formatTime(getTime())).append(' ');
+            msg.append(ChatColor.GRAY).append(ActivityUtil.formatTime(getTime())).append(' ');
             msg.append(interact).append("interact with ").append(MaterialNames.materialName(newBlockId, newBlockData));
 
             if (getVector() != null) {
@@ -292,24 +290,24 @@ public class BlockActionLog extends ActionLog implements LookupCache {
         if (data != null) {
             if (logType == LoggingType.blockbreak || logType == LoggingType.blockplace) {
                 if (old_id == 63 || old_id == 68 || new_id == 63 || new_id == 68) {
-                    extraData = fromJson(data, BlockExtraData.SignExtraData.class);
+                    extraData = ActivityUtil.fromJson(data, BlockExtraData.SignExtraData.class);
                 } else if (old_id == 144 || new_id == 144) {
-                    extraData = fromJson(data, BlockExtraData.SkullExtraData.class);
+                    extraData = ActivityUtil.fromJson(data, BlockExtraData.SkullExtraData.class);
                 } else if (old_id == 52) {
-                    extraData = fromJson(data, BlockExtraData.MobSpawnerExtraData.class);
+                    extraData = ActivityUtil.fromJson(data, BlockExtraData.MobSpawnerExtraData.class);
                 } else if (old_id == 140) {
                     // TODO: Flower pot contents
                 } else if (old_id == 137) {
-                    extraData = fromJson(data, BlockExtraData.CommandBlockExtraData.class);
+                    extraData = ActivityUtil.fromJson(data, BlockExtraData.CommandBlockExtraData.class);
                 }
             } else if (logType == LoggingType.inventoryaccess) {
-                extraData = fromJson(data, InventoryExtraData.class);
+                extraData = ActivityUtil.fromJson(data, InventoryExtraData.class);
             }
         }
 
         UUID uuid;
         try {
-            uuid = UUID.fromString(fixUUID(sUUID));
+            uuid = UUID.fromString(ActivityUtil.fixUUID(sUUID));
         } catch (IllegalArgumentException e) {
             uuid = null;
         }

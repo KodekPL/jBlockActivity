@@ -1,7 +1,5 @@
 package jcraft.jblockactivity;
 
-import static org.bukkit.Bukkit.getLogger;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,6 +11,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 
 import jcraft.jblockactivity.actionlog.ActionLog;
+
+import org.bukkit.Bukkit;
 
 public class LogExecuteThread implements Runnable {
 
@@ -51,7 +51,7 @@ public class LogExecuteThread implements Runnable {
                 }
 
                 if (queueWarningSize > 0 && queue.size() >= queueWarningSize) {
-                    getLogger().info("[Queue] Queue is overloaded! Size: " + getQueueSize());
+                    Bukkit.getLogger().info("[Queue] Queue is overloaded! Size: " + getQueueSize());
                 }
 
                 Connection connection = BlockActivity.getBlockActivity().getConnection();
@@ -71,27 +71,28 @@ public class LogExecuteThread implements Runnable {
                         }
                         if (!BlockActivity.playerIds.containsKey(log.getIdentifier())) {
                             if (!addPlayer(state, log.getPlayerName(), log.getUUID())) {
-                                getLogger().warning("[Executor] Failed to add new player: " + log.getPlayerName() + " (" + log.getUUID() + ")");
+                                Bukkit.getLogger()
+                                        .warning("[Executor] Failed to add new player: " + log.getPlayerName() + " (" + log.getUUID() + ")");
                                 continue;
                             }
                         }
                         try {
                             log.executeStatements(connection);
                         } catch (final SQLException ex) {
-                            getLogger().log(Level.SEVERE, "[Executor] SQL Exception on executing: ", ex);
+                            Bukkit.getLogger().log(Level.SEVERE, "[Executor] SQL Exception on executing: ", ex);
                             break;
                         }
                         count++;
                     }
                     connection.commit();
                 } catch (SQLException e) {
-                    getLogger().log(Level.SEVERE, "[Executor] SQL Exception on connection:", e);
+                    Bukkit.getLogger().log(Level.SEVERE, "[Executor] SQL Exception on connection:", e);
                 } finally {
                     try {
                         state.close();
                         connection.close();
                     } catch (final SQLException ex) {
-                        getLogger().log(Level.SEVERE, "[Executor] SQL Exception on close:", ex);
+                        Bukkit.getLogger().log(Level.SEVERE, "[Executor] SQL Exception on close:", ex);
                     }
                     lock.unlock();
                 }

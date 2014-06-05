@@ -1,9 +1,5 @@
 package jcraft.jblockactivity.config;
 
-import static jcraft.jblockactivity.utils.ActivityUtil.parseTime;
-import static org.bukkit.Bukkit.getConsoleSender;
-import static org.bukkit.Bukkit.getWorlds;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,9 +16,11 @@ import jcraft.jblockactivity.LoggingType;
 import jcraft.jblockactivity.sql.SQLProfile;
 import jcraft.jblockactivity.tool.LogTool;
 import jcraft.jblockactivity.tool.LogTool.ToolBehavior;
+import jcraft.jblockactivity.utils.ActivityUtil;
 import jcraft.jblockactivity.utils.QueryParams;
 import jcraft.jblockactivity.utils.SQLUpdater;
 
+import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -61,7 +59,7 @@ public class ActivityConfig {
         configDef.put("mysql.database", "minecraft");
 
         final List<String> logWorlds = new ArrayList<String>();
-        for (World world : getWorlds()) {
+        for (World world : Bukkit.getWorlds()) {
             logWorlds.add(world.getName());
         }
         configDef.put("loggedWorlds", logWorlds);
@@ -126,7 +124,7 @@ public class ActivityConfig {
         queueWarningSize = CONFIG.getInt("queue.queueWarningSize");
 
         defaultDistance = CONFIG.getInt("lookup.defaultDistance");
-        defaultTime = parseTime(CONFIG.getString("lookup.defaultTime").split(" "));
+        defaultTime = ActivityUtil.parseTime(CONFIG.getString("lookup.defaultTime").split(" "));
 
         linesPerPage = CONFIG.getInt("lookup.linesPerPage");
 
@@ -135,7 +133,7 @@ public class ActivityConfig {
         final int itemId = CONFIG.getInt("tools.itemtool.itemId");
         if (itemId != 0) {
             final byte itemData = (byte) CONFIG.getInt("tools.itemtool.itemData");
-            final QueryParams params = new QueryParams(getConsoleSender(), CONFIG.getString("tools.itemtool.params").split(" "), true);
+            final QueryParams params = new QueryParams(Bukkit.getConsoleSender(), CONFIG.getString("tools.itemtool.params").split(" "), true);
             final ToolBehavior leftClickBehavior = ToolBehavior.valueOf(CONFIG.getString("tools.itemtool.leftClickBehavior").toUpperCase());
             final ToolBehavior rightClickBehavior = ToolBehavior.valueOf(CONFIG.getString("tools.itemtool.rightClickBehavior").toUpperCase());
             final LogTool itemTool = new LogTool(leftClickBehavior, rightClickBehavior, itemId, itemData, params);
@@ -145,7 +143,7 @@ public class ActivityConfig {
         final int blockId = CONFIG.getInt("tools.blocktool.itemId");
         if (blockId != 0) {
             final byte itemData = (byte) CONFIG.getInt("tools.blocktool.itemData");
-            final QueryParams params = new QueryParams(getConsoleSender(), CONFIG.getString("tools.blocktool.params").split(" "), true);
+            final QueryParams params = new QueryParams(Bukkit.getConsoleSender(), CONFIG.getString("tools.blocktool.params").split(" "), true);
             final ToolBehavior leftClickBehavior = ToolBehavior.valueOf(CONFIG.getString("tools.blocktool.leftClickBehavior").toUpperCase());
             final ToolBehavior rightClickBehavior = ToolBehavior.valueOf(CONFIG.getString("tools.blocktool.rightClickBehavior").toUpperCase());
             final LogTool blockTool = new LogTool(leftClickBehavior, rightClickBehavior, blockId, itemData, params);

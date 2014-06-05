@@ -1,8 +1,5 @@
 package jcraft.jblockactivity.listeners;
 
-import static jcraft.jblockactivity.utils.ActivityUtil.getInventoryHolderLocation;
-import static jcraft.jblockactivity.utils.ActivityUtil.getInventoryHolderType;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,6 +8,7 @@ import jcraft.jblockactivity.LoggingType;
 import jcraft.jblockactivity.actionlog.BlockActionLog;
 import jcraft.jblockactivity.config.WorldConfig;
 import jcraft.jblockactivity.extradata.InventoryExtraData;
+import jcraft.jblockactivity.utils.InventoryUtil;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -42,7 +40,7 @@ public class InventoryAccessListener implements Listener {
             final HumanEntity player = event.getPlayer();
             final InventoryExtraData lastContent = invExtraData.get(player);
             if (lastContent != null) {
-                final Location location = getInventoryHolderLocation(holder);
+                final Location location = InventoryUtil.getInventoryHolderLocation(holder);
                 final InventoryExtraData newContent = new InventoryExtraData(event.getInventory().getContents(), true, location.getWorld());
                 lastContent.compareInventories(newContent);
                 if (!lastContent.isEmpty()) {
@@ -67,7 +65,7 @@ public class InventoryAccessListener implements Listener {
         if (event.getInventory() != null) {
             final InventoryHolder holder = event.getInventory().getHolder();
             if (holder instanceof BlockState || holder instanceof DoubleChest) {
-                if (getInventoryHolderType(holder) != Material.WORKBENCH) {
+                if (InventoryUtil.getInventoryHolderType(holder) != Material.WORKBENCH) {
                     invExtraData.put(event.getPlayer(),
                             new InventoryExtraData(event.getInventory().getContents(), true, event.getPlayer().getWorld()));
                 }

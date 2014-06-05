@@ -1,9 +1,5 @@
 package jcraft.jblockactivity;
 
-import static jcraft.jblockactivity.utils.ActivityUtil.isInt;
-import static jcraft.jblockactivity.utils.ActivityUtil.saveSpawnHeight;
-import static org.bukkit.Bukkit.getLogger;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,6 +15,8 @@ import jcraft.jblockactivity.editor.BlockEditorResult;
 import jcraft.jblockactivity.session.ActiveSession;
 import jcraft.jblockactivity.session.LookupCache;
 import jcraft.jblockactivity.session.LookupCacheFactory;
+import jcraft.jblockactivity.utils.ActivityUtil;
+import jcraft.jblockactivity.utils.BlocksUtil;
 import jcraft.jblockactivity.utils.ImportQueryGen;
 import jcraft.jblockactivity.utils.ImportQueryGen.ImportPlugin;
 import jcraft.jblockactivity.utils.QueryParams;
@@ -29,6 +27,7 @@ import jcraft.jblockactivity.utils.question.QuestionData;
 import jcraft.jblockactivity.utils.question.RedoQuestion;
 import jcraft.jblockactivity.utils.question.RollbackQuestion;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -114,7 +113,7 @@ public class CommandHandler implements CommandExecutor {
                     preExecuteCommand(new ActionRequest(ActionType.CMD_REDO, sender, args, true), true);
                     return true;
                 } else if (args[0].equalsIgnoreCase("page")) {
-                    if (args.length == 2 && isInt(args[1])) {
+                    if (args.length == 2 && ActivityUtil.isInt(args[1])) {
                         showPage(sender, Integer.valueOf(args[1]));
                     } else {
                         sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You have to specify a page numer!");
@@ -129,7 +128,7 @@ public class CommandHandler implements CommandExecutor {
                         sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You don't have required permission - ba.teleport");
                         return false;
                     }
-                    if (args.length != 2 || !isInt(args[1])) {
+                    if (args.length != 2 || !ActivityUtil.isInt(args[1])) {
                         sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You have to specify a log ID numer!");
                         return false;
                     }
@@ -146,7 +145,7 @@ public class CommandHandler implements CommandExecutor {
                     if (pos >= 0 && pos < session.getLastLookupCache().length) {
                         final Location loc = session.getLastLookupCache()[pos].getLocation();
                         if (loc != null) {
-                            player.teleport(new Location(loc.getWorld(), loc.getX() + 0.5, saveSpawnHeight(loc), loc.getZ() + 0.5, player
+                            player.teleport(new Location(loc.getWorld(), loc.getX() + 0.5, BlocksUtil.safeSpawnHeight(loc), loc.getZ() + 0.5, player
                                     .getLocation().getYaw(), player.getLocation().getPitch()));
                             player.sendMessage(BlockActivity.prefix + ChatColor.GOLD + "Teleported to " + loc.getBlockX() + ":" + loc.getBlockY()
                                     + ":" + loc.getBlockZ());
@@ -212,7 +211,8 @@ public class CommandHandler implements CommandExecutor {
                             return false;
                         }
 
-                        getLogger().log(Level.INFO, "Last query params of " + sender.getName() + ": " + session.getLastQueryParams().getQuery());
+                        Bukkit.getLogger().log(Level.INFO,
+                                "Last query params of " + sender.getName() + ": " + session.getLastQueryParams().getQuery());
                         sender.sendMessage(BlockActivity.prefix + ChatColor.GREEN + "Printed last query params in console log.");
                         return true;
                     }
@@ -324,7 +324,7 @@ public class CommandHandler implements CommandExecutor {
             }
         } catch (SQLException e1) {
             sender.sendMessage(ChatColor.RED + "Exception, check error log!");
-            getLogger().log(Level.SEVERE, "[Lookup] " + params.getQuery() + ": ", e1);
+            Bukkit.getLogger().log(Level.SEVERE, "[Lookup] " + params.getQuery() + ": ", e1);
             e1.printStackTrace();
         } catch (IllegalArgumentException e2) {
             sender.sendMessage(ChatColor.RED + e2.getMessage());
@@ -340,7 +340,7 @@ public class CommandHandler implements CommandExecutor {
                     connection.close();
                 }
             } catch (SQLException e) {
-                getLogger().log(Level.SEVERE, "[CommandsHandler] SQL Exception on close!", e);
+                Bukkit.getLogger().log(Level.SEVERE, "[CommandsHandler] SQL Exception on close!", e);
             }
         }
     }
@@ -381,7 +381,7 @@ public class CommandHandler implements CommandExecutor {
             }
         } catch (Exception e) {
             sender.sendMessage(ChatColor.RED + "Exception, check error log!");
-            getLogger().log(Level.SEVERE, "[ClearLog] " + params.getQuery() + ": ", e);
+            Bukkit.getLogger().log(Level.SEVERE, "[ClearLog] " + params.getQuery() + ": ", e);
         } finally {
             try {
                 if (result != null) {
@@ -394,7 +394,7 @@ public class CommandHandler implements CommandExecutor {
                     connection.close();
                 }
             } catch (SQLException e) {
-                getLogger().log(Level.SEVERE, "[CommandsHandler] SQL Exception on close!", e);
+                Bukkit.getLogger().log(Level.SEVERE, "[CommandsHandler] SQL Exception on close!", e);
             }
         }
     }
@@ -452,7 +452,7 @@ public class CommandHandler implements CommandExecutor {
             }
         } catch (SQLException | Error e) {
             sender.sendMessage(ChatColor.RED + "Exception, check error log!");
-            getLogger().log(Level.SEVERE, "[Rollback] " + params.getQuery() + ": ", e);
+            Bukkit.getLogger().log(Level.SEVERE, "[Rollback] " + params.getQuery() + ": ", e);
             e.printStackTrace();
         } catch (IllegalArgumentException e) {
             sender.sendMessage(ChatColor.RED + e.getMessage());
@@ -468,7 +468,7 @@ public class CommandHandler implements CommandExecutor {
                     connection.close();
                 }
             } catch (SQLException e) {
-                getLogger().log(Level.SEVERE, "[CommandsHandler] SQL Exception on close!", e);
+                Bukkit.getLogger().log(Level.SEVERE, "[CommandsHandler] SQL Exception on close!", e);
             }
         }
     }
@@ -527,7 +527,7 @@ public class CommandHandler implements CommandExecutor {
             }
         } catch (SQLException | Error e) {
             sender.sendMessage(ChatColor.RED + "Exception, check error log!");
-            getLogger().log(Level.SEVERE, "[Redo] " + params.getQuery() + ": ", e);
+            Bukkit.getLogger().log(Level.SEVERE, "[Redo] " + params.getQuery() + ": ", e);
             e.printStackTrace();
         } catch (IllegalArgumentException e) {
             sender.sendMessage(ChatColor.RED + e.getMessage());
@@ -543,7 +543,7 @@ public class CommandHandler implements CommandExecutor {
                     connection.close();
                 }
             } catch (SQLException e) {
-                getLogger().log(Level.SEVERE, "[CommandsHandler] SQL Exception on close!", e);
+                Bukkit.getLogger().log(Level.SEVERE, "[CommandsHandler] SQL Exception on close!", e);
             }
         }
     }
@@ -671,7 +671,7 @@ public class CommandHandler implements CommandExecutor {
                         }
                     } catch (Exception e) {
                         sender.sendMessage(ChatColor.RED + "Exception, check error log!");
-                        getLogger().log(Level.SEVERE, "[ClearLog] " + params.getQuery() + ": ", e);
+                        Bukkit.getLogger().log(Level.SEVERE, "[ClearLog] " + params.getQuery() + ": ", e);
                     } finally {
                         try {
                             if (result != null) {
@@ -684,7 +684,7 @@ public class CommandHandler implements CommandExecutor {
                                 connection.close();
                             }
                         } catch (SQLException e) {
-                            getLogger().log(Level.SEVERE, "[CommandsHandler] SQL Exception on close!", e);
+                            Bukkit.getLogger().log(Level.SEVERE, "[CommandsHandler] SQL Exception on close!", e);
                         }
                     }
                 }

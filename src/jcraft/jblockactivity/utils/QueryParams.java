@@ -1,10 +1,5 @@
 package jcraft.jblockactivity.utils;
 
-import static jcraft.jblockactivity.utils.ActivityUtil.hasExtraData;
-import static jcraft.jblockactivity.utils.ActivityUtil.isInt;
-import static jcraft.jblockactivity.utils.ActivityUtil.matchEntity;
-import static jcraft.jblockactivity.utils.ActivityUtil.parseTime;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -359,7 +354,7 @@ public class QueryParams {
                         if (mat == null) {
                             throw new IllegalArgumentException("No material matching: '" + blockName + "'");
                         }
-                        if (hasExtraData(mat)) {
+                        if (BlocksUtil.hasExtraData(mat)) {
                             needExtraData = true;
                         }
                         itemTypes.add(new MaterialData(mat.getId(), (byte) data));
@@ -368,7 +363,7 @@ public class QueryParams {
                         if (mat == null) {
                             throw new IllegalArgumentException("No material matching: '" + blockName + "'");
                         }
-                        if (hasExtraData(mat)) {
+                        if (BlocksUtil.hasExtraData(mat)) {
                             needExtraData = true;
                         }
                         itemTypes.add(new MaterialData(mat.getId(), (byte) -1));
@@ -379,7 +374,7 @@ public class QueryParams {
                     throw new IllegalArgumentException("No or wrong count of arguments for '" + param + "'");
                 }
                 for (final String entityName : values) {
-                    final EntityType ent = matchEntity(entityName);
+                    final EntityType ent = ActivityUtil.matchEntity(entityName);
                     if (ent == null) {
                         throw new IllegalArgumentException("No entity matching: '" + entityName + "'");
                     }
@@ -394,19 +389,19 @@ public class QueryParams {
                     radius = BlockActivity.config.defaultDistance;
                     if (!prepareToolQuery) location = player.getLocation();
                 } else {
-                    if (!isInt(values[0])) {
+                    if (!ActivityUtil.isInt(values[0])) {
                         throw new IllegalArgumentException("Not a number: '" + values[0] + "'");
                     }
                     radius = Integer.parseInt(values[0]);
                     if (!prepareToolQuery) location = player.getLocation();
                 }
             } else if (param.equals("time") || param.equals("since")) {
-                since = (values.length > 0) ? parseTime(values) : BlockActivity.config.defaultTime;
+                since = (values.length > 0) ? ActivityUtil.parseTime(values) : BlockActivity.config.defaultTime;
                 if (since == -1) {
                     throw new IllegalArgumentException("Failed to parse time spec for '" + param + "'");
                 }
             } else if (param.equals("before")) {
-                before = (values.length > 0) ? parseTime(values) : BlockActivity.config.defaultTime;
+                before = (values.length > 0) ? ActivityUtil.parseTime(values) : BlockActivity.config.defaultTime;
                 if (before == -1) {
                     throw new IllegalArgumentException("Faile to parse time spec for '" + param + "'");
                 }
@@ -457,7 +452,7 @@ public class QueryParams {
                 if (values.length != 1) {
                     throw new IllegalArgumentException("Wrong count of arguments for '" + param + "'");
                 }
-                if (!isInt(values[0])) {
+                if (!ActivityUtil.isInt(values[0])) {
                     throw new IllegalArgumentException("Not a number: '" + values[0] + "'");
                 }
                 limit = Integer.parseInt(values[0]);
@@ -484,7 +479,7 @@ public class QueryParams {
                     throw new IllegalArgumentException("Wrong count arguments for '" + param + "'");
                 }
                 for (final String vec : vectors) {
-                    if (!isInt(vec)) {
+                    if (!ActivityUtil.isInt(vec)) {
                         throw new IllegalArgumentException("Not a number: '" + vec + "'");
                     }
                 }

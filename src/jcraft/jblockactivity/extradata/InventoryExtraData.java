@@ -1,7 +1,5 @@
 package jcraft.jblockactivity.extradata;
 
-import static jcraft.jblockactivity.utils.ActivityUtil.toJson;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,6 +12,7 @@ import java.util.Map.Entry;
 import jcraft.jblockactivity.BlockActivity;
 import jcraft.jblockactivity.config.WorldConfig;
 import jcraft.jblockactivity.extradata.ExtraLoggingTypes.ItemMetaType;
+import jcraft.jblockactivity.utils.ActivityUtil;
 
 import org.bukkit.FireworkEffect;
 import org.bukkit.Material;
@@ -127,7 +126,7 @@ public class InventoryExtraData implements ExtraData {
         fillData();
         this.config = null;
         this.content = null;
-        return toJson(this);
+        return ActivityUtil.toJson(this);
     }
 
     @Override

@@ -2,43 +2,23 @@ package jcraft.jblockactivity.utils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
-import jcraft.jblockactivity.BlockActivity;
-
-import org.bukkit.Chunk;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.DoubleChest;
 import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
 import org.bukkit.craftbukkit.libs.com.google.gson.GsonBuilder;
 import org.bukkit.craftbukkit.libs.com.google.gson.JsonSyntaxException;
 import org.bukkit.entity.EntityType;
-import org.bukkit.inventory.EntityEquipment;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.Vector;
 
 public class ActivityUtil {
 
-    private final static Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+    private final static Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
 
     public static String toJson(Object object) {
-        return gson.toJson(object);
+        return GSON.toJson(object);
     }
 
     public static <T> T fromJson(String data, Class<T> clazz) {
         try {
-            return gson.fromJson(data, clazz);
+            return GSON.fromJson(data, clazz);
         } catch (JsonSyntaxException e) {
             e.printStackTrace();
             return null;
@@ -51,40 +31,6 @@ public class ActivityUtil {
         }
         return uuid.substring(0, 8) + "-" + uuid.substring(8, 12) + "-" + uuid.substring(12, 16) + "-" + uuid.substring(16, 20) + "-"
                 + uuid.substring(20, 32);
-    }
-
-    public static ItemStack[] packEntityEquipment(EntityEquipment eq) {
-        final ItemStack[] eqArray = new ItemStack[5];
-        if (isItem(eq.getItemInHand())) eqArray[0] = eq.getItemInHand();
-        if (isItem(eq.getHelmet())) eqArray[1] = eq.getHelmet();
-        if (isItem(eq.getChestplate())) eqArray[2] = eq.getChestplate();
-        if (isItem(eq.getLeggings())) eqArray[3] = eq.getLeggings();
-        if (isItem(eq.getBoots())) eqArray[4] = eq.getBoots();
-
-        for (ItemStack item : eqArray) {
-            if (item != null) {
-                return eqArray;
-            }
-        }
-        return null;
-    }
-
-    public static Float[] packEntityEquipmentChance(EntityEquipment eq) {
-        final Float[] dropChance = new Float[5];
-        if (isItem(eq.getItemInHand())) dropChance[0] = eq.getItemInHandDropChance();
-        if (isItem(eq.getHelmet())) dropChance[1] = eq.getHelmetDropChance();
-        if (isItem(eq.getChestplate())) dropChance[2] = eq.getChestplateDropChance();
-        if (isItem(eq.getLeggings())) dropChance[3] = eq.getLeggingsDropChance();
-        if (isItem(eq.getBoots())) dropChance[4] = eq.getBootsDropChance();
-
-        return dropChance;
-    }
-
-    public static boolean isItem(ItemStack item) {
-        if (item == null || item.getType() == Material.AIR) {
-            return false;
-        }
-        return true;
     }
 
     public static EntityType matchEntity(String name) {
@@ -110,126 +56,6 @@ public class ActivityUtil {
         }
 
         return result;
-    }
-
-    public static boolean isEntitySpawnClear(Material blockId) {
-        switch (blockId) {
-        case AIR:
-        case SAPLING:
-        case LONG_GRASS:
-        case DEAD_BUSH:
-        case YELLOW_FLOWER:
-        case RED_ROSE:
-        case BROWN_MUSHROOM:
-        case RED_MUSHROOM:
-        case REDSTONE_WIRE:
-        case LEVER:
-        case STONE_BUTTON:
-        case REDSTONE_TORCH_ON:
-        case REDSTONE_TORCH_OFF:
-        case SNOW:
-        case VINE:
-        case CARPET:
-        case DOUBLE_PLANT:
-            return true;
-        default:
-            return false;
-        }
-    }
-
-    public static boolean isItemSimilar(ItemStack item1, ItemStack item2) {
-        return item1.getType() == item2.getType() && item2.getDurability() == item2.getDurability();
-    }
-
-    public static boolean isSameLocation(Vector v1, Vector v2) {
-        if (v1.getBlockX() != v1.getBlockX()) return false;
-        if (v1.getBlockY() != v2.getBlockY()) return false;
-        if (v1.getBlockZ() != v2.getBlockZ()) return false;
-        return true;
-    }
-
-    public static int modifyContainer(BlockState block, ItemStack item) {
-        if (block instanceof InventoryHolder) {
-            final Inventory inv = ((InventoryHolder) block).getInventory();
-            if (item.getAmount() < 0) {
-                item.setAmount(-item.getAmount());
-                final ItemStack tmp = inv.removeItem(item).get(0);
-                return (tmp != null) ? tmp.getAmount() : 0;
-            } else if (item.getAmount() > 0) {
-                final ItemStack tmp = inv.addItem(item).get(0);
-                return (tmp != null) ? tmp.getAmount() : 0;
-            }
-        }
-        return 0;
-    }
-
-    public static Location getInventoryHolderLocation(InventoryHolder holder) {
-        if (holder instanceof DoubleChest) {
-            return ((DoubleChest) holder).getLocation();
-        } else if (holder instanceof BlockState) {
-            return ((BlockState) holder).getLocation();
-        } else {
-            return null;
-        }
-    }
-
-    public static Material getInventoryHolderType(InventoryHolder holder) {
-        if (holder instanceof DoubleChest) {
-            return ((DoubleChest) holder).getLocation().getBlock().getType();
-        } else if (holder instanceof BlockState) {
-            return ((BlockState) holder).getType();
-        } else {
-            return null;
-        }
-    }
-
-    private static final Set<Set<Integer>> blockEquivalents;
-
-    static {
-        blockEquivalents = new HashSet<Set<Integer>>(9);
-        blockEquivalents.add(new HashSet<Integer>(Arrays.asList(2, 3, 60)));
-        blockEquivalents.add(new HashSet<Integer>(Arrays.asList(8, 9, 79)));
-        blockEquivalents.add(new HashSet<Integer>(Arrays.asList(10, 11)));
-        blockEquivalents.add(new HashSet<Integer>(Arrays.asList(61, 62)));
-        blockEquivalents.add(new HashSet<Integer>(Arrays.asList(73, 74)));
-        blockEquivalents.add(new HashSet<Integer>(Arrays.asList(75, 76)));
-        blockEquivalents.add(new HashSet<Integer>(Arrays.asList(93, 94)));
-        blockEquivalents.add(new HashSet<Integer>(Arrays.asList(123, 124)));
-        blockEquivalents.add(new HashSet<Integer>(Arrays.asList(149, 150)));
-    }
-
-    public static boolean isEqualType(int type1, int type2) {
-        if (type1 == type2) {
-            return true;
-        }
-        for (final Set<Integer> equivalent : blockEquivalents) {
-            if (equivalent.contains(type1) && equivalent.contains(type2)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static int saveSpawnHeight(Location location) {
-        final World world = location.getWorld();
-        final Chunk chunk = world.getChunkAt(location);
-        if (!world.isChunkLoaded(chunk)) {
-            world.loadChunk(chunk);
-        }
-        final int x = location.getBlockX();
-        final int z = location.getBlockZ();
-        int y = location.getBlockY();
-        boolean lower = world.getBlockTypeIdAt(x, y, z) == 0;
-        boolean upper = world.getBlockTypeIdAt(x, y + 1, z) == 0;
-
-        while ((!lower || !upper) && y != 255) {
-            lower = upper;
-            upper = world.getBlockTypeIdAt(x, ++y, z) == 0;
-        }
-        while (world.getBlockTypeIdAt(x, y - 1, z) == 0 && y != 0) {
-            y--;
-        }
-        return y;
     }
 
     public static String makeSpaces(int count) {
@@ -304,28 +130,10 @@ public class ActivityUtil {
         }
     }
 
-    private final static SimpleDateFormat timeFormatter = new SimpleDateFormat("MM-dd HH:mm:ss");
-
-    public static boolean hasExtraData(Material material) {
-        switch (material) {
-        case WALL_SIGN:
-        case SIGN_POST:
-        case COMMAND:
-        case MOB_SPAWNER:
-        case FLOWER_POT:
-        case SKULL:
-            return true;
-        default:
-            return false;
-        }
-    }
-
-    public static Vector toVector(Location location) {
-        return new Vector(location.getBlockX(), location.getBlockY(), location.getBlockZ());
-    }
+    private final static SimpleDateFormat TIME_FORMATTER = new SimpleDateFormat("MM-dd HH:mm:ss");
 
     public static String formatTime(long time) {
-        return timeFormatter.format(time);
+        return TIME_FORMATTER.format(time);
     }
 
     public static boolean isInt(String str) {
@@ -335,212 +143,6 @@ public class ActivityUtil {
         } catch (final NumberFormatException e) {
             return false;
         }
-    }
-
-    public static String getPlayerId(String identifier) {
-        if (identifier == null) {
-            return "NULL";
-        }
-        final Integer id = BlockActivity.playerIds.get(identifier);
-        if (id != null) {
-            return id.toString();
-        }
-        return "(SELECT playerid FROM `ba-players` WHERE uuid = '" + identifier + "')";
-    }
-
-    public static boolean isFallingBlock(Material material) {
-        switch (material) {
-        case SAND:
-        case GRAVEL:
-        case DRAGON_EGG:
-        case ANVIL:
-            return true;
-        default:
-            return false;
-        }
-    }
-
-    public static boolean canFall(World world, int x, int y, int z) {
-        final Material material = world.getBlockAt(x, y, z).getType();
-        return isFallingOverridingBlock(material);
-    }
-
-    public static boolean isFallingOverridingBlock(Material material) {
-        switch (material) {
-        case AIR:
-        case WATER:
-        case STATIONARY_WATER:
-        case LAVA:
-        case STATIONARY_LAVA:
-        case FIRE:
-        case VINE:
-        case LONG_GRASS:
-        case DEAD_BUSH:
-        case SNOW:
-            return true;
-        default:
-            return false;
-        }
-    }
-
-    public static boolean isFallingBlockKiller(Material material) {
-        switch (material) {
-        case SIGN_POST:
-        case WALL_SIGN:
-        case STONE_PLATE:
-        case WOOD_PLATE:
-        case IRON_PLATE:
-        case GOLD_PLATE:
-        case SAPLING:
-        case SUGAR_CANE_BLOCK:
-        case RED_ROSE:
-        case YELLOW_FLOWER:
-        case CROPS:
-        case POTATO:
-        case CARROT:
-        case WATER_LILY:
-        case RED_MUSHROOM:
-        case BROWN_MUSHROOM:
-        case STEP:
-        case WOOD_STEP:
-        case TORCH:
-        case FLOWER_POT:
-        case POWERED_RAIL:
-        case DETECTOR_RAIL:
-        case ACTIVATOR_RAIL:
-        case RAILS:
-        case LEVER:
-        case REDSTONE_WIRE:
-        case REDSTONE_TORCH_ON:
-        case REDSTONE_TORCH_OFF:
-        case DIODE_BLOCK_ON:
-        case DIODE_BLOCK_OFF:
-        case REDSTONE_COMPARATOR_ON:
-        case REDSTONE_COMPARATOR_OFF:
-        case DAYLIGHT_DETECTOR:
-        case CARPET:
-        case DOUBLE_PLANT:
-            return true;
-        default:
-            return false;
-        }
-    }
-
-    public static boolean isContainerBlock(Material material) {
-        switch (material) {
-        case CHEST:
-        case TRAPPED_CHEST:
-        case DISPENSER:
-        case DROPPER:
-        case HOPPER:
-        case BREWING_STAND:
-        case FURNACE:
-        case BURNING_FURNACE:
-        case BEACON:
-            return true;
-        default:
-            return false;
-        }
-    }
-
-    public static boolean isBottomRelativeBreakableBlock(Material material) {
-        switch (material) {
-        case SAPLING:
-        case LONG_GRASS:
-        case DEAD_BUSH:
-        case YELLOW_FLOWER:
-        case RED_ROSE:
-        case BROWN_MUSHROOM:
-        case RED_MUSHROOM:
-        case CROPS:
-        case POTATO:
-        case CARROT:
-        case WATER_LILY:
-        case CACTUS:
-        case SUGAR_CANE_BLOCK:
-        case FLOWER_POT:
-        case POWERED_RAIL:
-        case DETECTOR_RAIL:
-        case ACTIVATOR_RAIL:
-        case RAILS:
-        case REDSTONE_WIRE:
-        case SIGN_POST:
-        case STONE_PLATE:
-        case WOOD_PLATE:
-        case IRON_PLATE:
-        case GOLD_PLATE:
-        case SNOW:
-        case DIODE_BLOCK_ON:
-        case DIODE_BLOCK_OFF:
-        case REDSTONE_COMPARATOR_ON:
-        case REDSTONE_COMPARATOR_OFF:
-        case WOODEN_DOOR:
-        case IRON_DOOR_BLOCK:
-        case CARPET:
-        case DOUBLE_PLANT:
-            return true;
-        default:
-            return false;
-        }
-    }
-
-    public static boolean isRelativeSideBreakableBlock(Material material) {
-        switch (material) {
-        case WALL_SIGN:
-        case LADDER:
-        case STONE_BUTTON:
-        case WOOD_BUTTON:
-        case REDSTONE_TORCH_ON:
-        case REDSTONE_TORCH_OFF:
-        case LEVER:
-        case TORCH:
-        case TRAP_DOOR:
-        case TRIPWIRE_HOOK:
-        case COCOA:
-        case BED_BLOCK:
-        case PISTON_BASE:
-        case PISTON_STICKY_BASE:
-        case PISTON_EXTENSION:
-            return true;
-        default:
-            return false;
-        }
-    }
-
-    private static final BlockFace[] relativeSideBlockFaces = new BlockFace[] { BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH,
-            BlockFace.UP, BlockFace.DOWN };
-
-    public static List<Block> getSideRelativeBreakableBlocks(Block originBlock) {
-        final List<Block> blocks = new ArrayList<Block>();
-        for (BlockFace blockFace : relativeSideBlockFaces) {
-            Block block = originBlock.getRelative(blockFace);
-            if (isRelativeSideBreakableBlock(block.getType())) {
-                blocks.add(block);
-            }
-        }
-        return blocks;
-    }
-
-    public static final BlockFace[] primaryCardinalDirs = { BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST };
-
-    public static BlockFace yawToFace(float yaw) {
-        return primaryCardinalDirs[Math.round(yaw / 90f) & 0x3];
-    }
-
-    public static BlockFace turnFace(BlockFace face, boolean right) {
-        int dir = face.ordinal();
-        if (right) {
-            dir++;
-            if (dir >= primaryCardinalDirs.length) {
-                dir = 0;
-            }
-        } else {
-            dir--;
-            if (dir < 0) {
-                dir = primaryCardinalDirs.length - 1;
-            }
-        }
-        return primaryCardinalDirs[dir];
     }
 
 }

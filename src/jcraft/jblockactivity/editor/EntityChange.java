@@ -1,10 +1,5 @@
 package jcraft.jblockactivity.editor;
 
-import static jcraft.jblockactivity.utils.ActivityUtil.isEntitySpawnClear;
-import static jcraft.jblockactivity.utils.ActivityUtil.isItemSimilar;
-import static jcraft.jblockactivity.utils.ActivityUtil.isSameLocation;
-import static org.bukkit.Bukkit.getOfflinePlayer;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -29,8 +24,11 @@ import jcraft.jblockactivity.extradata.EntityExtraData.WolfExtraData;
 import jcraft.jblockactivity.extradata.EntityExtraData.ZombieExtraData;
 import jcraft.jblockactivity.extradata.ExtraData;
 import jcraft.jblockactivity.extradata.InventoryExtraData;
+import jcraft.jblockactivity.utils.BlocksUtil;
+import jcraft.jblockactivity.utils.InventoryUtil;
 import jcraft.jblockactivity.utils.MaterialNames;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -139,7 +137,7 @@ public class EntityChange extends EntityActionLog {
                                 ItemFrame itemFrame = (ItemFrame) hanging;
                                 if (itemFrame.getItem().getType() == Material.AIR) {
                                     firstEmpty = itemFrame;
-                                } else if (isItemSimilar(itemFrame.getItem(), item)) {
+                                } else if (InventoryUtil.isItemSimilar(itemFrame.getItem(), item)) {
                                     return BlockEditorResult.NO_INVENTORY_ACTION;
                                 }
                             }
@@ -152,7 +150,7 @@ public class EntityChange extends EntityActionLog {
                     } else {
                         for (Hanging hanging : hangings) {
                             ItemFrame itemFrame = (ItemFrame) hanging;
-                            if (hanging.getFacing().ordinal() == getEntityData() && isItemSimilar(itemFrame.getItem(), item)) {
+                            if (hanging.getFacing().ordinal() == getEntityData() && InventoryUtil.isItemSimilar(itemFrame.getItem(), item)) {
                                 itemFrame.setItem(new ItemStack(Material.AIR));
                                 return BlockEditorResult.INVENTORY_ACCESS;
                             }
@@ -162,7 +160,7 @@ public class EntityChange extends EntityActionLog {
                     return BlockEditorResult.NO_INVENTORY_ACTION;
                 }
             } else if (getLoggingType() == LoggingType.creaturekill) {
-                if (!isEntitySpawnClear(block.getType())) {
+                if (!BlocksUtil.isEntitySpawnSafe(block.getType())) {
                     return BlockEditorResult.NO_ENTITY_ACTION;
                 }
                 final EntityType type = EntityType.fromId(getEntityId());
@@ -249,7 +247,7 @@ public class EntityChange extends EntityActionLog {
                             if (data.isTamed() != null) wolf.setTamed(data.isTamed());
                             if (data.getOwner() != null) {
                                 final UUID ownerUUID = data.getOwnerUUID();
-                                wolf.setOwner((ownerUUID == null) ? getOfflinePlayer(data.getOwner()) : getOfflinePlayer(ownerUUID));
+                                wolf.setOwner((ownerUUID == null) ? Bukkit.getOfflinePlayer(data.getOwner()) : Bukkit.getOfflinePlayer(ownerUUID));
                             }
                             if (data.getCollarColor() != null) wolf.setCollarColor(data.getCollarColor());
                         } else if (getEntityId() == 98) {
@@ -258,7 +256,7 @@ public class EntityChange extends EntityActionLog {
                             if (data.isTamed() != null) ocelot.setTamed(data.isTamed());
                             if (data.getOwner() != null) {
                                 final UUID ownerUUID = data.getOwnerUUID();
-                                ocelot.setOwner((ownerUUID == null) ? getOfflinePlayer(data.getOwner()) : getOfflinePlayer(ownerUUID));
+                                ocelot.setOwner((ownerUUID == null) ? Bukkit.getOfflinePlayer(data.getOwner()) : Bukkit.getOfflinePlayer(ownerUUID));
                             }
                             if (data.getCatType() != null) ocelot.setCatType(data.getCatType());
                         } else if (getEntityId() == 99) {
@@ -291,7 +289,7 @@ public class EntityChange extends EntityActionLog {
                             if (data.isTamed() != null) horse.setTamed(data.isTamed());
                             if (data.getOwner() != null) {
                                 final UUID ownerUUID = data.getOwnerUUID();
-                                horse.setOwner((ownerUUID == null) ? getOfflinePlayer(data.getOwner()) : getOfflinePlayer(ownerUUID));
+                                horse.setOwner((ownerUUID == null) ? Bukkit.getOfflinePlayer(data.getOwner()) : Bukkit.getOfflinePlayer(ownerUUID));
                             }
                         } else if (getEntityId() == 120) {
                             final VillagerExtraData data = (VillagerExtraData) getExtraData();
@@ -311,7 +309,7 @@ public class EntityChange extends EntityActionLog {
         final List<Entity> hangings = new ArrayList<Entity>();
         for (Entity entity : chunk.getEntities()) {
             if (entity instanceof Hanging && entity.getType().getTypeId() == entityId) {
-                if (isSameLocation(entity.getLocation().toVector(), vector)) {
+                if (InventoryUtil.isSameLocation(entity.getLocation().toVector(), vector)) {
                     hangings.add(entity);
                 }
             }

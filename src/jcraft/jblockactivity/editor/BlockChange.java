@@ -1,9 +1,5 @@
 package jcraft.jblockactivity.editor;
 
-import static jcraft.jblockactivity.utils.ActivityUtil.isContainerBlock;
-import static jcraft.jblockactivity.utils.ActivityUtil.isEqualType;
-import static jcraft.jblockactivity.utils.ActivityUtil.modifyContainer;
-import static jcraft.jblockactivity.utils.ActivityUtil.primaryCardinalDirs;
 import jcraft.jblockactivity.LoggingType;
 import jcraft.jblockactivity.actionlog.BlockActionLog;
 import jcraft.jblockactivity.extradata.BlockExtraData.CommandBlockExtraData;
@@ -12,6 +8,8 @@ import jcraft.jblockactivity.extradata.BlockExtraData.SignExtraData;
 import jcraft.jblockactivity.extradata.BlockExtraData.SkullExtraData;
 import jcraft.jblockactivity.extradata.ExtraData;
 import jcraft.jblockactivity.extradata.InventoryExtraData;
+import jcraft.jblockactivity.utils.BlocksUtil;
+import jcraft.jblockactivity.utils.InventoryUtil;
 import jcraft.jblockactivity.utils.MaterialNames;
 
 import org.bukkit.Material;
@@ -60,21 +58,21 @@ public class BlockChange extends BlockActionLog {
             }
 
             if (getLoggingType() == LoggingType.inventoryaccess) {
-                if (getExtraData() != null && !getExtraData().isNull() && isContainerBlock(Material.getMaterial(blockId))) {
+                if (getExtraData() != null && !getExtraData().isNull() && BlocksUtil.isContainerBlock(Material.getMaterial(blockId))) {
                     final InventoryExtraData extraData = (InventoryExtraData) getExtraData();
                     for (ItemStack item : extraData.getContent()) {
                         int leftover;
                         try {
                             ItemStack newItem1 = new ItemStack(item.getType(), -item.getAmount(), item.getDurability());
                             newItem1.setItemMeta(item.getItemMeta());
-                            leftover = modifyContainer(state, newItem1);
+                            leftover = InventoryUtil.modifyContainer(state, newItem1);
                             if (leftover > 0 && (blockId == 54 || blockId == 146)) {
-                                for (final BlockFace face : primaryCardinalDirs) {
+                                for (final BlockFace face : BlocksUtil.PRIMARY_CARDINAL_DIRS) {
                                     if (block.getRelative(face).getTypeId() == blockId) {
                                         ItemStack newItem2 = new ItemStack(item.getType(), (item.getAmount() < 0) ? leftover : -leftover,
                                                 item.getDurability());
                                         newItem2.setItemMeta(item.getItemMeta());
-                                        leftover = modifyContainer(block.getRelative(face).getState(), newItem2);
+                                        leftover = InventoryUtil.modifyContainer(block.getRelative(face).getState(), newItem2);
                                         break;
                                     }
                                 }
@@ -98,7 +96,7 @@ public class BlockChange extends BlockActionLog {
                 return BlockEditorResult.INVENTORY_ACCESS;
             }
 
-            if (!(isEqualType(block.getTypeId(), blockEditor.isRedo() ? getOldBlockId() : getNewBlockId()) || blockEditor.getWorldConfig().replaceAnyway
+            if (!(BlocksUtil.isEqualType(block.getTypeId(), blockEditor.isRedo() ? getOldBlockId() : getNewBlockId()) || blockEditor.getWorldConfig().replaceAnyway
                     .contains(block.getTypeId()))) {
                 return BlockEditorResult.NO_BLOCK_ACTION;
             }

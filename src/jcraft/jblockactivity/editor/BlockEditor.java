@@ -1,7 +1,5 @@
 package jcraft.jblockactivity.editor;
 
-import static org.bukkit.Bukkit.getLogger;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +14,7 @@ import jcraft.jblockactivity.actionlog.EntityActionLog;
 import jcraft.jblockactivity.config.WorldConfig;
 import jcraft.jblockactivity.session.LookupCache;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
@@ -131,7 +130,7 @@ public class BlockEditor extends BukkitRunnable {
             } catch (final BlockEditorException ex) {
                 errorList.add(ex);
             } catch (final Exception ex) {
-                getLogger().log(Level.WARNING, "[BlockEditor] Exeption: ", ex);
+                Bukkit.getLogger().log(Level.WARNING, "[BlockEditor] Exeption: ", ex);
             }
             counter++;
             if (sender != null) {
@@ -149,7 +148,7 @@ public class BlockEditor extends BukkitRunnable {
             } catch (final BlockEditorException ex) {
                 errorList.add(ex);
             } catch (final Exception ex) {
-                getLogger().log(Level.WARNING, "[BlockEditor] Exeption: ", ex);
+                Bukkit.getLogger().log(Level.WARNING, "[BlockEditor] Exeption: ", ex);
             }
             counter++;
             if (sender != null) {

@@ -1,15 +1,13 @@
 package jcraft.jblockactivity.extradata;
 
-import static jcraft.jblockactivity.utils.ActivityUtil.packEntityEquipment;
-import static jcraft.jblockactivity.utils.ActivityUtil.packEntityEquipmentChance;
-import static jcraft.jblockactivity.utils.ActivityUtil.toJson;
-
 import java.util.UUID;
 
 import jcraft.jblockactivity.BlockActivity;
 import jcraft.jblockactivity.config.WorldConfig;
 import jcraft.jblockactivity.extradata.ExtraLoggingTypes.EntityMetaType;
 import jcraft.jblockactivity.extradata.InventoryExtraData.SimpleItemMeta;
+import jcraft.jblockactivity.utils.ActivityUtil;
+import jcraft.jblockactivity.utils.InventoryUtil;
 
 import org.bukkit.Art;
 import org.bukkit.DyeColor;
@@ -61,9 +59,9 @@ public abstract class EntityExtraData implements ExtraData {
             this.removeWhenFarAway = lEntity.getRemoveWhenFarAway() ? null : false;
 
             if (config.isLoggingExtraEntityMeta(EntityMetaType.equipment)) {
-                final ItemStack[] eqArray = packEntityEquipment(lEntity.getEquipment());
+                final ItemStack[] eqArray = InventoryUtil.packEntityEquipment(lEntity.getEquipment());
                 if (eqArray != null) {
-                    dropChance = packEntityEquipmentChance(lEntity.getEquipment());
+                    dropChance = InventoryUtil.packEntityEquipmentDropChance(lEntity.getEquipment());
                     final InventoryExtraData invExtraData = new InventoryExtraData(eqArray, false, config);
                     equipmentContent = invExtraData.getStringContent();
                     equipmentMeta = invExtraData.getSimpleItemMeta();
@@ -120,7 +118,7 @@ public abstract class EntityExtraData implements ExtraData {
 
         @Override
         public String getData() {
-            return toJson(this);
+            return ActivityUtil.toJson(this);
         }
 
         @Override
@@ -146,7 +144,7 @@ public abstract class EntityExtraData implements ExtraData {
 
         @Override
         public String getData() {
-            return toJson(this);
+            return ActivityUtil.toJson(this);
         }
 
         @Override
@@ -177,7 +175,7 @@ public abstract class EntityExtraData implements ExtraData {
 
         @Override
         public String getData() {
-            return toJson(this);
+            return ActivityUtil.toJson(this);
         }
 
         @Override
@@ -202,7 +200,7 @@ public abstract class EntityExtraData implements ExtraData {
 
         @Override
         public String getData() {
-            return toJson(this);
+            return ActivityUtil.toJson(this);
         }
 
         @Override
@@ -227,7 +225,7 @@ public abstract class EntityExtraData implements ExtraData {
 
         @Override
         public String getData() {
-            return toJson(this);
+            return ActivityUtil.toJson(this);
         }
 
         @Override
@@ -252,7 +250,7 @@ public abstract class EntityExtraData implements ExtraData {
 
         @Override
         public String getData() {
-            return toJson(this);
+            return ActivityUtil.toJson(this);
         }
 
         @Override
@@ -298,7 +296,7 @@ public abstract class EntityExtraData implements ExtraData {
 
         @Override
         public String getData() {
-            return toJson(this);
+            return ActivityUtil.toJson(this);
         }
 
         @Override
@@ -323,7 +321,7 @@ public abstract class EntityExtraData implements ExtraData {
 
         @Override
         public String getData() {
-            return toJson(this);
+            return ActivityUtil.toJson(this);
         }
 
         @Override
@@ -360,7 +358,7 @@ public abstract class EntityExtraData implements ExtraData {
 
         @Override
         public String getData() {
-            return toJson(this);
+            return ActivityUtil.toJson(this);
         }
 
         public abstract boolean isNull();
@@ -383,7 +381,7 @@ public abstract class EntityExtraData implements ExtraData {
 
         @Override
         public String getData() {
-            return toJson(this);
+            return ActivityUtil.toJson(this);
         }
 
         @Override
@@ -501,7 +499,7 @@ public abstract class EntityExtraData implements ExtraData {
 
         @Override
         public String getData() {
-            return toJson(this);
+            return ActivityUtil.toJson(this);
         }
 
         @Override
@@ -557,7 +555,7 @@ public abstract class EntityExtraData implements ExtraData {
 
         @Override
         public String getData() {
-            return toJson(this);
+            return ActivityUtil.toJson(this);
         }
 
         @Override
@@ -613,7 +611,7 @@ public abstract class EntityExtraData implements ExtraData {
 
         @Override
         public String getData() {
-            return toJson(this);
+            return ActivityUtil.toJson(this);
         }
 
         @Override
@@ -638,7 +636,7 @@ public abstract class EntityExtraData implements ExtraData {
 
         @Override
         public String getData() {
-            return toJson(this);
+            return ActivityUtil.toJson(this);
         }
 
         @Override
@@ -669,7 +667,7 @@ public abstract class EntityExtraData implements ExtraData {
 
         @Override
         public String getData() {
-            return toJson(this);
+            return ActivityUtil.toJson(this);
         }
 
         @Override
@@ -694,7 +692,7 @@ public abstract class EntityExtraData implements ExtraData {
 
         @Override
         public String getData() {
-            return toJson(this);
+            return ActivityUtil.toJson(this);
         }
 
         @Override

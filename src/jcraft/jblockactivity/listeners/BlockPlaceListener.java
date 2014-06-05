@@ -1,11 +1,5 @@
 package jcraft.jblockactivity.listeners;
 
-import static jcraft.jblockactivity.utils.ActivityUtil.canFall;
-import static jcraft.jblockactivity.utils.ActivityUtil.isFallingBlock;
-import static jcraft.jblockactivity.utils.ActivityUtil.isFallingBlockKiller;
-import static jcraft.jblockactivity.utils.ActivityUtil.turnFace;
-import static jcraft.jblockactivity.utils.ActivityUtil.yawToFace;
-
 import java.util.List;
 import java.util.UUID;
 
@@ -17,6 +11,7 @@ import jcraft.jblockactivity.extradata.BlockExtraData;
 import jcraft.jblockactivity.extradata.BlockExtraData.SignExtraData;
 import jcraft.jblockactivity.extradata.BlockExtraData.SkullExtraData;
 import jcraft.jblockactivity.extradata.ExtraLoggingTypes.BlockMetaType;
+import jcraft.jblockactivity.utils.BlocksUtil;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -59,7 +54,7 @@ public class BlockPlaceListener implements Listener {
         }
 
         /** FALLING BLOCK **/
-        if (isFallingBlock(material)) {
+        if (BlocksUtil.isFallingBlock(material)) {
             if (beforeState.getType() != Material.AIR) {
                 final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, afterState.getWorld(), afterState
                         .getLocation().toVector(), beforeState, afterState, null);
@@ -70,7 +65,7 @@ public class BlockPlaceListener implements Listener {
             int y = block.getY();
             final int z = block.getZ();
             if (event.getBlock().getRelative(BlockFace.DOWN).getType() == Material.AIR) {
-                while (y > 0 && canFall(block.getWorld(), x, (y - 1), z)) {
+                while (y > 0 && BlocksUtil.isFallingOverridingBlock(block.getWorld().getBlockAt(x, (y - 1), z).getType())) {
                     y--;
                 }
             }
@@ -78,7 +73,7 @@ public class BlockPlaceListener implements Listener {
             if (y > 0) {
                 final Location finalLocation = new Location(block.getWorld(), x, y, z);
                 final Block finalBlock = finalLocation.getBlock();
-                if (isFallingBlockKiller(finalBlock.getRelative(BlockFace.DOWN).getType())) {
+                if (BlocksUtil.isFallingBlockKiller(finalBlock.getRelative(BlockFace.DOWN).getType())) {
                     return;
                 }
                 if (finalBlock.getType() == Material.AIR || finalLocation.equals(block.getLocation())) {
@@ -135,8 +130,9 @@ public class BlockPlaceListener implements Listener {
             BlockActionLog action = null;
             if (material == Material.WOODEN_DOOR || material == Material.IRON_DOOR_BLOCK) {
                 if (afterState.getRawData() <= 3) {
-                    final BlockFace doorFace = yawToFace(event.getPlayer().getEyeLocation().getYaw()).getOppositeFace();
-                    final boolean doubleDoor = afterState.getBlock().getRelative(turnFace(doorFace, false)).getType() == afterState.getType();
+                    final BlockFace doorFace = BlocksUtil.yawToFace(event.getPlayer().getEyeLocation().getYaw()).getOppositeFace();
+                    final boolean doubleDoor = afterState.getBlock().getRelative(BlocksUtil.turnFace(doorFace, false)).getType() == afterState
+                            .getType();
                     action = new BlockActionLog(LoggingType.blockplace, playerName, playerUUID, afterState.getWorld(), afterState.getLocation()
                             .add(0, 1, 0).toVector(), 0, (byte) 0, material.getId(), doubleDoor ? (byte) 9 : (byte) 8, null);
                 }

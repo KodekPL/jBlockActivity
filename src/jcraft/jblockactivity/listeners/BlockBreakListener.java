@@ -1,12 +1,5 @@
 package jcraft.jblockactivity.listeners;
 
-import static jcraft.jblockactivity.utils.ActivityUtil.canFall;
-import static jcraft.jblockactivity.utils.ActivityUtil.getSideRelativeBreakableBlocks;
-import static jcraft.jblockactivity.utils.ActivityUtil.isBottomRelativeBreakableBlock;
-import static jcraft.jblockactivity.utils.ActivityUtil.isContainerBlock;
-import static jcraft.jblockactivity.utils.ActivityUtil.isFallingBlock;
-import static jcraft.jblockactivity.utils.ActivityUtil.isFallingBlockKiller;
-
 import java.util.List;
 import java.util.UUID;
 
@@ -17,6 +10,7 @@ import jcraft.jblockactivity.config.WorldConfig;
 import jcraft.jblockactivity.extradata.BlockExtraData;
 import jcraft.jblockactivity.extradata.ExtraLoggingTypes.BlockMetaType;
 import jcraft.jblockactivity.extradata.InventoryExtraData;
+import jcraft.jblockactivity.utils.BlocksUtil;
 
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -101,7 +95,7 @@ public class BlockBreakListener implements Listener {
             final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, block.getWorld(), block.getLocation()
                     .toVector(), block.getState(), null, BlockExtraData.getExtraData(block.getState()));
             BlockActivity.sendActionLog(action);
-        } else if (config.isLogging(LoggingType.inventoryaccess) && isContainerBlock(material)) {
+        } else if (config.isLogging(LoggingType.inventoryaccess) && BlocksUtil.isContainerBlock(material)) {
             /** CONTAINER **/
             final InventoryExtraData extraData = new InventoryExtraData(((InventoryHolder) block.getState()).getInventory().getContents(), true,
                     block.getWorld());
@@ -123,9 +117,9 @@ public class BlockBreakListener implements Listener {
 
         /** DOUBLE BLOCKS **/
         Block doubleBlock = null;
-        if (isBottomRelativeBreakableBlock(block.getType())) {
+        if (BlocksUtil.isBottomRelativeBreakableBlock(block.getType())) {
             doubleBlock = block;
-        } else if (isBottomRelativeBreakableBlock(block.getRelative(BlockFace.UP).getType())) {
+        } else if (BlocksUtil.isBottomRelativeBreakableBlock(block.getRelative(BlockFace.UP).getType())) {
             doubleBlock = block.getRelative(BlockFace.UP);
             final BlockActionLog upperPartAction = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, doubleBlock.getWorld(),
                     doubleBlock.getLocation().toVector(), doubleBlock.getState(), null, BlockExtraData.getExtraData(doubleBlock.getState()));
@@ -172,7 +166,7 @@ public class BlockBreakListener implements Listener {
         }
 
         /** RELATIVE SIDE BLOCKS **/
-        final List<Block> relativeBlocks = getSideRelativeBreakableBlocks(block);
+        final List<Block> relativeBlocks = BlocksUtil.getSideRelativeBreakableBlocks(block);
         if (!relativeBlocks.isEmpty()) {
             for (Block relativeBlock : relativeBlocks) {
                 final Material relativeMaterial = relativeBlock.getType();
@@ -279,7 +273,7 @@ public class BlockBreakListener implements Listener {
         Block fallingBlock = block.getRelative(BlockFace.UP);
         int up = 0;
         final int highestBlock = fallingBlock.getWorld().getHighestBlockYAt(fallingBlock.getLocation());
-        while (isFallingBlock(fallingBlock.getType())) {
+        while (BlocksUtil.isFallingBlock(fallingBlock.getType())) {
 
             BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, fallingBlock.getWorld(), fallingBlock
                     .getLocation().toVector(), fallingBlock.getState(), null, null);
@@ -289,7 +283,7 @@ public class BlockBreakListener implements Listener {
             int x = block.getX();
             int y = block.getY();
             int z = block.getZ();
-            while (y > 0 && canFall(block.getWorld(), x, (y - 1), z)) {
+            while (y > 0 && BlocksUtil.isFallingOverridingBlock(block.getWorld().getBlockAt(x, (y - 1), z).getType())) {
                 y--;
             }
 
@@ -297,9 +291,9 @@ public class BlockBreakListener implements Listener {
                 Location finalLocation = new Location(block.getWorld(), x, y, z);
                 Block finalBlock = finalLocation.getBlock();
 
-                if (!isFallingBlockKiller(finalBlock.getRelative(BlockFace.DOWN).getType())) {
+                if (!BlocksUtil.isFallingBlockKiller(finalBlock.getRelative(BlockFace.DOWN).getType())) {
                     finalLocation.add(0, up, 0);
-                    if (finalBlock.getType() == Material.AIR || isFallingBlock(finalBlock.getType())) {
+                    if (finalBlock.getType() == Material.AIR || BlocksUtil.isFallingBlock(finalBlock.getType())) {
                         BlockActionLog action1 = new BlockActionLog(LoggingType.blockplace, playerName, playerUUID, finalLocation.getWorld(),
                                 finalLocation.toVector(), null, fallingBlock.getState(), null);
                         BlockActivity.sendActionLog(action1);

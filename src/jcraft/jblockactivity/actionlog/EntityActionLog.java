@@ -1,10 +1,5 @@
 package jcraft.jblockactivity.actionlog;
 
-import static jcraft.jblockactivity.utils.ActivityUtil.fixUUID;
-import static jcraft.jblockactivity.utils.ActivityUtil.formatTime;
-import static jcraft.jblockactivity.utils.ActivityUtil.fromJson;
-import static jcraft.jblockactivity.utils.ActivityUtil.getPlayerId;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,12 +9,14 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import jcraft.jblockactivity.BlockActivity;
 import jcraft.jblockactivity.LoggingType;
 import jcraft.jblockactivity.extradata.EntityExtraData;
 import jcraft.jblockactivity.extradata.EntityExtraData.PaintingExtraData;
 import jcraft.jblockactivity.extradata.ExtraData;
 import jcraft.jblockactivity.extradata.InventoryExtraData;
 import jcraft.jblockactivity.session.LookupCache;
+import jcraft.jblockactivity.utils.ActivityUtil;
 import jcraft.jblockactivity.utils.MaterialNames;
 import jcraft.jblockactivity.utils.QueryParams;
 
@@ -64,9 +61,10 @@ public class EntityActionLog extends ActionLog implements LookupCache {
         PreparedStatement state = null;
         PreparedStatement extraState = null;
         try {
-            state = connection.prepareStatement("INSERT INTO `" + getWorldTableName()
-                    + "` (time, type, playerid, old_id, old_data, new_id, new_data, x, y, z) VALUES (FROM_UNIXTIME(?), ?, "
-                    + getPlayerId(getIdentifier()) + ", ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+            state = connection.prepareStatement(
+                    "INSERT INTO `" + getWorldTableName()
+                            + "` (time, type, playerid, old_id, old_data, new_id, new_data, x, y, z) VALUES (FROM_UNIXTIME(?), ?, "
+                            + BlockActivity.getPlayerId(getIdentifier()) + ", ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
             state.setLong(1, getTime());
             state.setInt(2, getLoggingType().getId());
             state.setInt(3, (getLoggingType() == LoggingType.hangingbreak || getLoggingType() == LoggingType.creaturekill) ? getEntityId() : 0);
@@ -147,7 +145,7 @@ public class EntityActionLog extends ActionLog implements LookupCache {
         final StringBuilder msg = new StringBuilder();
 
         if (getLoggingType() == LoggingType.hangingbreak || getLoggingType() == LoggingType.hangingplace) {
-            msg.append(ChatColor.GRAY).append(formatTime(getTime())).append(' ');
+            msg.append(ChatColor.GRAY).append(ActivityUtil.formatTime(getTime())).append(' ');
 
             if (getLoggingType() == LoggingType.hangingplace) {
                 msg.append(add).append("created ").append(BlockFace.values()[getEntityData()].name().toLowerCase()).append(' ')
@@ -163,7 +161,7 @@ public class EntityActionLog extends ActionLog implements LookupCache {
             }
             msg.append(ChatColor.GRAY).append(" (").append(getTimeSince()).append(')');
         } else if (getLoggingType() == LoggingType.hanginginteract && getExtraData() != null) {
-            msg.append(ChatColor.GRAY).append(formatTime(getTime())).append(' ');
+            msg.append(ChatColor.GRAY).append(ActivityUtil.formatTime(getTime())).append(' ');
             if (getExtraData() instanceof InventoryExtraData) {
                 final InventoryExtraData extraData = (InventoryExtraData) getExtraData();
                 final ItemStack item = (extraData.getContent().length > 0) ? extraData.getContent()[0] : null;
@@ -185,7 +183,7 @@ public class EntityActionLog extends ActionLog implements LookupCache {
                 msg.append(ChatColor.GRAY).append(" (").append(getTimeSince()).append(')');
             }
         } else if (getLoggingType() == LoggingType.creaturekill) {
-            msg.append(ChatColor.GRAY).append(formatTime(getTime())).append(' ').append(sub).append("killed ")
+            msg.append(ChatColor.GRAY).append(ActivityUtil.formatTime(getTime())).append(' ').append(sub).append("killed ")
                     .append(MaterialNames.entityName(getEntityId()));
             /*
              * Skip showing owner name, plugin is now saving only owner UUID and it is not worth asking database for addition names
@@ -238,44 +236,44 @@ public class EntityActionLog extends ActionLog implements LookupCache {
         if (data != null) {
             if (logType == LoggingType.hangingplace || logType == LoggingType.hangingbreak) {
                 if (entity_id == 9) {
-                    extraData = fromJson(data, PaintingExtraData.class);
+                    extraData = ActivityUtil.fromJson(data, PaintingExtraData.class);
                 }
             } else if (logType == LoggingType.hanginginteract) {
-                extraData = fromJson(data, InventoryExtraData.class);
+                extraData = ActivityUtil.fromJson(data, InventoryExtraData.class);
             } else if (logType == LoggingType.creaturekill) {
                 if (entity_id == 50) {
-                    extraData = fromJson(data, EntityExtraData.CreeperExtraData.class);
+                    extraData = ActivityUtil.fromJson(data, EntityExtraData.CreeperExtraData.class);
                 } else if (entity_id == 51) {
-                    extraData = fromJson(data, EntityExtraData.SkeletonExtraData.class);
+                    extraData = ActivityUtil.fromJson(data, EntityExtraData.SkeletonExtraData.class);
                 } else if (entity_id == 54) {
-                    extraData = fromJson(data, EntityExtraData.ZombieExtraData.class);
+                    extraData = ActivityUtil.fromJson(data, EntityExtraData.ZombieExtraData.class);
                 } else if (entity_id == 55) {
-                    extraData = fromJson(data, EntityExtraData.SlimeExtraData.class);
+                    extraData = ActivityUtil.fromJson(data, EntityExtraData.SlimeExtraData.class);
                 } else if (entity_id == 58) {
-                    extraData = fromJson(data, EntityExtraData.EndermanExtraData.class);
+                    extraData = ActivityUtil.fromJson(data, EntityExtraData.EndermanExtraData.class);
                 } else if (entity_id == 62) {
-                    extraData = fromJson(data, EntityExtraData.MagmaCubeExtraData.class);
+                    extraData = ActivityUtil.fromJson(data, EntityExtraData.MagmaCubeExtraData.class);
                 } else if (entity_id == 90) {
-                    extraData = fromJson(data, EntityExtraData.PigExtraData.class);
+                    extraData = ActivityUtil.fromJson(data, EntityExtraData.PigExtraData.class);
                 } else if (entity_id == 91) {
-                    extraData = fromJson(data, EntityExtraData.SheepExtraData.class);
+                    extraData = ActivityUtil.fromJson(data, EntityExtraData.SheepExtraData.class);
                 } else if (entity_id == 95) {
-                    extraData = fromJson(data, EntityExtraData.WolfExtraData.class);
+                    extraData = ActivityUtil.fromJson(data, EntityExtraData.WolfExtraData.class);
                 } else if (entity_id == 98) {
-                    extraData = fromJson(data, EntityExtraData.OcelotExtraData.class);
+                    extraData = ActivityUtil.fromJson(data, EntityExtraData.OcelotExtraData.class);
                 } else if (entity_id == 99) {
-                    extraData = fromJson(data, EntityExtraData.IronGolemExtraData.class);
+                    extraData = ActivityUtil.fromJson(data, EntityExtraData.IronGolemExtraData.class);
                 } else if (entity_id == 100) {
-                    extraData = fromJson(data, EntityExtraData.HorseExtraData.class);
+                    extraData = ActivityUtil.fromJson(data, EntityExtraData.HorseExtraData.class);
                 } else if (entity_id == 120) {
-                    extraData = fromJson(data, EntityExtraData.VillagerExtraData.class);
+                    extraData = ActivityUtil.fromJson(data, EntityExtraData.VillagerExtraData.class);
                 }
             }
         }
 
         UUID uuid;
         try {
-            uuid = UUID.fromString(fixUUID(sUUID));
+            uuid = UUID.fromString(ActivityUtil.fixUUID(sUUID));
         } catch (IllegalArgumentException e) {
             uuid = null;
         }
