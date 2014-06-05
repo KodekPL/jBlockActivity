@@ -56,7 +56,7 @@ public class WorldConfig {
 
         for (LoggingType type : LoggingType.values()) {
             if (type.getId() <= 0) continue;
-            configDef.put("logging." + type.name(), true);
+            configDef.put("logging." + type.name(), type.getDefaultState());
         }
         configDef.put("logExtraData.blockMeta.enable", true);
         for (BlockMetaType type : BlockMetaType.values()) {

@@ -2,27 +2,33 @@ package jcraft.jblockactivity;
 
 public enum LoggingType {
 
-    bothblocks(-2),
-    all(-1),
-    blockbreak(1),
-    blockplace(2),
-    inventoryaccess(3),
-    blockinteract(4),
-    hangingbreak(5),
-    hangingplace(6),
-    hanginginteract(7),
-    creaturekill(8),
-    explosions(9),
-    blockburn(10);
+    bothblocks(-2, false),
+    all(-1, false),
+    blockbreak(1, true),
+    blockplace(2, true),
+    inventoryaccess(3, true),
+    blockinteract(4, true),
+    hangingbreak(5, true),
+    hangingplace(6, true),
+    hanginginteract(7, true),
+    creaturekill(8, true),
+    explosions(9, true),
+    blockburn(10, true);
 
     private final int id;
+    private final boolean defaultState;
 
-    private LoggingType(int id) {
+    private LoggingType(int id, boolean defaultState) {
         this.id = id;
+        this.defaultState = defaultState;
     }
 
     public int getId() {
         return id;
+    }
+
+    public boolean getDefaultState() {
+        return defaultState;
     }
 
     public static LoggingType getTypeById(int id) {
