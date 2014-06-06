@@ -21,6 +21,7 @@ import jcraft.jblockactivity.session.LookupCache;
 import jcraft.jblockactivity.utils.ActivityUtil;
 import jcraft.jblockactivity.utils.MaterialNames;
 import jcraft.jblockactivity.utils.QueryParams;
+import jcraft.jblockactivity.utils.QueryParams.ParamType;
 
 import org.bukkit.ChatColor;
 import org.bukkit.World;
@@ -274,17 +275,17 @@ public class BlockActionLog extends ActionLog implements LookupCache {
     }
 
     public static BlockActionLog getBlockActionLog(ResultSet result, QueryParams params) throws SQLException {
-        final int id = params.needId ? result.getInt("id") : 0;
-        final long time = params.needTime ? result.getTimestamp("time").getTime() : 0;
-        final LoggingType logType = params.needLogType ? LoggingType.getTypeById(result.getInt("type")) : null;
-        final Vector location = params.needCoords ? new Vector(result.getInt("x"), result.getInt("y"), result.getInt("z")) : null;
-        final String playerName = params.needPlayer ? result.getString("playername") : " ";
-        final String sUUID = params.needPlayer ? result.getString("uuid") : null;
-        final int old_id = params.needMaterial ? result.getInt("old_id") : 0;
-        final int new_id = params.needMaterial ? result.getInt("new_id") : 0;
-        final byte old_data = params.needData ? result.getByte("old_data") : (byte) 0;
-        final byte new_data = params.needData ? result.getByte("new_data") : (byte) 0;
-        final String data = params.needExtraData ? result.getString("data") : null;
+        final long time = params.getBoolean(ParamType.NEED_TIME) ? result.getTimestamp("time").getTime() : 0;
+        final LoggingType logType = params.getBoolean(ParamType.NEED_LOG_TYPE) ? LoggingType.getTypeById(result.getInt("type")) : null;
+        final Vector location = params.getBoolean(ParamType.NEED_COORDS) ? new Vector(result.getInt("x"), result.getInt("y"), result.getInt("z"))
+                : null;
+        final String playerName = params.getBoolean(ParamType.NEED_PLAYER) ? result.getString("playername") : " ";
+        final String sUUID = params.getBoolean(ParamType.NEED_PLAYER) ? result.getString("uuid") : null;
+        final int old_id = params.getBoolean(ParamType.NEED_MATERIAL) ? result.getInt("old_id") : 0;
+        final int new_id = params.getBoolean(ParamType.NEED_MATERIAL) ? result.getInt("new_id") : 0;
+        final byte old_data = params.getBoolean(ParamType.NEED_DATA) ? result.getByte("old_data") : (byte) 0;
+        final byte new_data = params.getBoolean(ParamType.NEED_DATA) ? result.getByte("new_data") : (byte) 0;
+        final String data = params.getBoolean(ParamType.NEED_EXTRA_DATA) ? result.getString("data") : null;
 
         ExtraData extraData = null;
         if (data != null) {
@@ -314,7 +315,6 @@ public class BlockActionLog extends ActionLog implements LookupCache {
 
         final BlockActionLog log = new BlockActionLog(logType, playerName, uuid, params.getWorld(), location, old_id, old_data, new_id, new_data,
                 extraData);
-        log.setId(id);
         log.setTime(time);
         return log;
     }

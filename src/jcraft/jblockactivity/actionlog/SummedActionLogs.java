@@ -20,7 +20,7 @@ public class SummedActionLogs {
         private final float spaceFactor;
 
         public SummedBlockActionLogs(ResultSet result, QueryParams params, float spaceFactor) throws SQLException {
-            group = (params.mode == SummarizationMode.PLAYERS) ? result.getString(1) : MaterialNames.materialName(result.getInt(1));
+            group = (params.getSumMode() == SummarizationMode.PLAYERS) ? result.getString(1) : MaterialNames.materialName(result.getInt(1));
             created = result.getInt(2);
             destroyed = result.getInt(3);
             this.spaceFactor = spaceFactor;
@@ -51,7 +51,8 @@ public class SummedActionLogs {
         private final float spaceFactor;
 
         public SummedEntityActionLogs(ResultSet result, QueryParams params, float spaceFactor) throws SQLException {
-            group = MaterialNames.entityName(result.getInt(1));
+            final Object object = result.getObject(1);
+            group = (object instanceof Integer) ? MaterialNames.entityName((int) object) : (String) object;
             kills = result.getInt(2);
             this.spaceFactor = spaceFactor;
         }

@@ -17,7 +17,7 @@ import org.bukkit.util.Vector;
 
 public abstract class ActionLog {
 
-    private long id, time;
+    private long time;
     private LoggingType type;
     private UUID uuid;
     private String playerName, worldName;
@@ -36,14 +36,6 @@ public abstract class ActionLog {
         this.worldName = world.getName();
         this.location = location;
         this.extraData = extraData;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     public void setTime(long time) {

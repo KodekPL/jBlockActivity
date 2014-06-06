@@ -21,6 +21,7 @@ import jcraft.jblockactivity.utils.ImportQueryGen;
 import jcraft.jblockactivity.utils.ImportQueryGen.ImportPlugin;
 import jcraft.jblockactivity.utils.QueryParams;
 import jcraft.jblockactivity.utils.QueryParams.Order;
+import jcraft.jblockactivity.utils.QueryParams.ParamType;
 import jcraft.jblockactivity.utils.QueryParams.SummarizationMode;
 import jcraft.jblockactivity.utils.question.ClearlogQuestion;
 import jcraft.jblockactivity.utils.question.QuestionData;
@@ -269,10 +270,10 @@ public class CommandHandler implements CommandExecutor {
                 if (numberOfPages != 1) {
                     sender.sendMessage(ChatColor.GRAY + "Page " + page + "/" + numberOfPages);
                 }
-                if (session.getLastQueryParams().mode != SummarizationMode.NONE) {
-                    if (session.getLastQueryParams().mode == SummarizationMode.BLOCKS) {
+                if (session.getLastQueryParams().getSumMode() != SummarizationMode.NONE) {
+                    if (session.getLastQueryParams().getSumMode() == SummarizationMode.BLOCKS) {
                         sender.sendMessage(ChatColor.GOLD + "Created - Destroyed - Block");
-                    } else if (session.getLastQueryParams().mode == SummarizationMode.ENTITIES) {
+                    } else if (session.getLastQueryParams().getSumMode() == SummarizationMode.ENTITIES) {
                         sender.sendMessage(ChatColor.GOLD + "Kills - Entity");
                     } else {
                         sender.sendMessage(ChatColor.GOLD + "Created - Destroyed - Player");
@@ -358,7 +359,8 @@ public class CommandHandler implements CommandExecutor {
             state = connection.createStatement();
 
             int deleted = 0;
-            final String join = (params.players.size() > 0) ? "INNER JOIN `ba-players` USING (playerid) " : "";
+            final String join = (params.containsParam(ParamType.PLAYERS) || params.containsParam(ParamType.EXCLUDED_PLAYERS)) ? "INNER JOIN `ba-players` USING (playerid) "
+                    : "";
 
             result = state.executeQuery("SELECT count(*) FROM " + params.getTable() + join + params.getWhere(LoggingType.all));
             result.next();
@@ -404,16 +406,16 @@ public class CommandHandler implements CommandExecutor {
         Statement state = null;
         ResultSet result = null;
 
-        params.logType = LoggingType.all;
-        params.needCoords = true;
-        params.needMaterial = true;
-        params.needData = true;
-        params.needPlayer = true;
-        params.needTime = true;
-        params.needLogType = true;
-        params.needExtraData = true;
-        params.order = Order.DESC;
-        params.mode = SummarizationMode.NONE;
+        params.setParam(ParamType.LOG_TYPE, LoggingType.all);
+        params.setParam(ParamType.NEED_COORDS, true);
+        params.setParam(ParamType.NEED_MATERIAL, true);
+        params.setParam(ParamType.NEED_DATA, true);
+        params.setParam(ParamType.NEED_PLAYER, true);
+        params.setParam(ParamType.NEED_TIME, true);
+        params.setParam(ParamType.NEED_LOG_TYPE, true);
+        params.setParam(ParamType.NEED_EXTRA_DATA, true);
+        params.setParam(ParamType.ORDER, Order.DESC);
+        params.setParam(ParamType.SUM_MODE, SummarizationMode.NONE);
 
         try {
             connection = BlockActivity.getBlockActivity().getConnection();
@@ -478,16 +480,16 @@ public class CommandHandler implements CommandExecutor {
         Statement state = null;
         ResultSet result = null;
 
-        params.logType = LoggingType.all;
-        params.needCoords = true;
-        params.needMaterial = true;
-        params.needData = true;
-        params.needPlayer = true;
-        params.needTime = true;
-        params.needLogType = true;
-        params.needExtraData = true;
-        params.order = Order.ASC;
-        params.mode = SummarizationMode.NONE;
+        params.setParam(ParamType.LOG_TYPE, LoggingType.all);
+        params.setParam(ParamType.NEED_COORDS, true);
+        params.setParam(ParamType.NEED_MATERIAL, true);
+        params.setParam(ParamType.NEED_DATA, true);
+        params.setParam(ParamType.NEED_PLAYER, true);
+        params.setParam(ParamType.NEED_TIME, true);
+        params.setParam(ParamType.NEED_LOG_TYPE, true);
+        params.setParam(ParamType.NEED_EXTRA_DATA, true);
+        params.setParam(ParamType.ORDER, Order.ASC);
+        params.setParam(ParamType.SUM_MODE, SummarizationMode.NONE);
 
         try {
             connection = BlockActivity.getBlockActivity().getConnection();
@@ -648,7 +650,8 @@ public class CommandHandler implements CommandExecutor {
                         state = connection.createStatement();
 
                         int deleted = 0;
-                        final String join = (params.players.size() > 0) ? "INNER JOIN `ba-players` USING (playerid) " : "";
+                        final String join = (params.containsParam(ParamType.PLAYERS) || params.containsParam(ParamType.EXCLUDED_PLAYERS)) ? "INNER JOIN `ba-players` USING (playerid) "
+                                : "";
 
                         result = state.executeQuery("SELECT count(*) FROM " + params.getTable() + join + params.getWhere(LoggingType.all));
                         result.next();

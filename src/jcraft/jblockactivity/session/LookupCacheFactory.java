@@ -8,6 +8,7 @@ import jcraft.jblockactivity.actionlog.BlockActionLog;
 import jcraft.jblockactivity.actionlog.EntityActionLog;
 import jcraft.jblockactivity.actionlog.SummedActionLogs;
 import jcraft.jblockactivity.utils.QueryParams;
+import jcraft.jblockactivity.utils.QueryParams.ParamType;
 import jcraft.jblockactivity.utils.QueryParams.SummarizationMode;
 
 public class LookupCacheFactory {
@@ -21,8 +22,8 @@ public class LookupCacheFactory {
     }
 
     public LookupCache getLookupCache(ResultSet result) throws SQLException {
-        if (params.mode == SummarizationMode.NONE) {
-            final LoggingType logType = params.needLogType ? LoggingType.getTypeById(result.getInt("type")) : null;
+        if (params.getSumMode() == SummarizationMode.NONE) {
+            final LoggingType logType = params.getBoolean(ParamType.NEED_LOG_TYPE) ? LoggingType.getTypeById(result.getInt("type")) : null;
             switch (logType) {
             case blockbreak:
             case blockinteract:
@@ -37,7 +38,7 @@ public class LookupCacheFactory {
             default:
                 return null;
             }
-        } else if (params.mode == SummarizationMode.BLOCKS) {
+        } else if (params.getSumMode() == SummarizationMode.BLOCKS) {
             return new SummedActionLogs.SummedBlockActionLogs(result, params, spaceFactor);
         } else {
             return new SummedActionLogs.SummedEntityActionLogs(result, params, spaceFactor);
