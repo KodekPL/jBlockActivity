@@ -11,7 +11,10 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 
 import jcraft.jblockactivity.BlockActivity;
+import jcraft.jblockactivity.LoggingType;
 import jcraft.jblockactivity.config.ActivityConfig;
+import jcraft.jblockactivity.config.WorldConfig;
+import jcraft.jblockactivity.extradata.InventoryExtraData;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -87,6 +90,57 @@ public class SQLUpdater implements Runnable {
             } catch (final SQLException e) {
                 Bukkit.getLogger().log(Level.SEVERE, "[SQLUpdater] Error: ", e);
                 return;
+            }
+        }
+
+        // New inventory items format coverter
+        if (LOADED_VERSION < 3) {
+            Bukkit.getLogger().log(Level.INFO, "[jBlockActivity] SQLUpdater started updating to config version 3, that can take a while...");
+            final Connection connection = BlockActivity.getBlockActivity().getConnection();
+            for (WorldConfig config : BlockActivity.worldConfigs.values()) {
+                try {
+                    connection.setAutoCommit(false);
+                    Bukkit.getLogger().log(Level.INFO, "[jBlockActivity] Downloading " + config.tableName + " table to convert inventories...");
+                    final Statement state1 = connection.createStatement();
+                    final ResultSet result = state1.executeQuery("SELECT id, data FROM `" + config.tableName + "` INNER JOIN `" + config.tableName
+                            + "-extra` USING (id) WHERE type = " + LoggingType.inventoryaccess.getId());
+                    connection.commit();
+
+                    if (result.next()) {
+                        int count = 0;
+                        Bukkit.getLogger().log(Level.INFO, "[jBlockActivity] Converting inventory extra data in " + config.tableName + " table.");
+
+                        final Statement state2 = connection.createStatement();
+                        result.beforeFirst();
+                        while (result.next()) {
+                            OldInventoryExtraData oldInvExtraData = ActivityUtil.fromJson(result.getString(2), OldInventoryExtraData.class);
+                            if (oldInvExtraData.isEmpty()) {
+                                continue;
+                            }
+                            InventoryExtraData newInvExtraData = new InventoryExtraData(oldInvExtraData.getContent(), false, config);
+                            state2.executeUpdate("UPDATE `" + config.tableName + "-extra` SET `data`='" + newInvExtraData.getData()
+                                    + "' WHERE `id` = " + result.getInt(1));
+                            count++;
+                        }
+
+                        Bukkit.getLogger().log(Level.INFO,
+                                "[jBlockActivity] Updating " + count + " inventory extra data in " + config.tableName + " table.");
+
+                        connection.commit();
+                        state2.close();
+                    } else {
+                        Bukkit.getLogger().log(Level.INFO, "[jBlockActivity] No inventory extra data in  " + config.tableName + " table, skipped.");
+                    }
+
+                    Bukkit.getLogger()
+                            .log(Level.INFO, "[jBlockActivity] Finished converting inventory extra data in " + config.tableName + " table.");
+                    state1.close();
+                    result.close();
+
+                } catch (final SQLException e) {
+                    Bukkit.getLogger().log(Level.SEVERE, "[SQLUpdater] Error: ", e);
+                    return;
+                }
             }
         }
 

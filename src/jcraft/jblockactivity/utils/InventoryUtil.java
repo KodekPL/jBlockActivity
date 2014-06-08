@@ -4,6 +4,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.DoubleChest;
+import org.bukkit.entity.Entity;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -74,6 +75,8 @@ public class InventoryUtil {
             return ((DoubleChest) holder).getLocation();
         } else if (holder instanceof BlockState) {
             return ((BlockState) holder).getLocation();
+        } else if (holder instanceof Entity) {
+            return ((Entity) holder).getLocation();
         } else {
             return null;
         }

@@ -39,7 +39,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class BlockActivity extends JavaPlugin {
 
-    public final static int LATEST_VERSION = 2;
+    public final static int LATEST_VERSION = 3;
 
     public static File dataFolder;
     public final static String prefix = ChatColor.GOLD + "[" + ChatColor.WHITE + "jBlockActivity" + ChatColor.GOLD + "] " + ChatColor.WHITE;

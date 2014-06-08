@@ -236,29 +236,34 @@ public class BlockActionLog extends ActionLog implements LookupCache {
                         .append(getVector().getBlockZ());
             }
             msg.append(ChatColor.GRAY).append(" (").append(getTimeSince()).append(')');
-        } else if (getLoggingType() == LoggingType.inventoryaccess && getExtraData() != null) {
+        } else if (getLoggingType() == LoggingType.inventoryaccess) {
             final String prefixTime = ChatColor.GRAY + ActivityUtil.formatTime(getTime()) + " ";
             final String suffixTime = ChatColor.GRAY + " (" + getTimeSince() + ")";
-            if (getExtraData() instanceof InventoryExtraData) {
-                final InventoryExtraData extraData = (InventoryExtraData) getExtraData();
-                for (int i = 0; i < extraData.getContent().length; i++) {
-                    ItemStack item = extraData.getContent()[i];
-                    if (item == null) continue;
-                    if (item.getAmount() < 0) {
-                        msg.append(prefixTime).append(sub).append("took ").append(-item.getAmount()).append("x ")
-                                .append(MaterialNames.materialName(item.getTypeId(), item.getData().getData()));
-                        if (item.hasItemMeta()) msg.append(" [e]");
-                        msg.append(" from ").append(MaterialNames.materialName(newBlockId, newBlockData)).append(suffixTime);
-                    } else {
-                        msg.append(prefixTime).append(add).append("put ").append(item.getAmount()).append("x ")
-                                .append(MaterialNames.materialName(item.getTypeId(), item.getData().getData()));
-                        if (item.hasItemMeta()) msg.append(" [e]");
-                        msg.append(" into ").append(MaterialNames.materialName(newBlockId, newBlockData)).append(suffixTime);
-                    }
-                    if (i < extraData.getContent().length) {
-                        msg.append('\n');
+            if (getExtraData() != null) {
+                if (getExtraData() instanceof InventoryExtraData) {
+                    final InventoryExtraData extraData = (InventoryExtraData) getExtraData();
+                    for (int i = 0; i < extraData.getContent().length; i++) {
+                        ItemStack item = extraData.getContent()[i];
+                        if (item == null) continue;
+                        if (item.getAmount() < 0) {
+                            msg.append(prefixTime).append(sub).append("took ").append(-item.getAmount()).append("x ")
+                                    .append(MaterialNames.materialName(item.getTypeId(), item.getData().getData()));
+                            if (item.hasItemMeta()) msg.append(" [e]");
+                            msg.append(" from ").append(MaterialNames.materialName(newBlockId, newBlockData)).append(suffixTime);
+                        } else {
+                            msg.append(prefixTime).append(add).append("put ").append(item.getAmount()).append("x ")
+                                    .append(MaterialNames.materialName(item.getTypeId(), item.getData().getData()));
+                            if (item.hasItemMeta()) msg.append(" [e]");
+                            msg.append(" into ").append(MaterialNames.materialName(newBlockId, newBlockData)).append(suffixTime);
+                        }
+                        if (i < extraData.getContent().length) {
+                            msg.append('\n');
+                        }
                     }
                 }
+            } else {
+                msg.append(prefixTime).append(interact).append("accessed ").append(MaterialNames.materialName(newBlockId, newBlockData))
+                        .append(suffixTime);
             }
         } else if (getLoggingType() == LoggingType.blockinteract) {
             msg.append(ChatColor.GRAY).append(ActivityUtil.formatTime(getTime())).append(' ');

@@ -5,9 +5,9 @@ import java.util.UUID;
 import jcraft.jblockactivity.BlockActivity;
 import jcraft.jblockactivity.config.WorldConfig;
 import jcraft.jblockactivity.extradata.ExtraLoggingTypes.EntityMetaType;
-import jcraft.jblockactivity.extradata.InventoryExtraData.SimpleItemMeta;
 import jcraft.jblockactivity.utils.ActivityUtil;
 import jcraft.jblockactivity.utils.InventoryUtil;
+import jcraft.simpleinventory.inventory.SimpleItemStack;
 
 import org.bukkit.Art;
 import org.bukkit.DyeColor;
@@ -44,8 +44,7 @@ public abstract class EntityExtraData implements ExtraData {
     private Boolean canPickupItems;
     private Boolean removeWhenFarAway;
 
-    private String[] equipmentContent;
-    private SimpleItemMeta[] equipmentMeta;
+    private SimpleItemStack[] equipmentContent;
     private Float[] dropChance;
 
     protected EntityExtraData(WorldConfig config, Entity entity) {
@@ -63,8 +62,7 @@ public abstract class EntityExtraData implements ExtraData {
                 if (eqArray != null) {
                     dropChance = InventoryUtil.packEntityEquipmentDropChance(lEntity.getEquipment());
                     final InventoryExtraData invExtraData = new InventoryExtraData(eqArray, false, config);
-                    equipmentContent = invExtraData.getStringContent();
-                    equipmentMeta = invExtraData.getSimpleItemMeta();
+                    equipmentContent = invExtraData.getSimpleContent();
                 }
             }
         }
@@ -100,7 +98,7 @@ public abstract class EntityExtraData implements ExtraData {
 
     public ItemStack[] getEquipmentContent(World world) {
         if (equipmentContent != null) {
-            final InventoryExtraData invExtraData = new InventoryExtraData(equipmentContent, equipmentMeta, world);
+            final InventoryExtraData invExtraData = new InventoryExtraData(equipmentContent, world);
             return invExtraData.getContent();
         }
         return null;
@@ -402,8 +400,7 @@ public abstract class EntityExtraData implements ExtraData {
         private Integer domestication;
         private Double jumpStrength;
         private Boolean isCarryingChest;
-        private String[] inventoryContent;
-        private SimpleItemMeta[] inventoryMeta;
+        private SimpleItemStack[] inventoryContent;
 
         public HorseExtraData(WorldConfig config, Horse entity) {
             super(config, entity);
@@ -420,11 +417,9 @@ public abstract class EntityExtraData implements ExtraData {
                 isCarryingChest = entity.isCarryingChest() ? true : null;
 
                 if (entity.isCarryingChest()) {
-                    inventoryContent = new String[entity.getInventory().getSize() + 2];
-                    inventoryMeta = new SimpleItemMeta[entity.getInventory().getSize() + 2];
+                    inventoryContent = new SimpleItemStack[entity.getInventory().getSize() + 2];
                 } else {
-                    inventoryContent = new String[2];
-                    inventoryMeta = new SimpleItemMeta[2];
+                    inventoryContent = new SimpleItemStack[2];
                 }
 
                 final ItemStack[] content = new ItemStack[inventoryContent.length];
@@ -437,8 +432,7 @@ public abstract class EntityExtraData implements ExtraData {
                 }
 
                 final InventoryExtraData invExtraData = new InventoryExtraData(content, false, config);
-                inventoryContent = invExtraData.getStringContent();
-                inventoryMeta = invExtraData.getSimpleItemMeta();
+                inventoryContent = invExtraData.getSimpleContent();
             }
         }
 
@@ -491,7 +485,7 @@ public abstract class EntityExtraData implements ExtraData {
 
         public ItemStack[] getInventory(World world) {
             if (inventoryContent != null) {
-                final InventoryExtraData invExtraData = new InventoryExtraData(inventoryContent, inventoryMeta, world);
+                final InventoryExtraData invExtraData = new InventoryExtraData(inventoryContent, world);
                 return invExtraData.getContent();
             }
             return null;
