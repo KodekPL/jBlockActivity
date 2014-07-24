@@ -191,7 +191,8 @@ public class BlockActionLog extends ActionLog implements LookupCache {
 
         final StringBuilder msg = new StringBuilder();
 
-        if (getLoggingType() == LoggingType.blockplace || getLoggingType() == LoggingType.blockbreak || getLoggingType() == LoggingType.explosions) {
+        if (getLoggingType() == LoggingType.blockplace || getLoggingType() == LoggingType.blockbreak || getLoggingType() == LoggingType.explosions
+                || getLoggingType() == LoggingType.tramplefarmland) {
             msg.append(ChatColor.GRAY).append(ActivityUtil.formatTime(getTime())).append(' ');
             if (getLoggingType() == LoggingType.blockplace) {
                 if (oldBlockId == 0) {
@@ -202,6 +203,8 @@ public class BlockActionLog extends ActionLog implements LookupCache {
                 }
             } else if (getLoggingType() == LoggingType.blockbreak || getLoggingType() == LoggingType.explosions) {
                 msg.append(sub).append("destroyed ").append(MaterialNames.materialName(oldBlockId, oldBlockData));
+            } else if (getLoggingType() == LoggingType.tramplefarmland) {
+                msg.append(sub).append("trampled ").append(MaterialNames.materialName(oldBlockId, oldBlockData));
             }
 
             if (getExtraData() != null) {

@@ -128,7 +128,7 @@ public class BlockActivity extends JavaPlugin {
         if (config.isWorldsLogging(LoggingType.inventoryaccess)) {
             manager.registerEvents(new InventoryAccessListener(), this);
         }
-        if (config.isWorldsLogging(LoggingType.blockinteract)) {
+        if (config.isWorldsLogging(LoggingType.blockinteract) || config.isWorldsLogging(LoggingType.tramplefarmland)) {
             manager.registerEvents(new BlockInteractListener(), this);
         }
         if (config.isWorldsLogging(LoggingType.hangingbreak) || config.isWorldsLogging(LoggingType.hangingplace)

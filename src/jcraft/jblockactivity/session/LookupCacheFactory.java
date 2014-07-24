@@ -29,6 +29,7 @@ public class LookupCacheFactory {
             case blockinteract:
             case blockplace:
             case inventoryaccess:
+            case tramplefarmland:
                 return BlockActionLog.getBlockActionLog(result, params);
             case hangingbreak:
             case hangingplace:

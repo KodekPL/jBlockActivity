@@ -13,7 +13,8 @@ public enum LoggingType {
     hanginginteract(7, true),
     creaturekill(8, true),
     explosions(9, true),
-    blockburn(10, true);
+    blockburn(10, true),
+    tramplefarmland(11, true);
 
     private final int id;
     private final boolean defaultState;

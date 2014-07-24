@@ -9,6 +9,7 @@ logging:
   hanginginteract: true
   creaturekill: true
   explosions: true
+  tramplefarmland: true
 logExtraData:
   blockMeta:
     enable: true
