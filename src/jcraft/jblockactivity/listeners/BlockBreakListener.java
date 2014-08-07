@@ -74,6 +74,10 @@ public class BlockBreakListener implements Listener {
     }
 
     public static void blockBreak(WorldConfig config, Block block, Material material, String playerName, UUID playerUUID) {
+        blockBreak(config, block, material, playerName, playerUUID, false);
+    }
+
+    public static void blockBreak(WorldConfig config, Block block, Material material, String playerName, UUID playerUUID, boolean simple) {
         // TODO: Flower Pot contents
         if (config.isLoggingExtraBlockMeta(BlockMetaType.signtext) && (material == Material.WALL_SIGN || material == Material.SIGN_POST)) {
             /** SIGN **/
@@ -113,6 +117,11 @@ public class BlockBreakListener implements Listener {
             final BlockActionLog mainAction = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, block.getWorld(), block
                     .getLocation().toVector(), block.getState(), null, null);
             BlockActivity.sendActionLog(mainAction);
+        }
+
+        if (simple) {
+            // Skip other checkings if logging simple block break
+            return;
         }
 
         /** DOUBLE BLOCKS **/

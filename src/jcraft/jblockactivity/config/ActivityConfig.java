@@ -45,6 +45,7 @@ public class ActivityConfig {
     public Set<String> hiddenPlayers;
     public boolean askRollbacks, askRedos, askClearlogs;
     public boolean callActionLogQueueEvent;
+    public boolean forceWorldEditPlugin;
 
     public void genConfig() {
         final Map<String, Object> configDef = new LinkedHashMap<String, Object>();
@@ -94,6 +95,8 @@ public class ActivityConfig {
         configDef.put("questioner.askClearlogs", true);
 
         configDef.put("event.callActionLogQueueEvent", false);
+
+        configDef.put("plugins.forceWorldEditPlugin", false);
 
         for (Entry<String, Object> e : configDef.entrySet()) {
             if (!CONFIG.contains(e.getKey())) {
@@ -160,6 +163,8 @@ public class ActivityConfig {
         askClearlogs = CONFIG.getBoolean("questioner.askClearlogs");
 
         callActionLogQueueEvent = CONFIG.getBoolean("event.callActionLogQueueEvent");
+
+        forceWorldEditPlugin = CONFIG.getBoolean("plugins.forceWorldEditPlugin");
     }
 
     public void checkConfigVersion() {

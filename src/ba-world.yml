@@ -10,6 +10,7 @@ logging:
   creaturekill: true
   explosions: true
   tramplefarmland: true
+  worldedit: false
 logExtraData:
   blockMeta:
     enable: true

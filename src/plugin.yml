@@ -1,7 +1,8 @@
 name: jBlockActivity
-version: 0.9.2
+version: 0.9.3
 author: Kodek
 website: 'https://github.com/KodekPL/jBlockActivity'
+softdepend: [WorldEdit]
 main: jcraft.jblockactivity.BlockActivity
 
 commands:

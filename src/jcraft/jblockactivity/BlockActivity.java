@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 
 import jcraft.jblockactivity.actionlog.ActionLog;
 import jcraft.jblockactivity.config.ActivityConfig;
@@ -25,6 +26,7 @@ import jcraft.jblockactivity.listeners.ExplosionListener;
 import jcraft.jblockactivity.listeners.HangingListener;
 import jcraft.jblockactivity.listeners.InventoryAccessListener;
 import jcraft.jblockactivity.listeners.LogToolListener;
+import jcraft.jblockactivity.listeners.WorldEditListener;
 import jcraft.jblockactivity.session.LookupCacheFactory;
 import jcraft.jblockactivity.sql.SQLConnectionPool;
 import jcraft.jblockactivity.sql.SQLProfile;
@@ -34,12 +36,16 @@ import jcraft.jblockactivity.utils.QueryParams;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.material.MaterialData;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 
 public class BlockActivity extends JavaPlugin {
 
     public final static int LATEST_VERSION = 3;
+    public final static int MIN_WE_BUILD = 3282;
 
     public static File dataFolder;
     public final static String prefix = ChatColor.GOLD + "[" + ChatColor.WHITE + "jBlockActivity" + ChatColor.GOLD + "] " + ChatColor.WHITE;
@@ -144,6 +150,9 @@ public class BlockActivity extends JavaPlugin {
         if (config.isWorldsLogging(LoggingType.blockburn)) {
             manager.registerEvents(new BlockBurnListener(), this);
         }
+        if (config.isWorldsLogging(LoggingType.worldedit)) {
+            hookWorldEditPlugin();
+        }
         manager.registerEvents(new LogToolListener(), this);
     }
 
@@ -178,6 +187,48 @@ public class BlockActivity extends JavaPlugin {
                 getLogger().severe("MySQL connection lost!");
             }
             return null;
+        }
+    }
+
+    public void hookWorldEditPlugin() {
+        final Plugin worldEdit = getServer().getPluginManager().getPlugin("WorldEdit");
+        if (worldEdit != null) {
+            final String bukkitVersion = worldEdit.getDescription().getVersion();
+            final Pattern pattern = Pattern.compile("[\\*.-]");
+
+            if (!config.forceWorldEditPlugin) {
+                int build = -1;
+                try {
+                    build = Integer.parseInt(pattern.split(bukkitVersion)[4]);
+                } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+                    getLogger()
+                            .log(Level.SEVERE,
+                                    "Plugin was not able to read version of WorldEdit installed on this server. "
+                                            + "Make sure your WorldEdit is up to date. "
+                                            + "If you think your version is correct, turn on 'forceWorldEditPlugin' in jBlockActivity configuration file to force WorldEdit support. "
+                                            + "This option may cause issues if your WorldEdit is older than required.");
+                    return;
+                }
+
+                if (build != -1 && build < MIN_WE_BUILD) {
+                    getLogger()
+                            .log(Level.SEVERE,
+                                    "Version of WorldEdit installed on this server is lower than required by jBlockActivity! "
+                                            + "Install WorldEdit build "
+                                            + MIN_WE_BUILD
+                                            + " or higher, to run support for WorldEdit. "
+                                            + "If you think your version is correct, turn on 'forceWorldEditPlugin' in jBlockActivity configuration file to force WorldEdit support. "
+                                            + "This option may cause issues if your WorldEdit is older than required.");
+                    return;
+                }
+            }
+
+            final WorldEditPlugin worldEditPlugin = (WorldEditPlugin) worldEdit;
+            worldEditPlugin.getWorldEdit().getEventBus().register(new WorldEditListener());
+            getLogger().log(Level.INFO, "Plugin WorldEdit was hooked correctly to jBlockActivity.");
+        } else {
+            getLogger().log(Level.SEVERE,
+                    "Server was unable to find WorldEdit plugin installed. Make sure WorldEdit is located in your plugins folder.");
         }
     }
 

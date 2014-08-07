@@ -14,7 +14,8 @@ public enum LoggingType {
     creaturekill(8, true),
     explosions(9, true),
     blockburn(10, true),
-    tramplefarmland(11, true);
+    tramplefarmland(11, true),
+    worldedit(12, false);
 
     private final int id;
     private final boolean defaultState;
