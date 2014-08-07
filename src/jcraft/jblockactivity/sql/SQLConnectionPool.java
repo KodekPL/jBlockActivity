@@ -26,10 +26,10 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import jcraft.jblockactivity.BlockActivity;
+
 public class SQLConnectionPool implements Closeable {
 
-    private final static int poolSize = 10;
-    private final static long timeToLive = 300000;
     private final Vector<JDCConnection> connections;
     private final SQLProfile profile;
     private final Lock lock = new ReentrantLock();
@@ -37,7 +37,7 @@ public class SQLConnectionPool implements Closeable {
     public SQLConnectionPool(SQLProfile profile) throws ClassNotFoundException {
         Class.forName("com.mysql.jdbc.Driver");
         this.profile = profile;
-        connections = new Vector<JDCConnection>(poolSize);
+        connections = new Vector<JDCConnection>(BlockActivity.config.connectionsPoolSize);
         final ConnectionReaper reaper = new ConnectionReaper();
         new Thread(reaper, "jBlockLogSQLConnection").start();
     }
@@ -82,7 +82,7 @@ public class SQLConnectionPool implements Closeable {
 
     private void reapConnections() {
         lock.lock();
-        final long stale = System.currentTimeMillis() - timeToLive;
+        final long stale = System.currentTimeMillis() - BlockActivity.config.connectionLifeSpan;
         final Iterator<JDCConnection> itr = connections.iterator();
         while (itr.hasNext()) {
             final JDCConnection conn = itr.next();
@@ -98,7 +98,7 @@ public class SQLConnectionPool implements Closeable {
         public void run() {
             while (true) {
                 try {
-                    Thread.sleep(300000);
+                    Thread.sleep(BlockActivity.config.connectionLifeSpan);
                 } catch (final InterruptedException e) {
                 }
                 reapConnections();
@@ -382,7 +382,7 @@ public class SQLConnectionPool implements Closeable {
         }
 
         public void abort(Executor exec) throws SQLException {
-            // Not implemented really...
+
         }
 
         public String getSchema() throws SQLException {

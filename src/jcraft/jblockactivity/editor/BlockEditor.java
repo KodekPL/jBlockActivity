@@ -130,7 +130,7 @@ public class BlockEditor extends BukkitRunnable {
             } catch (final BlockEditorException ex) {
                 errorList.add(ex);
             } catch (final Exception ex) {
-                Bukkit.getLogger().log(Level.WARNING, "[BlockEditor] Exeption: ", ex);
+                Bukkit.getLogger().log(Level.WARNING, "[jBA-BlockEditor] Exeption: ", ex);
             }
             counter++;
             if (sender != null) {
@@ -148,7 +148,7 @@ public class BlockEditor extends BukkitRunnable {
             } catch (final BlockEditorException ex) {
                 errorList.add(ex);
             } catch (final Exception ex) {
-                Bukkit.getLogger().log(Level.WARNING, "[BlockEditor] Exeption: ", ex);
+                Bukkit.getLogger().log(Level.WARNING, "[jBA-BlockEditor] Exeption: ", ex);
             }
             counter++;
             if (sender != null) {

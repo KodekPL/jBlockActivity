@@ -39,8 +39,8 @@ public class BlockPlaceListener implements Listener {
         final Block block = event.getBlock();
         final Material material = block.getType();
 
-        // SignChangeEvent
         if (config.isLoggingExtraBlockMeta(BlockMetaType.signtext) && (material == Material.SIGN_POST || material == Material.WALL_SIGN)) {
+            // SignChangeEvent
             return;
         }
 

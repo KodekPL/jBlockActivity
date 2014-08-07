@@ -79,27 +79,27 @@ public class BlockBreakListener implements Listener {
 
     public static void blockBreak(WorldConfig config, Block block, Material material, String playerName, UUID playerUUID, boolean simple) {
         // TODO: Flower Pot contents
-        if (config.isLoggingExtraBlockMeta(BlockMetaType.signtext) && (material == Material.WALL_SIGN || material == Material.SIGN_POST)) {
+        if ((material == Material.WALL_SIGN || material == Material.SIGN_POST) && config.isLoggingExtraBlockMeta(BlockMetaType.signtext)) {
             /** SIGN **/
             final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, block.getWorld(), block.getLocation()
                     .toVector(), block.getState(), null, BlockExtraData.getExtraData(block.getState()));
             BlockActivity.sendActionLog(action);
-        } else if (config.isLoggingExtraBlockMeta(BlockMetaType.skull) && material == Material.SKULL) {
+        } else if (material == Material.SKULL && config.isLoggingExtraBlockMeta(BlockMetaType.skull)) {
             /** SKULL **/
             final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, block.getWorld(), block.getLocation()
                     .toVector(), block.getState(), null, BlockExtraData.getExtraData(block.getState()));
             BlockActivity.sendActionLog(action);
-        } else if (config.isLoggingExtraBlockMeta(BlockMetaType.mobspawner) && material == Material.MOB_SPAWNER) {
+        } else if (material == Material.MOB_SPAWNER && config.isLoggingExtraBlockMeta(BlockMetaType.mobspawner)) {
             /** MOB SPAWNER **/
             final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, block.getWorld(), block.getLocation()
                     .toVector(), block.getState(), null, BlockExtraData.getExtraData(block.getState()));
             BlockActivity.sendActionLog(action);
-        } else if (config.isLoggingExtraBlockMeta(BlockMetaType.commandblock) && material == Material.COMMAND) {
+        } else if (material == Material.COMMAND && config.isLoggingExtraBlockMeta(BlockMetaType.commandblock)) {
             /** COMMAND BLOCK **/
             final BlockActionLog action = new BlockActionLog(LoggingType.blockbreak, playerName, playerUUID, block.getWorld(), block.getLocation()
                     .toVector(), block.getState(), null, BlockExtraData.getExtraData(block.getState()));
             BlockActivity.sendActionLog(action);
-        } else if (config.isLogging(LoggingType.inventoryaccess) && BlocksUtil.isContainerBlock(material)) {
+        } else if (BlocksUtil.isContainerBlock(material) && config.isLogging(LoggingType.inventoryaccess)) {
             /** CONTAINER **/
             final InventoryExtraData extraData = new InventoryExtraData(((InventoryHolder) block.getState()).getInventory().getContents(), true,
                     block.getWorld());

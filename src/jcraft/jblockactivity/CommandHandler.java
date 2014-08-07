@@ -84,7 +84,11 @@ public class CommandHandler implements CommandExecutor {
                         sender.sendMessage(BlockActivity.prefix + ChatColor.GREEN + "You aren't hidden anylonger.");
                     }
                     return true;
-                } else if (args[0].equalsIgnoreCase("savequeue") && sender.hasPermission("ba.savequeue")) {
+                } else if (args[0].equalsIgnoreCase("savequeue")) {
+                    if (!sender.hasPermission("ba.savequeue")) {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You don't have required permission - ba.savequeue");
+                        return false;
+                    }
                     final LogExecuteThread executor = BlockActivity.getLogExecuteThread();
                     sender.sendMessage(ChatColor.GOLD + "Current queue size: " + executor.getQueueSize());
                     int lastSize = -1, fails = 0;
@@ -176,13 +180,25 @@ public class CommandHandler implements CommandExecutor {
                         answerQuestion(sender, answer);
                     }
                     return true;
-                } else if (args[0].equalsIgnoreCase("lookup") && sender.hasPermission("ba.lookup")) {
+                } else if (args[0].equalsIgnoreCase("lookup") || args[0].equalsIgnoreCase("look") || args[0].equalsIgnoreCase("l")) {
+                    if (!sender.hasPermission("ba.lookup")) {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You don't have required permission - ba.lookup");
+                        return false;
+                    }
                     preExecuteCommand(new ActionRequest(ActionType.CMD_LOOKUP, sender, args, false), true);
                     return true;
-                } else if (args[0].equalsIgnoreCase("clearlog") && sender.hasPermission("ba.clearlog")) {
+                } else if (args[0].equalsIgnoreCase("clearlog")) {
+                    if (!sender.hasPermission("ba.clearlog")) {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You don't have required permission - ba.clearlog");
+                        return false;
+                    }
                     preExecuteCommand(new ActionRequest(ActionType.CMD_CLEARLOG, sender, args, true), true);
                     return true;
-                } else if (args[0].equalsIgnoreCase("importlogs") && sender.hasPermission("ba.admin")) {
+                } else if (args[0].equalsIgnoreCase("importlogs")) {
+                    if (!sender.hasPermission("ba.admin")) {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You don't have required permission - ba.admin");
+                        return false;
+                    }
                     if (args.length == 4) {
                         final ImportPlugin pluginName;
                         try {
@@ -204,7 +220,11 @@ public class CommandHandler implements CommandExecutor {
                         sender.sendMessage(BlockActivity.prefix + ChatColor.YELLOW + "Command example: /ba importlogs LOGBLOCK lb-world world");
                         return false;
                     }
-                } else if (args[0].equalsIgnoreCase("debug") && sender.hasPermission("ba.admin")) {
+                } else if (args[0].equalsIgnoreCase("debug")) {
+                    if (!sender.hasPermission("ba.admin")) {
+                        sender.sendMessage(BlockActivity.prefix + ChatColor.RED + "You don't have required permission - ba.admin");
+                        return false;
+                    }
                     if (args.length == 2 && args[1].equalsIgnoreCase("query")) {
                         final ActiveSession session = ActiveSession.getSession(sender);
                         if (session.getLastQueryParams() == null) {
@@ -325,7 +345,7 @@ public class CommandHandler implements CommandExecutor {
             }
         } catch (SQLException e1) {
             sender.sendMessage(ChatColor.RED + "Exception, check error log!");
-            Bukkit.getLogger().log(Level.SEVERE, "[Lookup] " + params.getQuery() + ": ", e1);
+            Bukkit.getLogger().log(Level.SEVERE, "[jBA-Lookup] " + params.getQuery() + ": ", e1);
             e1.printStackTrace();
         } catch (IllegalArgumentException e2) {
             sender.sendMessage(ChatColor.RED + e2.getMessage());
@@ -341,7 +361,7 @@ public class CommandHandler implements CommandExecutor {
                     connection.close();
                 }
             } catch (SQLException e) {
-                Bukkit.getLogger().log(Level.SEVERE, "[CommandsHandler] SQL Exception on close!", e);
+                Bukkit.getLogger().log(Level.SEVERE, "[jBA-CommandsHandler] SQL Exception on close!", e);
             }
         }
     }
@@ -383,7 +403,7 @@ public class CommandHandler implements CommandExecutor {
             }
         } catch (Exception e) {
             sender.sendMessage(ChatColor.RED + "Exception, check error log!");
-            Bukkit.getLogger().log(Level.SEVERE, "[ClearLog] " + params.getQuery() + ": ", e);
+            Bukkit.getLogger().log(Level.SEVERE, "[jBA-ClearLog] " + params.getQuery() + ": ", e);
         } finally {
             try {
                 if (result != null) {
@@ -396,7 +416,7 @@ public class CommandHandler implements CommandExecutor {
                     connection.close();
                 }
             } catch (SQLException e) {
-                Bukkit.getLogger().log(Level.SEVERE, "[CommandsHandler] SQL Exception on close!", e);
+                Bukkit.getLogger().log(Level.SEVERE, "[jBA-CommandsHandler] SQL Exception on close!", e);
             }
         }
     }
@@ -454,7 +474,7 @@ public class CommandHandler implements CommandExecutor {
             }
         } catch (SQLException | Error e) {
             sender.sendMessage(ChatColor.RED + "Exception, check error log!");
-            Bukkit.getLogger().log(Level.SEVERE, "[Rollback] " + params.getQuery() + ": ", e);
+            Bukkit.getLogger().log(Level.SEVERE, "[jBA-Rollback] " + params.getQuery() + ": ", e);
             e.printStackTrace();
         } catch (IllegalArgumentException e) {
             sender.sendMessage(ChatColor.RED + e.getMessage());
@@ -470,7 +490,7 @@ public class CommandHandler implements CommandExecutor {
                     connection.close();
                 }
             } catch (SQLException e) {
-                Bukkit.getLogger().log(Level.SEVERE, "[CommandsHandler] SQL Exception on close!", e);
+                Bukkit.getLogger().log(Level.SEVERE, "[jBA-CommandsHandler] SQL Exception on close!", e);
             }
         }
     }
@@ -529,7 +549,7 @@ public class CommandHandler implements CommandExecutor {
             }
         } catch (SQLException | Error e) {
             sender.sendMessage(ChatColor.RED + "Exception, check error log!");
-            Bukkit.getLogger().log(Level.SEVERE, "[Redo] " + params.getQuery() + ": ", e);
+            Bukkit.getLogger().log(Level.SEVERE, "[jBA-Redo] " + params.getQuery() + ": ", e);
             e.printStackTrace();
         } catch (IllegalArgumentException e) {
             sender.sendMessage(ChatColor.RED + e.getMessage());
@@ -545,7 +565,7 @@ public class CommandHandler implements CommandExecutor {
                     connection.close();
                 }
             } catch (SQLException e) {
-                Bukkit.getLogger().log(Level.SEVERE, "[CommandsHandler] SQL Exception on close!", e);
+                Bukkit.getLogger().log(Level.SEVERE, "[jBA-CommandsHandler] SQL Exception on close!", e);
             }
         }
     }
@@ -674,7 +694,7 @@ public class CommandHandler implements CommandExecutor {
                         }
                     } catch (Exception e) {
                         sender.sendMessage(ChatColor.RED + "Exception, check error log!");
-                        Bukkit.getLogger().log(Level.SEVERE, "[ClearLog] " + params.getQuery() + ": ", e);
+                        Bukkit.getLogger().log(Level.SEVERE, "[jBA-ClearLog] " + params.getQuery() + ": ", e);
                     } finally {
                         try {
                             if (result != null) {
@@ -687,7 +707,7 @@ public class CommandHandler implements CommandExecutor {
                                 connection.close();
                             }
                         } catch (SQLException e) {
-                            Bukkit.getLogger().log(Level.SEVERE, "[CommandsHandler] SQL Exception on close!", e);
+                            Bukkit.getLogger().log(Level.SEVERE, "[jBA-CommandsHandler] SQL Exception on close!", e);
                         }
                     }
                 }

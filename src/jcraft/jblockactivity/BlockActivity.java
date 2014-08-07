@@ -292,7 +292,7 @@ public class BlockActivity extends JavaPlugin {
                 return lookupLogs;
             }
         } catch (SQLException e1) {
-            org.bukkit.Bukkit.getLogger().log(Level.SEVERE, "[Lookup] " + params.getQuery() + ": ", e1);
+            org.bukkit.Bukkit.getLogger().log(Level.SEVERE, "[jBA-Lookup] " + params.getQuery() + ": ", e1);
             e1.printStackTrace();
         } catch (IllegalArgumentException e2) {
             return lookupLogs;

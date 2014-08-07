@@ -35,6 +35,7 @@ public class ActivityConfig {
     }
 
     public String sqlHost, sqlPort, sqlDatabase, sqlUsername, sqlPassword;
+    public int connectionsPoolSize, connectionLifeSpan;
     public int maxTimePerRun, timeBetweenRuns, minLogsToProcess, queueWarningSize;
     private boolean[] loggingTypes;
 
@@ -58,6 +59,9 @@ public class ActivityConfig {
         configDef.put("mysql.username", "root");
         configDef.put("mysql.password", "password");
         configDef.put("mysql.database", "minecraft");
+
+        configDef.put("mysql.connection.poolSize", 10);
+        configDef.put("mysql.connection.lifeSpan", 300000);
 
         final List<String> logWorlds = new ArrayList<String>();
         for (World world : Bukkit.getWorlds()) {
@@ -120,6 +124,9 @@ public class ActivityConfig {
         sqlUsername = getStringIncludingInts("mysql.username");
         sqlPassword = getStringIncludingInts("mysql.password");
         BlockActivity.sqlProfile = new SQLProfile(sqlHost, sqlPort, sqlDatabase, sqlUsername, sqlPassword);
+
+        connectionsPoolSize = CONFIG.getInt("mysql.connection.poolSize");
+        connectionLifeSpan = CONFIG.getInt("mysql.connection.lifeSpan");
 
         maxTimePerRun = CONFIG.getInt("queue.maxTimePerRun");
         timeBetweenRuns = CONFIG.getInt("queue.timeBetweenRuns");

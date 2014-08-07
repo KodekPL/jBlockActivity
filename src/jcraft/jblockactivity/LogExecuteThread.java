@@ -51,7 +51,7 @@ public class LogExecuteThread implements Runnable {
                 }
 
                 if (queueWarningSize > 0 && queue.size() >= queueWarningSize) {
-                    Bukkit.getLogger().info("[Queue] Queue is overloaded! Size: " + getQueueSize());
+                    Bukkit.getLogger().info("[jBA-Queue] Queue is overloaded! Size: " + getQueueSize());
                 }
 
                 Connection connection = BlockActivity.getBlockActivity().getConnection();
@@ -71,28 +71,28 @@ public class LogExecuteThread implements Runnable {
                         }
                         if (!BlockActivity.playerIds.containsKey(log.getIdentifier())) {
                             if (!addPlayer(state, log.getPlayerName(), log.getUUID())) {
-                                Bukkit.getLogger()
-                                        .warning("[Executor] Failed to add new player: " + log.getPlayerName() + " (" + log.getUUID() + ")");
+                                Bukkit.getLogger().warning(
+                                        "[jBA-Executor] Failed to add new player: " + log.getPlayerName() + " (" + log.getUUID() + ")");
                                 continue;
                             }
                         }
                         try {
                             log.executeStatements(connection);
                         } catch (final SQLException ex) {
-                            Bukkit.getLogger().log(Level.SEVERE, "[Executor] SQL Exception on executing: ", ex);
+                            Bukkit.getLogger().log(Level.SEVERE, "[jBA-Executor] SQL Exception on executing: ", ex);
                             break;
                         }
                         count++;
                     }
                     connection.commit();
                 } catch (SQLException e) {
-                    Bukkit.getLogger().log(Level.SEVERE, "[Executor] SQL Exception on connection:", e);
+                    Bukkit.getLogger().log(Level.SEVERE, "[jBA-Executor] SQL Exception on connection:", e);
                 } finally {
                     try {
                         state.close();
                         connection.close();
                     } catch (final SQLException ex) {
-                        Bukkit.getLogger().log(Level.SEVERE, "[Executor] SQL Exception on close:", ex);
+                        Bukkit.getLogger().log(Level.SEVERE, "[jBA-Executor] SQL Exception on close:", ex);
                     }
                     lock.unlock();
                 }
