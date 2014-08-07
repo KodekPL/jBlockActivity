@@ -1,10 +1,14 @@
-configVersion: 1
+configVersion: 3
+autoUpdateTables: true
 mysql:
   host: '127.0.0.1'
   port: '3306'
   username: root
   password: ''
   database: minecraft
+  connection:
+    poolSize: 10
+    lifeSpan: 300000
 loggedWorlds:
 - world
 logging:
@@ -38,3 +42,5 @@ questioner:
   askClearlogs: true
 event:
   callActionLogQueueEvent: false
+plugins:
+  forceWorldEditPlugin: false
