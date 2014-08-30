@@ -161,7 +161,7 @@ public class EntityActionLog extends ActionLog implements LookupCache {
                         .append(getVector().getBlockZ());
             }
             msg.append(ChatColor.GRAY).append(" (").append(getTimeSince()).append(')');
-        } else if (getLoggingType() == LoggingType.hanginginteract && getExtraData() != null) {
+        } else if (getLoggingType() == LoggingType.hanginginteract && getExtraData() != null && !getExtraData().isNull()) {
             msg.append(ChatColor.GRAY).append(ActivityUtil.formatTime(getTime())).append(' ');
             if (getExtraData() instanceof InventoryExtraData) {
                 final InventoryExtraData extraData = (InventoryExtraData) getExtraData();

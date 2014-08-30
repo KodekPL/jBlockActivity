@@ -242,7 +242,7 @@ public class BlockActionLog extends ActionLog implements LookupCache {
         } else if (getLoggingType() == LoggingType.inventoryaccess) {
             final String prefixTime = ChatColor.GRAY + ActivityUtil.formatTime(getTime()) + " ";
             final String suffixTime = ChatColor.GRAY + " (" + getTimeSince() + ")";
-            if (getExtraData() != null) {
+            if (getExtraData() != null && !getExtraData().isNull()) {
                 if (getExtraData() instanceof InventoryExtraData) {
                     final InventoryExtraData extraData = (InventoryExtraData) getExtraData();
                     for (int i = 0; i < extraData.getContent().length; i++) {
