@@ -261,7 +261,7 @@ public class MaterialNames {
     }
 
     private static void addMaterialName(Material material, int data, String name) {
-        MATERIAL_NAMES.put(material.name() + ";" + data, name);
+        MATERIAL_NAMES.put(material.getId() + ";" + data, name);
     }
 
     public static String entityName(EntityType entity) {
@@ -281,10 +281,16 @@ public class MaterialNames {
     }
 
     public static String materialName(Material material, byte data) {
-        final String key = material.name() + ";" + data;
+        final String key = material.getId() + ";" + data;
 
         if (MATERIAL_NAMES.containsKey(key)) {
             return MATERIAL_NAMES.get(key);
+        }
+
+        final String noDataKey = material.getId() + ";-1";
+
+        if (MATERIAL_NAMES.containsKey(noDataKey)) {
+            return MATERIAL_NAMES.get(noDataKey);
         }
 
         return toMaterialName(material);
