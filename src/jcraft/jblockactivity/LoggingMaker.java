@@ -50,6 +50,7 @@ public enum LoggingMaker {
             name = ((Player) entity).getUniqueId().toString();
         } else if (entity instanceof Projectile && ((Projectile) entity).getShooter() != null) {
             final ProjectileSource shooter = ((Projectile) entity).getShooter();
+
             if (shooter instanceof Player) {
                 name = ((Player) shooter).getUniqueId().toString();
             } else {
@@ -57,10 +58,12 @@ public enum LoggingMaker {
             }
         } else if (entity instanceof TNTPrimed && ((TNTPrimed) entity).getSource() != null) {
             final Entity source = ((TNTPrimed) entity).getSource();
+
             if (source instanceof Player) {
                 name = ((Player) source).getUniqueId().toString();
             } else if (source instanceof Projectile && ((Projectile) entity).getShooter() != null) {
                 final ProjectileSource shooter = ((Projectile) source).getShooter();
+
                 if (shooter instanceof Player) {
                     name = ((Player) shooter).getUniqueId().toString();
                 } else {
@@ -71,6 +74,7 @@ public enum LoggingMaker {
             }
         } else if (entity instanceof Creeper && explosion && ((Creeper) entity).getTarget() != null) {
             final LivingEntity target = ((Creeper) entity).getTarget();
+
             if (target instanceof Player) {
                 name = ((Player) target).getUniqueId().toString();
             } else {

@@ -50,18 +50,28 @@ public abstract class EntityExtraData implements ExtraData {
     protected EntityExtraData(WorldConfig config, Entity entity) {
         if (entity instanceof LivingEntity) {
             final LivingEntity lEntity = (LivingEntity) entity;
+
             this.maxHealth = lEntity.getMaxHealth();
             this.health = lEntity.getHealth();
-            if (config.isLoggingExtraEntityMeta(EntityMetaType.customname)) this.customName = lEntity.getCustomName();
-            if (config.isLoggingExtraEntityMeta(EntityMetaType.customname)) this.customNameVisible = lEntity.isCustomNameVisible() ? true : null;
+
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.customname)) {
+                this.customName = lEntity.getCustomName();
+            }
+
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.customname)) {
+                this.customNameVisible = lEntity.isCustomNameVisible() ? true : null;
+            }
+
             this.canPickupItems = lEntity.getCanPickupItems() ? true : null;
             this.removeWhenFarAway = lEntity.getRemoveWhenFarAway() ? null : false;
 
             if (config.isLoggingExtraEntityMeta(EntityMetaType.equipment)) {
                 final ItemStack[] eqArray = InventoryUtil.packEntityEquipment(lEntity.getEquipment());
+
                 if (eqArray != null) {
-                    dropChance = InventoryUtil.packEntityEquipmentDropChance(lEntity.getEquipment());
                     final InventoryExtraData invExtraData = new InventoryExtraData(eqArray, false, config);
+
+                    dropChance = InventoryUtil.packEntityEquipmentDropChance(lEntity.getEquipment());
                     equipmentContent = invExtraData.getSimpleContent();
                 }
             }
@@ -99,6 +109,7 @@ public abstract class EntityExtraData implements ExtraData {
     public ItemStack[] getEquipmentContent(World world) {
         if (equipmentContent != null) {
             final InventoryExtraData invExtraData = new InventoryExtraData(equipmentContent, world);
+
             return invExtraData.getContent();
         }
         return null;
@@ -159,8 +170,14 @@ public abstract class EntityExtraData implements ExtraData {
 
         public ZombieExtraData(WorldConfig config, Zombie entity) {
             super(config, entity);
-            if (config.isLoggingExtraEntityMeta(EntityMetaType.zombiebaby)) isBaby = entity.isBaby() ? true : null;
-            if (config.isLoggingExtraEntityMeta(EntityMetaType.zombievillager)) isVillager = entity.isVillager() ? true : null;
+
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.zombiebaby)) {
+                isBaby = entity.isBaby() ? true : null;
+            }
+
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.zombievillager)) {
+                isVillager = entity.isVillager() ? true : null;
+            }
         }
 
         public Boolean isBaby() {
@@ -265,8 +282,10 @@ public abstract class EntityExtraData implements ExtraData {
 
         public EndermanExtraData(WorldConfig config, Enderman entity) {
             super(config, entity);
+
             if (config.isLoggingExtraEntityMeta(EntityMetaType.endermancarriedblock)) {
                 final MaterialData material = entity.getCarriedMaterial();
+
                 if (material.getItemTypeId() == 0) {
                     blockId = null;
                     blockData = null;
@@ -289,6 +308,7 @@ public abstract class EntityExtraData implements ExtraData {
             if (blockId == null || blockData == null) {
                 return null;
             }
+
             return new MaterialData(blockId, blockData);
         }
 
@@ -310,7 +330,10 @@ public abstract class EntityExtraData implements ExtraData {
 
         public IronGolemExtraData(WorldConfig config, IronGolem entity) {
             super(config, entity);
-            if (config.isLoggingExtraEntityMeta(EntityMetaType.irongolemplayercreation)) isPlayerCreated = entity.isPlayerCreated();
+
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.irongolemplayercreation)) {
+                isPlayerCreated = entity.isPlayerCreated();
+            }
         }
 
         public Boolean isPlayerCreated() {
@@ -337,9 +360,18 @@ public abstract class EntityExtraData implements ExtraData {
 
         public AgeableExtraData(WorldConfig config, Ageable entity) {
             super(config, entity);
-            if (config.isLoggingExtraEntityMeta(EntityMetaType.age)) this.age = (entity.getAge() == 0) ? null : entity.getAge();
-            if (config.isLoggingExtraEntityMeta(EntityMetaType.age)) this.ageLock = entity.getAgeLock() ? true : null;
-            if (config.isLoggingExtraEntityMeta(EntityMetaType.animalbaby)) this.isAdult = entity.isAdult() ? null : false;
+
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.age)) {
+                this.age = (entity.getAge() == 0) ? null : entity.getAge();
+            }
+
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.age)) {
+                this.ageLock = entity.getAgeLock() ? true : null;
+            }
+
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.animalbaby)) {
+                this.isAdult = entity.isAdult() ? null : false;
+            }
         }
 
         public Integer getAge() {
@@ -369,8 +401,11 @@ public abstract class EntityExtraData implements ExtraData {
 
         public VillagerExtraData(WorldConfig config, Villager entity) {
             super(config, entity);
-            if (config.isLoggingExtraEntityMeta(EntityMetaType.villagerprofession)) this.profession = (entity.getProfession() == Profession.FARMER) ? null
-                    : entity.getProfession();
+
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.villagerprofession)) {
+                this.profession = (entity.getProfession() == Profession.FARMER) ? null : entity.getProfession();
+            }
+
         }
 
         public Profession getProfession() {
@@ -404,15 +439,31 @@ public abstract class EntityExtraData implements ExtraData {
 
         public HorseExtraData(WorldConfig config, Horse entity) {
             super(config, entity);
-            if (config.isLoggingExtraEntityMeta(EntityMetaType.horseowner)) isTamed = entity.isTamed() ? true : null;
-            if (config.isLoggingExtraEntityMeta(EntityMetaType.horseowner)) owner = (entity.getOwner() != null) ? entity.getOwner().getUniqueId()
-                    .toString() : null;
-            if (config.isLoggingExtraEntityMeta(EntityMetaType.horselook)) variant = entity.getVariant();
-            if (config.isLoggingExtraEntityMeta(EntityMetaType.horselook)) color = entity.getColor();
-            if (config.isLoggingExtraEntityMeta(EntityMetaType.horselook)) style = entity.getStyle();
+
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.horseowner)) {
+                isTamed = entity.isTamed() ? true : null;
+            }
+
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.horseowner)) {
+                owner = (entity.getOwner() != null) ? entity.getOwner().getUniqueId().toString() : null;
+            }
+
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.horselook)) {
+                variant = entity.getVariant();
+            }
+
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.horselook)) {
+                color = entity.getColor();
+            }
+
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.horselook)) {
+                style = entity.getStyle();
+            }
+
             maxDomestication = entity.getMaxDomestication();
             domestication = entity.getDomestication();
             jumpStrength = entity.getJumpStrength();
+
             if (config.isLoggingExtraEntityMeta(EntityMetaType.horseinventory)) {
                 isCarryingChest = entity.isCarryingChest() ? true : null;
 
@@ -423,8 +474,10 @@ public abstract class EntityExtraData implements ExtraData {
                 }
 
                 final ItemStack[] content = new ItemStack[inventoryContent.length];
+
                 content[0] = entity.getInventory().getSaddle();
                 content[1] = entity.getInventory().getArmor();
+
                 if (content.length > 2) {
                     for (int i = 2; i < entity.getInventory().getSize() + 2; i++) {
                         content[i] = entity.getInventory().getItem(i - 2);
@@ -432,6 +485,7 @@ public abstract class EntityExtraData implements ExtraData {
                 }
 
                 final InventoryExtraData invExtraData = new InventoryExtraData(content, false, config);
+
                 inventoryContent = invExtraData.getSimpleContent();
             }
         }
@@ -472,6 +526,7 @@ public abstract class EntityExtraData implements ExtraData {
             if (owner == null) {
                 return null;
             }
+
             try {
                 return UUID.fromString(owner);
             } catch (IllegalArgumentException e) {
@@ -486,8 +541,10 @@ public abstract class EntityExtraData implements ExtraData {
         public ItemStack[] getInventory(World world) {
             if (inventoryContent != null) {
                 final InventoryExtraData invExtraData = new InventoryExtraData(inventoryContent, world);
+
                 return invExtraData.getContent();
             }
+
             return null;
         }
 
@@ -512,12 +569,21 @@ public abstract class EntityExtraData implements ExtraData {
 
         public WolfExtraData(WorldConfig config, Wolf entity) {
             super(config, entity);
-            if (config.isLoggingExtraEntityMeta(EntityMetaType.wolfowner)) isTamed = entity.isTamed() ? true : null;
-            if (config.isLoggingExtraEntityMeta(EntityMetaType.wolfowner)) owner = (entity.getOwner() != null) ? entity.getOwner().getUniqueId()
-                    .toString() : null;
-            if (config.isLoggingExtraEntityMeta(EntityMetaType.wolfowner)) isSitting = entity.isSitting() ? true : null;
-            if (config.isLoggingExtraEntityMeta(EntityMetaType.wolfcollar)) collarColor = (entity.getCollarColor() == DyeColor.RED) ? null : entity
-                    .getCollarColor();
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.wolfowner)) {
+                isTamed = entity.isTamed() ? true : null;
+            }
+
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.wolfowner)) {
+                owner = (entity.getOwner() != null) ? entity.getOwner().getUniqueId().toString() : null;
+            }
+
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.wolfowner)) {
+                isSitting = entity.isSitting() ? true : null;
+            }
+
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.wolfcollar)) {
+                collarColor = (entity.getCollarColor() == DyeColor.RED) ? null : entity.getCollarColor();
+            }
         }
 
         public Boolean isTamed() {
@@ -532,6 +598,7 @@ public abstract class EntityExtraData implements ExtraData {
             if (owner == null) {
                 return null;
             }
+
             try {
                 return UUID.fromString(owner);
             } catch (IllegalArgumentException e) {
@@ -568,12 +635,21 @@ public abstract class EntityExtraData implements ExtraData {
 
         public OcelotExtraData(WorldConfig config, Ocelot entity) {
             super(config, entity);
-            if (config.isLoggingExtraEntityMeta(EntityMetaType.catowner)) isTamed = entity.isTamed() ? true : null;
-            if (config.isLoggingExtraEntityMeta(EntityMetaType.catowner)) owner = (entity.getOwner() != null) ? entity.getOwner().getUniqueId()
-                    .toString() : null;
-            if (config.isLoggingExtraEntityMeta(EntityMetaType.catowner)) isSitting = entity.isSitting() ? true : null;
-            if (config.isLoggingExtraEntityMeta(EntityMetaType.cattype)) catType = (entity.getCatType() == org.bukkit.entity.Ocelot.Type.WILD_OCELOT) ? null
-                    : entity.getCatType();
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.catowner)) {
+                isTamed = entity.isTamed() ? true : null;
+            }
+
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.catowner)) {
+                owner = (entity.getOwner() != null) ? entity.getOwner().getUniqueId().toString() : null;
+            }
+
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.catowner)) {
+                isSitting = entity.isSitting() ? true : null;
+            }
+
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.cattype)) {
+                catType = (entity.getCatType() == org.bukkit.entity.Ocelot.Type.WILD_OCELOT) ? null : entity.getCatType();
+            }
         }
 
         public Boolean isTamed() {
@@ -588,6 +664,7 @@ public abstract class EntityExtraData implements ExtraData {
             if (owner == null) {
                 return null;
             }
+
             try {
                 return UUID.fromString(owner);
             } catch (IllegalArgumentException e) {
@@ -647,8 +724,14 @@ public abstract class EntityExtraData implements ExtraData {
 
         public SheepExtraData(WorldConfig config, Sheep entity) {
             super(config, entity);
-            if (config.isLoggingExtraEntityMeta(EntityMetaType.sheepcolor)) color = (entity.getColor() == DyeColor.WHITE) ? null : entity.getColor();
-            if (config.isLoggingExtraEntityMeta(EntityMetaType.sheepsheard)) sheared = entity.isSheared() ? true : null;
+
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.sheepcolor)) {
+                color = (entity.getColor() == DyeColor.WHITE) ? null : entity.getColor();
+            }
+
+            if (config.isLoggingExtraEntityMeta(EntityMetaType.sheepsheard)) {
+                sheared = entity.isSheared() ? true : null;
+            }
         }
 
         public DyeColor getColor() {
@@ -677,6 +760,7 @@ public abstract class EntityExtraData implements ExtraData {
 
         public PaintingExtraData(WorldConfig config, Painting entity) {
             super(config, entity);
+
             this.art = entity.getArt();
         }
 

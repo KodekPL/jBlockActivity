@@ -15,27 +15,59 @@ public class InventoryUtil {
 
     public static ItemStack[] packEntityEquipment(EntityEquipment eq) {
         final ItemStack[] eqArray = new ItemStack[5];
-        if (isItem(eq.getItemInHand())) eqArray[0] = eq.getItemInHand();
-        if (isItem(eq.getHelmet())) eqArray[1] = eq.getHelmet();
-        if (isItem(eq.getChestplate())) eqArray[2] = eq.getChestplate();
-        if (isItem(eq.getLeggings())) eqArray[3] = eq.getLeggings();
-        if (isItem(eq.getBoots())) eqArray[4] = eq.getBoots();
+
+        if (isItem(eq.getItemInHand())) {
+            eqArray[0] = eq.getItemInHand();
+        }
+
+        if (isItem(eq.getHelmet())) {
+            eqArray[1] = eq.getHelmet();
+        }
+
+        if (isItem(eq.getChestplate())) {
+            eqArray[2] = eq.getChestplate();
+        }
+
+        if (isItem(eq.getLeggings())) {
+            eqArray[3] = eq.getLeggings();
+        }
+
+        if (isItem(eq.getBoots())) {
+            eqArray[4] = eq.getBoots();
+        }
 
         for (ItemStack item : eqArray) {
             if (item != null) {
                 return eqArray;
             }
         }
+
         return null;
     }
 
     public static Float[] packEntityEquipmentDropChance(EntityEquipment eq) {
         final Float[] dropChance = new Float[5];
-        if (isItem(eq.getItemInHand())) dropChance[0] = eq.getItemInHandDropChance();
-        if (isItem(eq.getHelmet())) dropChance[1] = eq.getHelmetDropChance();
-        if (isItem(eq.getChestplate())) dropChance[2] = eq.getChestplateDropChance();
-        if (isItem(eq.getLeggings())) dropChance[3] = eq.getLeggingsDropChance();
-        if (isItem(eq.getBoots())) dropChance[4] = eq.getBootsDropChance();
+
+        if (isItem(eq.getItemInHand())) {
+            dropChance[0] = eq.getItemInHandDropChance();
+        }
+
+        if (isItem(eq.getHelmet())) {
+            dropChance[1] = eq.getHelmetDropChance();
+        }
+
+        if (isItem(eq.getChestplate())) {
+            dropChance[2] = eq.getChestplateDropChance();
+        }
+
+        if (isItem(eq.getLeggings())) {
+            dropChance[3] = eq.getLeggingsDropChance();
+        }
+
+        if (isItem(eq.getBoots())) {
+            dropChance[4] = eq.getBootsDropChance();
+        }
+
         return dropChance;
     }
 
@@ -43,6 +75,7 @@ public class InventoryUtil {
         if (item == null || item.getType() == Material.AIR) {
             return false;
         }
+
         return true;
     }
 
@@ -58,6 +91,7 @@ public class InventoryUtil {
     public static int modifyContainer(BlockState block, ItemStack item) {
         if (block instanceof InventoryHolder) {
             final Inventory inv = ((InventoryHolder) block).getInventory();
+
             if (item.getAmount() < 0) {
                 item.setAmount(-item.getAmount());
                 final ItemStack tmp = inv.removeItem(item).get(0);

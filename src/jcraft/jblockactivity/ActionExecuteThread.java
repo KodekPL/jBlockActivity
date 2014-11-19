@@ -8,9 +8,10 @@ import org.bukkit.command.CommandSender;
 
 public class ActionExecuteThread implements Runnable {
 
+    private boolean running = true;
+
     private final CommandHandler cmdHandler;
     private final static LinkedBlockingQueue<ActionRequest> queue = new LinkedBlockingQueue<ActionRequest>();
-    private boolean running = true;
 
     public ActionExecuteThread(CommandHandler cmdHandler) {
         this.cmdHandler = cmdHandler;
@@ -20,12 +21,14 @@ public class ActionExecuteThread implements Runnable {
         synchronized (queue) {
             while (running) {
                 ActionRequest request;
+
                 try {
                     request = queue.take();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                     continue;
                 }
+
                 try {
                     cmdHandler.executeCommand(request);
                 } catch (IllegalArgumentException e) {
@@ -101,6 +104,7 @@ public class ActionExecuteThread implements Runnable {
             if (params == null) {
                 parseParams();
             }
+
             return params;
         }
 

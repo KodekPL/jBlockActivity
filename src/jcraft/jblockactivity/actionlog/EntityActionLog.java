@@ -61,6 +61,7 @@ public class EntityActionLog extends ActionLog implements LookupCache {
     public void executeStatements(Connection connection) throws SQLException {
         PreparedStatement state = null;
         PreparedStatement extraState = null;
+
         try {
             state = connection.prepareStatement(
                     "INSERT INTO `" + getWorldTableName()
@@ -79,9 +80,11 @@ public class EntityActionLog extends ActionLog implements LookupCache {
 
             final ExtraData extraData = getExtraData();
             final String sData;
+
             if (extraData != null && (sData = extraData.getData()) != null && !sData.equals("{}")) {
                 final int id;
                 final ResultSet result = state.getGeneratedKeys();
+
                 result.next();
                 id = result.getInt(1);
                 extraState = connection.prepareStatement("INSERT INTO `" + getWorldTableName() + "-extra` (id, data) VALUES (?, ?)");
@@ -116,6 +119,7 @@ public class EntityActionLog extends ActionLog implements LookupCache {
         final long diffInSeconds = (end.getTime() - start.getTime()) / 1000;
 
         final long diff[] = { 0L, 0L, 0L, 0L };
+
         diff[0] = TimeUnit.SECONDS.toDays(diffInSeconds);
         diff[1] = TimeUnit.SECONDS.toHours(diffInSeconds) - (diff[0] * 24);
         diff[2] = TimeUnit.SECONDS.toMinutes(diffInSeconds) - (TimeUnit.SECONDS.toHours(diffInSeconds) * 60);
@@ -124,15 +128,19 @@ public class EntityActionLog extends ActionLog implements LookupCache {
         if (diff[0] >= 1) {
             time_ago.append(diff[0]).append('d');
         }
+
         if (diff[1] >= 1) {
             time_ago.append(diff[1]).append('h');
         }
+
         if (diff[2] > 1 && diff[2] < 60) {
             time_ago.append(diff[2]).append('m');
         }
+
         if (diff[0] == 0 && diff[1] == 0 && diff[2] <= 1) {
             time_ago.append(diff[3]).append('s');
         }
+
         return time_ago.toString();
     }
 
@@ -163,24 +171,35 @@ public class EntityActionLog extends ActionLog implements LookupCache {
             msg.append(ChatColor.GRAY).append(" (").append(getTimeSince()).append(')');
         } else if (getLoggingType() == LoggingType.hanginginteract && getExtraData() != null && !getExtraData().isNull()) {
             msg.append(ChatColor.GRAY).append(ActivityUtil.formatTime(getTime())).append(' ');
+
             if (getExtraData() instanceof InventoryExtraData) {
                 final InventoryExtraData extraData = (InventoryExtraData) getExtraData();
                 final ItemStack item = (extraData.getContent().length > 0) ? extraData.getContent()[0] : null;
+
                 if (item != null) {
                     if (item.getAmount() < 0) {
                         msg.append(sub).append("took ").append(-item.getAmount()).append("x ")
                                 .append(MaterialNames.materialName(item.getTypeId(), item.getData().getData()));
-                        if (item.hasItemMeta()) msg.append(" [e]");
+
+                        if (item.hasItemMeta()) {
+                            msg.append(" [e]");
+                        }
+
                         msg.append(" from item frame");
                     } else {
                         msg.append(add).append("put ").append(item.getAmount()).append("x ")
                                 .append(MaterialNames.materialName(item.getTypeId(), item.getData().getData()));
-                        if (item.hasItemMeta()) msg.append(" [e]");
+
+                        if (item.hasItemMeta()) {
+                            msg.append(" [e]");
+                        }
+
                         msg.append(" into item frame");
                     }
                 } else {
                     msg.append(interact).append("did something with item frame");
                 }
+
                 msg.append(ChatColor.GRAY).append(" (").append(getTimeSince()).append(')');
             }
         } else if (getLoggingType() == LoggingType.creaturekill) {
@@ -203,6 +222,7 @@ public class EntityActionLog extends ActionLog implements LookupCache {
              * if (ownerName != null) msg.append(ChatColor.GRAY).append(" [").append(ownerName).append(']');
              * }
              */
+
             msg.append(" (").append(getTimeSince()).append(')');
         }
 
@@ -225,6 +245,7 @@ public class EntityActionLog extends ActionLog implements LookupCache {
 
         int entity_id = 0;
         int entity_data = 0;
+
         if (logType == LoggingType.hangingbreak || logType == LoggingType.creaturekill) {
             entity_id = params.getBoolean(ParamType.NEED_MATERIAL) ? result.getInt("old_id") : 0;
             entity_data = params.getBoolean(ParamType.NEED_DATA) ? result.getByte("old_data") : (byte) 0;
@@ -234,6 +255,7 @@ public class EntityActionLog extends ActionLog implements LookupCache {
         }
 
         ExtraData extraData = null;
+
         if (data != null) {
             if (logType == LoggingType.hangingplace || logType == LoggingType.hangingbreak) {
                 if (entity_id == 9) {
@@ -273,6 +295,7 @@ public class EntityActionLog extends ActionLog implements LookupCache {
         }
 
         UUID uuid;
+
         try {
             uuid = UUID.fromString(ActivityUtil.fixUUID(sUUID));
         } catch (IllegalArgumentException e) {
@@ -280,6 +303,7 @@ public class EntityActionLog extends ActionLog implements LookupCache {
         }
 
         final EntityActionLog log = new EntityActionLog(logType, playerName, uuid, params.getWorld(), location, entity_id, entity_data, extraData);
+
         log.setTime(time);
         return log;
     }

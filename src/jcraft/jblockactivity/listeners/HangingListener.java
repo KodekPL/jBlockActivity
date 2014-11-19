@@ -31,6 +31,7 @@ public class HangingListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onHangingPlace(HangingPlaceEvent event) {
         final WorldConfig config = BlockActivity.getWorldConfig(event.getEntity().getWorld().getName());
+
         if (config == null || !config.isLogging(LoggingType.hangingplace)) {
             return;
         }
@@ -38,6 +39,7 @@ public class HangingListener implements Listener {
         final UUID playerUUID = event.getPlayer().getUniqueId();
         final String playerName = event.getPlayer().getName();
         final int entityType = event.getEntity().getType().getTypeId();
+
         if (!config.loggingHangings.contains(entityType)) {
             return;
         }
@@ -53,6 +55,7 @@ public class HangingListener implements Listener {
 
             final EntityActionLog action = new EntityActionLog(LoggingType.hangingplace, playerName, playerUUID, location.getWorld(),
                     location.toVector(), entityType, face, null);
+
             BlockActivity.sendActionLog(action);
         } else if (event.getEntity() instanceof Painting) {
             final Painting painting = (Painting) event.getEntity();
@@ -61,6 +64,7 @@ public class HangingListener implements Listener {
 
             final EntityActionLog action = new EntityActionLog(LoggingType.hangingplace, playerName, playerUUID, location.getWorld(),
                     location.toVector(), entityType, face, EntityExtraData.getExtraData(painting));
+
             BlockActivity.sendActionLog(action);
         }
     }
@@ -73,16 +77,19 @@ public class HangingListener implements Listener {
         }
 
         final WorldConfig config = BlockActivity.getWorldConfig(event.getEntity().getWorld().getName());
+
         if (config == null || !config.isLogging(LoggingType.hangingbreak)) {
             return;
         }
 
         final int entityType = event.getEntity().getType().getTypeId();
+
         if (!config.loggingHangings.contains(entityType)) {
             return;
         }
 
         final String removerName = LoggingMaker.getLoggingMaker(event.getCause()).getName();
+
         if (BlockActivity.isHidden(removerName)) {
             return;
         }
@@ -96,11 +103,13 @@ public class HangingListener implements Listener {
                 final InventoryExtraData extraData = new InventoryExtraData(new ItemStack[] { frame.getItem() }, false, location.getWorld());
                 final EntityActionLog action = new EntityActionLog(LoggingType.hanginginteract, removerName, location.getWorld(),
                         location.toVector(), entityType, face, extraData);
+
                 BlockActivity.sendActionLog(action);
             }
 
             final EntityActionLog action = new EntityActionLog(LoggingType.hangingbreak, removerName, location.getWorld(), location.toVector(),
                     entityType, face, null);
+
             BlockActivity.sendActionLog(action);
         } else if (event.getEntity() instanceof Painting) {
             final Painting painting = (Painting) event.getEntity();
@@ -109,6 +118,7 @@ public class HangingListener implements Listener {
 
             final EntityActionLog action = new EntityActionLog(LoggingType.hangingbreak, removerName, location.getWorld(), location.toVector(),
                     entityType, face, EntityExtraData.getExtraData(painting));
+
             BlockActivity.sendActionLog(action);
         }
     }
@@ -116,11 +126,13 @@ public class HangingListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onHangingBreakByEntity(HangingBreakByEntityEvent event) {
         final WorldConfig config = BlockActivity.getWorldConfig(event.getEntity().getWorld().getName());
+
         if (config == null || !config.isLogging(LoggingType.hangingbreak)) {
             return;
         }
 
         final int entityType = event.getEntity().getType().getTypeId();
+
         if (!config.loggingHangings.contains(entityType)) {
             return;
         }
@@ -132,6 +144,7 @@ public class HangingListener implements Listener {
         }
 
         UUID removerUUID;
+
         try {
             removerUUID = UUID.fromString(removerName);
         } catch (IllegalArgumentException e) {
@@ -147,11 +160,13 @@ public class HangingListener implements Listener {
                 final InventoryExtraData extraData = new InventoryExtraData(new ItemStack[] { frame.getItem() }, false, location.getWorld());
                 final EntityActionLog action = new EntityActionLog(LoggingType.hanginginteract, removerName, removerUUID, location.getWorld(),
                         location.toVector(), entityType, face, extraData);
+
                 BlockActivity.sendActionLog(action);
             }
 
             final EntityActionLog action = new EntityActionLog(LoggingType.hangingbreak, removerName, removerUUID, location.getWorld(),
                     location.toVector(), entityType, face, null);
+
             BlockActivity.sendActionLog(action);
         } else if (event.getEntity() instanceof Painting) {
             final Painting painting = (Painting) event.getEntity();
@@ -160,6 +175,7 @@ public class HangingListener implements Listener {
 
             final EntityActionLog action = new EntityActionLog(LoggingType.hangingbreak, removerName, removerUUID, location.getWorld(),
                     location.toVector(), entityType, face, EntityExtraData.getExtraData(painting));
+
             BlockActivity.sendActionLog(action);
         }
     }
@@ -167,11 +183,13 @@ public class HangingListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerInteractHanging(PlayerInteractEntityEvent event) {
         final WorldConfig config = BlockActivity.getWorldConfig(event.getRightClicked().getWorld().getName());
+
         if (config == null || !config.isLogging(LoggingType.hanginginteract)) {
             return;
         }
 
         final int entityType = event.getRightClicked().getType().getTypeId();
+
         if (!config.loggingHangings.contains(entityType)) {
             return;
         }
@@ -190,6 +208,7 @@ public class HangingListener implements Listener {
                 final InventoryExtraData extraData = new InventoryExtraData(new ItemStack[] { item }, false, location.getWorld());
                 final EntityActionLog action = new EntityActionLog(LoggingType.hanginginteract, player.getName(), player.getUniqueId(),
                         location.getWorld(), location.toVector(), entityType, face, extraData);
+
                 BlockActivity.sendActionLog(action);
             }
         }
@@ -198,11 +217,13 @@ public class HangingListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerRemoveItemFromHanging(EntityDamageByEntityEvent event) {
         final WorldConfig config = BlockActivity.getWorldConfig(event.getEntity().getWorld().getName());
+
         if (config == null || !config.isLogging(LoggingType.hanginginteract)) {
             return;
         }
 
         final int entityType = event.getEntity().getType().getTypeId();
+
         if (!config.loggingHangings.contains(entityType)) {
             return;
         }
@@ -214,6 +235,7 @@ public class HangingListener implements Listener {
                 final String removerName = LoggingMaker.getLoggingMaker(event.getDamager());
 
                 UUID removerUUID;
+
                 try {
                     removerUUID = UUID.fromString(removerName);
                 } catch (IllegalArgumentException e) {
@@ -229,6 +251,7 @@ public class HangingListener implements Listener {
                 final InventoryExtraData extraData = new InventoryExtraData(new ItemStack[] { item }, false, location.getWorld());
                 final EntityActionLog action = new EntityActionLog(LoggingType.hanginginteract, removerName, removerUUID, location.getWorld(),
                         location.toVector(), entityType, face, extraData);
+
                 BlockActivity.sendActionLog(action);
             }
         }

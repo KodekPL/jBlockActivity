@@ -19,7 +19,7 @@ public class MaterialNames {
     private static Map<String, String> MATERIAL_NAMES = new LinkedHashMap<String, String>();
 
     public static void loadMaterialNames() {
-        final File materialsFile = new File(BlockActivity.dataFolder, "materials.yml");
+        final File materialsFile = new File(BlockActivity.DATA_FOLDER, "materials.yml");
 
         if (!materialsFile.exists()) {
             MATERIAL_NAMES = new LinkedHashMap<String, String>();
@@ -38,7 +38,7 @@ public class MaterialNames {
     }
 
     public static void saveMaterialNames() {
-        final File materialsFile = new File(BlockActivity.dataFolder, "materials.yml");
+        final File materialsFile = new File(BlockActivity.DATA_FOLDER, "materials.yml");
         final YamlConfiguration yml = YamlConfiguration.loadConfiguration(materialsFile);
 
         addMaterialName(Material.WOOD, 1, "spruce wood planks");

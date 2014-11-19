@@ -107,15 +107,19 @@ public class BlockEditor extends BukkitRunnable {
 
     public synchronized void start() throws Error, InterruptedException {
         final long start = System.currentTimeMillis();
+
         taskID = BlockActivity.getBlockActivity().getServer().getScheduler().scheduleSyncRepeatingTask(BlockActivity.getBlockActivity(), this, 0, 1);
+
         if (taskID == -1) {
             throw new Error("Failed to schedule task!");
         }
+
         try {
             wait();
         } catch (final InterruptedException ex) {
             throw new InterruptedException("Interrupted!");
         }
+
         elapsedTime = System.currentTimeMillis() - start;
     }
 
@@ -124,6 +128,7 @@ public class BlockEditor extends BukkitRunnable {
         final List<BlockEditorException> errorList = new ArrayList<BlockEditorException>();
         int counter = 0;
         float size = blockEdits.size();
+
         while (!blockEdits.isEmpty() && counter < 100) {
             try {
                 addResult(blockEdits.poll().perform(this));
@@ -132,11 +137,14 @@ public class BlockEditor extends BukkitRunnable {
             } catch (final Exception ex) {
                 Bukkit.getLogger().log(Level.WARNING, "[jBA-BlockEditor] Exeption: ", ex);
             }
+
             counter++;
+
             if (sender != null) {
                 float percentage = ((size - (blockEdits.size())) / size) * 100.0F;
+
                 if (percentage % 20 == 0) {
-                    sender.sendMessage(BlockActivity.prefix + ChatColor.YELLOW + " Rollback progress: " + percentage + "%" + " Blocks edited: "
+                    sender.sendMessage(BlockActivity.PREFIX + ChatColor.YELLOW + " Rollback progress: " + percentage + "%" + " Blocks edited: "
                             + counter);
                 }
             }
@@ -150,15 +158,19 @@ public class BlockEditor extends BukkitRunnable {
             } catch (final Exception ex) {
                 Bukkit.getLogger().log(Level.WARNING, "[jBA-BlockEditor] Exeption: ", ex);
             }
+
             counter++;
+
             if (sender != null) {
                 float percentage = ((size - (entityEdits.size())) / size) * 100.0F;
+
                 if (percentage % 20 == 0) {
-                    sender.sendMessage(BlockActivity.prefix + ChatColor.YELLOW + " Rollback progress: " + percentage + "%" + " Entities edited: "
+                    sender.sendMessage(BlockActivity.PREFIX + ChatColor.YELLOW + " Rollback progress: " + percentage + "%" + " Entities edited: "
                             + counter);
                 }
             }
         }
+
         if (blockEdits.isEmpty() && entityEdits.isEmpty()) {
             BlockActivity.getBlockActivity().getServer().getScheduler().cancelTask(taskID);
             errors = errorList.toArray(new BlockEditorException[errorList.size()]);

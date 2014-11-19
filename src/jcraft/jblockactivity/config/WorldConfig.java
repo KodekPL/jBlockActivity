@@ -45,7 +45,7 @@ public class WorldConfig {
 
     public WorldConfig(String worldName) {
         this.worldName = worldName;
-        configFile = new File(BlockActivity.dataFolder, "ba-" + worldName + ".yml");
+        configFile = new File(BlockActivity.DATA_FOLDER, "ba-" + worldName + ".yml");
         config = YamlConfiguration.loadConfiguration(configFile);
     }
 
@@ -58,15 +58,21 @@ public class WorldConfig {
             if (type.getId() <= 0) continue;
             configDef.put("logging." + type.name(), type.getDefaultState());
         }
+
         configDef.put("logExtraData.blockMeta.enable", true);
+
         for (BlockMetaType type : BlockMetaType.values()) {
             configDef.put("logExtraData.blockMeta." + type.name(), true);
         }
+
         configDef.put("logExtraData.itemMeta.enable", true);
+
         for (ItemMetaType type : ItemMetaType.values()) {
             configDef.put("logExtraData.itemMeta." + type.name(), true);
         }
+
         configDef.put("logExtraData.entityMeta.enable", true);
+
         for (EntityMetaType type : EntityMetaType.values()) {
             configDef.put("logExtraData.entityMeta." + type.name(), true);
         }
@@ -99,14 +105,19 @@ public class WorldConfig {
         tableName = config.getString("tableName");
 
         loggingTypes = new boolean[LoggingType.values().length];
+
         for (LoggingType type : LoggingType.values()) {
-            if (type.getId() <= 0) continue;
+            if (type.getId() <= 0) {
+                continue;
+            }
+
             boolean result = config.getBoolean("logging." + type.name());
             loggingTypes[type.ordinal()] = result;
         }
 
         saveExtraBlockMeta = config.getBoolean("logExtraData.blockMeta.enable");
         extraBlockMetaTypes = new boolean[BlockMetaType.values().length];
+
         for (BlockMetaType type : BlockMetaType.values()) {
             boolean result = config.getBoolean("logExtraData.blockMeta." + type.name());
             extraBlockMetaTypes[type.ordinal()] = result;
@@ -114,6 +125,7 @@ public class WorldConfig {
 
         saveExtraItemMeta = config.getBoolean("logExtraData.itemMeta.enable");
         extraItemMetaTypes = new boolean[ItemMetaType.values().length];
+
         for (ItemMetaType type : ItemMetaType.values()) {
             boolean result = saveExtraItemMeta ? config.getBoolean("logExtraData.itemMeta." + type.name()) : false;
             extraItemMetaTypes[type.ordinal()] = result;
@@ -121,6 +133,7 @@ public class WorldConfig {
 
         saveExtraEntityMeta = config.getBoolean("logExtraData.entityMeta.enable");
         extraEntityMetaTypes = new boolean[EntityMetaType.values().length];
+
         for (EntityMetaType type : EntityMetaType.values()) {
             boolean result = saveExtraEntityMeta ? config.getBoolean("logExtraData.entityMeta." + type.name()) : false;
             extraEntityMetaTypes[type.ordinal()] = result;
@@ -129,9 +142,11 @@ public class WorldConfig {
         if (isLogging(LoggingType.blockinteract)) {
             interactBlocks = new HashSet<Integer>(config.getIntegerList("special.logging.interactBlocks"));
         }
+
         if (isLogging(LoggingType.creaturekill)) {
             loggingCreatures = new HashSet<Integer>(config.getIntegerList("special.logging.creatures"));
         }
+
         if (isLogging(LoggingType.hangingplace) || isLogging(LoggingType.hangingbreak) || isLogging(LoggingType.hanginginteract)) {
             loggingHangings = new HashSet<Integer>(config.getIntegerList("special.logging.hangings"));
         }
@@ -185,17 +200,22 @@ public class WorldConfig {
 
     public void createTable() throws SQLException {
         final Connection connection = BlockActivity.getBlockActivity().getConnection();
+
         if (connection == null) {
             return;
         }
+
         final Statement state = connection.createStatement();
+
         state.executeUpdate("CREATE TABLE IF NOT EXISTS `"
                 + tableName
                 + "` (id INT UNSIGNED NOT NULL AUTO_INCREMENT, time DATETIME NOT NULL, type SMALLINT UNSIGNED NOT NULL, playerid MEDIUMINT UNSIGNED NOT NULL, old_id MEDIUMINT UNSIGNED NOT NULL, old_data MEDIUMINT UNSIGNED NOT NULL, new_id MEDIUMINT UNSIGNED NOT NULL, new_data MEDIUMINT UNSIGNED NOT NULL, x MEDIUMINT NOT NULL, y SMALLINT UNSIGNED NOT NULL, z MEDIUMINT NOT NULL, PRIMARY KEY (id), KEY coords (x, z, y), KEY time (time), KEY playerid (playerid))");
+
         if (isLoggingExtraBlockMeta()) {
             state.executeUpdate("CREATE TABLE IF NOT EXISTS `" + tableName
                     + "-extra` (id INT UNSIGNED NOT NULL, data text, PRIMARY KEY (id)) DEFAULT CHARSET=utf8");
         }
+
         state.close();
         connection.close();
     }

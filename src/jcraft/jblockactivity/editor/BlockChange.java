@@ -39,16 +39,20 @@ public class BlockChange extends BlockActionLog {
             }
 
             final Block block = getLocation().getBlock();
+
             if ((blockEditor.isRedo() ? getNewBlockId() : getOldBlockId()) == 0 && block.getType() == Material.AIR) {
                 return BlockEditorResult.NO_BLOCK_ACTION;
             }
+
             final BlockState state = block.getState();
+
             if (!blockEditor.getWorld().isChunkLoaded(block.getChunk())) {
                 blockEditor.getWorld().loadChunk(block.getChunk());
             }
 
             int blockId;
             byte blockData;
+
             if (!blockEditor.isRedo()) {
                 blockId = getOldBlockId();
                 blockData = getOldBlockData();
@@ -60,12 +64,15 @@ public class BlockChange extends BlockActionLog {
             if (getLoggingType() == LoggingType.inventoryaccess) {
                 if (getExtraData() != null && !getExtraData().isNull() && BlocksUtil.isContainerBlock(Material.getMaterial(blockId))) {
                     final InventoryExtraData extraData = (InventoryExtraData) getExtraData();
+
                     for (ItemStack item : extraData.getContent()) {
                         int leftover;
+
                         try {
                             ItemStack newItem1 = new ItemStack(item.getType(), -item.getAmount(), item.getDurability());
                             newItem1.setItemMeta(item.getItemMeta());
                             leftover = InventoryUtil.modifyContainer(state, newItem1);
+
                             if (leftover > 0 && (blockId == 54 || blockId == 146)) {
                                 for (final BlockFace face : BlocksUtil.PRIMARY_CARDINAL_DIRS) {
                                     if (block.getRelative(face).getTypeId() == blockId) {
@@ -121,21 +128,26 @@ public class BlockChange extends BlockActionLog {
             }
 
             final int currentType = block.getTypeId();
+
             if (currentType == 59 || currentType == 104 || currentType == 105 || currentType == 141 || currentType == 142) {
                 if (blockEditor.getWorldConfig().farmlandForCrops) {
                     block.getRelative(BlockFace.DOWN).setTypeId(60);
                 }
             }
+
             if (getExtraData() != null && !getExtraData().isNull()) {
                 if (currentType == 63 || currentType == 68) {
                     final Sign sign = (Sign) block.getState();
                     final String[] lines = ((SignExtraData) getExtraData()).getText();
+
                     if (lines == null || lines.length < 4) {
                         return BlockEditorResult.NO_BLOCK_ACTION;
                     }
+
                     for (int i = 0; i < 4; i++) {
                         sign.setLine(i, lines[i]);
                     }
+
                     if (!sign.update()) {
                         throw new BlockEditorException("Failed to update signtext of " + MaterialNames.materialName(block.getTypeId()),
                                 block.getLocation());
@@ -143,11 +155,14 @@ public class BlockChange extends BlockActionLog {
                 } else if (currentType == 144) {
                     final Skull skull = (Skull) block.getState();
                     final SkullExtraData data = (SkullExtraData) getExtraData();
+
                     skull.setSkullType(data.getSkullType());
                     skull.setRotation(data.getRotation());
+
                     if (data.getName() != null) {
                         skull.setOwner(data.getName());
                     }
+
                     if (!skull.update()) {
                         throw new BlockEditorException("Failed to update skull of " + MaterialNames.materialName(block.getTypeId()),
                                 block.getLocation());
@@ -155,7 +170,9 @@ public class BlockChange extends BlockActionLog {
                 } else if (currentType == 52) {
                     final CreatureSpawner spawner = (CreatureSpawner) block.getState();
                     final MobSpawnerExtraData data = (MobSpawnerExtraData) getExtraData();
+
                     spawner.setSpawnedType(data.getEntityType());
+
                     if (!spawner.update()) {
                         throw new BlockEditorException("Failed to update mobspawner of " + MaterialNames.materialName(block.getTypeId()),
                                 block.getLocation());
@@ -163,12 +180,15 @@ public class BlockChange extends BlockActionLog {
                 } else if (currentType == 137) {
                     final CommandBlock commandBlock = (CommandBlock) block.getState();
                     final CommandBlockExtraData data = (CommandBlockExtraData) getExtraData();
+
                     if (data.getName() != null) {
                         commandBlock.setName(data.getName());
                     }
+
                     if (data.getCommand() != null) {
                         commandBlock.setCommand(data.getCommand());
                     }
+
                     if (!commandBlock.update()) {
                         throw new BlockEditorException("Failed to update command block of " + MaterialNames.materialName(block.getTypeId()),
                                 block.getLocation());

@@ -56,19 +56,25 @@ public class LogExecuteThread implements Runnable {
 
                 Connection connection = BlockActivity.getBlockActivity().getConnection();
                 Statement state = null;
+
                 try {
                     if (connection == null) {
                         return;
                     }
+
                     connection.setAutoCommit(false);
                     state = connection.createStatement();
+
                     final long start = System.currentTimeMillis();
                     int count = 0;
+
                     while (!queue.isEmpty() && (System.currentTimeMillis() - start < maxTimePerRun || count < minLogsToProcess)) {
                         final ActionLog log = queue.poll();
+
                         if (log == null) {
                             continue;
                         }
+
                         if (!BlockActivity.playerIds.containsKey(log.getIdentifier())) {
                             if (!addPlayer(state, log.getPlayerName(), log.getUUID())) {
                                 Bukkit.getLogger().warning(
@@ -76,6 +82,7 @@ public class LogExecuteThread implements Runnable {
                                 continue;
                             }
                         }
+
                         try {
                             log.executeStatements(connection);
                         } catch (final SQLException ex) {
@@ -84,6 +91,7 @@ public class LogExecuteThread implements Runnable {
                         }
                         count++;
                     }
+
                     connection.commit();
                 } catch (SQLException e) {
                     Bukkit.getLogger().log(Level.SEVERE, "[jBA-Executor] SQL Exception on connection:", e);
@@ -94,6 +102,7 @@ public class LogExecuteThread implements Runnable {
                     } catch (final SQLException ex) {
                         Bukkit.getLogger().log(Level.SEVERE, "[jBA-Executor] SQL Exception on close:", ex);
                     }
+
                     lock.unlock();
                 }
 
@@ -113,6 +122,7 @@ public class LogExecuteThread implements Runnable {
 
     private boolean addPlayer(Statement state, String playerName, UUID uuid) throws SQLException {
         final String stripUUID;
+
         if (uuid != null) {
             stripUUID = uuid.toString().replace("-", "");
         } else {
@@ -120,29 +130,37 @@ public class LogExecuteThread implements Runnable {
         }
 
         final ResultSet result1 = state.executeQuery("SELECT playerid FROM `ba-players` WHERE uuid = '" + stripUUID + "'");
+
         if (result1.next()) {
             BlockActivity.playerIds.put(stripUUID, result1.getInt(1));
         } else {
             final ResultSet result2 = state.executeQuery("SELECT `playername`, `uuid` FROM `ba-players` WHERE `playername` LIKE CONCAT('"
                     + playerName + "%', '%') ORDER BY `playername` ASC");
+
             String takenName = playerName;
+
             int nameCount = 0;
+
             while (result2.next()) {
                 if (result2.getString(1).equalsIgnoreCase(takenName)) {
                     nameCount++;
                     takenName = playerName + nameCount;
                 }
             }
+
             state.execute("INSERT INTO `ba-players` (playername, uuid) SELECT '" + takenName + "', '" + stripUUID
                     + "' FROM DUAL WHERE NOT EXISTS (SELECT * FROM `ba-players` WHERE uuid = '" + stripUUID + "') LIMIT 1;");
 
             final ResultSet result3 = state.executeQuery("SELECT playerid FROM `ba-players` WHERE uuid = '" + stripUUID + "'");
+
             if (result3.next()) {
                 BlockActivity.playerIds.put(stripUUID, result3.getInt(1));
             }
+
             result2.close();
             result3.close();
         }
+
         result1.close();
         return BlockActivity.playerIds.containsKey(stripUUID);
     }

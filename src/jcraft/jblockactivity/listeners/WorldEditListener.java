@@ -26,8 +26,10 @@ public class WorldEditListener {
         if (event.getExtent() instanceof LastAccessExtentCache) {
             final Actor actor = event.getActor();
             final World world = event.getWorld();
+
             if (actor != null && actor.isPlayer() && world != null && world instanceof BukkitWorld) {
                 final WorldConfig config = BlockActivity.getWorldConfig(world.getName());
+
                 if (config != null && config.isLogging(LoggingType.worldedit)) {
                     event.setExtent(new WorldEditChangeLogger(actor, (BukkitWorld) event.getWorld(), config, event.getExtent()));
                 }
@@ -51,9 +53,11 @@ public class WorldEditListener {
         @Override
         protected void onBlockChange(Vector position, BaseBlock newBlock) {
             final Block oldBlock = world.getWorld().getBlockAt(position.getBlockX(), position.getBlockY(), position.getBlockZ());
+
             if (oldBlock.getType() == Material.AIR) {
                 final BlockActionLog action = new BlockActionLog(LoggingType.blockplace, actor.getName(), actor.getUniqueId(), oldBlock.getWorld(),
                         oldBlock.getLocation().toVector(), 0, (byte) 0, newBlock.getId(), (byte) newBlock.getData(), null);
+
                 BlockActivity.sendActionLog(action);
             } else {
                 if (newBlock.getId() == 0) {
@@ -62,6 +66,7 @@ public class WorldEditListener {
                     final BlockActionLog action = new BlockActionLog(LoggingType.blockplace, actor.getName(), actor.getUniqueId(),
                             oldBlock.getWorld(), oldBlock.getLocation().toVector(), oldBlock.getTypeId(), oldBlock.getData(), newBlock.getId(),
                             (byte) newBlock.getData(), null);
+
                     BlockActivity.sendActionLog(action);
                 }
             }

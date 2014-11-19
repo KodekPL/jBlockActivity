@@ -24,6 +24,7 @@ public class LookupCacheFactory {
     public LookupCache getLookupCache(ResultSet result) throws SQLException {
         if (params.getSumMode() == SummarizationMode.NONE) {
             final LoggingType logType = params.getBoolean(ParamType.NEED_LOG_TYPE) ? LoggingType.getTypeById(result.getInt("type")) : null;
+
             switch (logType) {
             case blockbreak:
             case blockinteract:

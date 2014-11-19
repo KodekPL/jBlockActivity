@@ -34,22 +34,27 @@ public class BlocksUtil {
         if (type1 == type2) {
             return true;
         }
+
         for (final Set<Integer> equivalent : BLOCK_EQUIVALENTS) {
             if (equivalent.contains(type1) && equivalent.contains(type2)) {
                 return true;
             }
         }
+
         return false;
     }
 
     public static int safeSpawnHeight(Location location) {
         final World world = location.getWorld();
         final Chunk chunk = world.getChunkAt(location);
+
         if (!world.isChunkLoaded(chunk)) {
             world.loadChunk(chunk);
         }
+
         final int x = location.getBlockX();
         final int z = location.getBlockZ();
+
         int y = location.getBlockY();
         boolean lower = world.getBlockAt(x, y, z).getType() == Material.AIR;
         boolean upper = world.getBlockAt(x, y + 1, z).getType() == Material.AIR;
@@ -58,9 +63,11 @@ public class BlocksUtil {
             lower = upper;
             upper = world.getBlockAt(x, ++y, z).getType() == Material.AIR;
         }
+
         while (world.getBlockAt(x, y - 1, z).getType() == Material.AIR && y != 0) {
             y--;
         }
+
         return y;
     }
 
@@ -262,12 +269,15 @@ public class BlocksUtil {
 
     public static List<Block> getSideRelativeBreakableBlocks(Block originBlock) {
         final List<Block> blocks = new ArrayList<Block>();
+
         for (BlockFace blockFace : SIDE_RELATIVE_BLOCK_FACES) {
             Block block = originBlock.getRelative(blockFace);
+
             if (isSideRelativeBreakableBlock(block.getType())) {
                 blocks.add(block);
             }
         }
+
         return blocks;
     }
 
@@ -279,6 +289,7 @@ public class BlocksUtil {
 
     public static BlockFace turnFace(BlockFace face, boolean right) {
         int dir = face.ordinal();
+
         if (right) {
             dir++;
             if (dir >= PRIMARY_CARDINAL_DIRS.length) {

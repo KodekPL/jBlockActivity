@@ -60,9 +60,11 @@ public class ActivityUtil {
 
     public static String makeSpaces(int count) {
         final StringBuilder filled = new StringBuilder(count);
+
         for (int i = 0; i < count; i++) {
             filled.append(' ');
         }
+
         return filled.toString();
     }
 
@@ -70,28 +72,34 @@ public class ActivityUtil {
         if (sTime == null || sTime.length < 1 || sTime.length > 2) {
             return -1;
         }
+
         if (sTime.length == 1 && isInt(sTime[0])) {
             return Integer.valueOf(sTime[0]);
         }
+
         if (!sTime[0].contains(":") && !sTime[0].contains(".")) {
             if (sTime.length == 2) {
                 if (!isInt(sTime[0])) {
                     return -1;
                 }
+
                 int min = Integer.parseInt(sTime[0]);
                 if (sTime[1].charAt(0) == 'h') {
                     min *= 60;
                 } else if (sTime[1].charAt(0) == 'd') {
                     min *= 1440;
                 }
+
                 return min;
             } else if (sTime.length == 1) {
                 int days = 0, hours = 0, minutes = 0;
                 int lastIndex = 0, currIndex = 1;
+
                 while (currIndex <= sTime[0].length()) {
                     while (currIndex <= sTime[0].length() && isInt(sTime[0].substring(lastIndex, currIndex))) {
                         currIndex++;
                     }
+
                     if (currIndex - 1 != lastIndex) {
                         final String param = sTime[0].substring(currIndex - 1, currIndex).toLowerCase();
                         if (param.equals("d")) {
@@ -102,18 +110,22 @@ public class ActivityUtil {
                             minutes = Integer.parseInt(sTime[0].substring(lastIndex, currIndex - 1));
                         }
                     }
+
                     lastIndex = currIndex;
                     currIndex++;
                 }
+
                 if (days == 0 && hours == 0 && minutes == 0) {
                     return -1;
                 }
+
                 return minutes + hours * 60 + days * 1440;
             } else {
                 return -1;
             }
         }
         final String timestamp;
+
         if (sTime.length == 1) {
             if (sTime[0].contains(":")) {
                 timestamp = new SimpleDateFormat("dd.MM.yyyy").format(System.currentTimeMillis()) + " " + sTime[0];
@@ -123,6 +135,7 @@ public class ActivityUtil {
         } else {
             timestamp = sTime[0] + " " + sTime[1];
         }
+
         try {
             return (int) ((System.currentTimeMillis() - new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").parse(timestamp).getTime()) / 60000);
         } catch (final ParseException ex) {

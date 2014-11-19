@@ -22,6 +22,7 @@ public class BlockInteractListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerInteract(PlayerInteractEvent event) {
         final WorldConfig config = BlockActivity.getWorldConfig(event.getPlayer().getWorld().getName());
+
         if (config == null || !config.isLogging(LoggingType.blockinteract)) {
             return;
         }
@@ -49,6 +50,7 @@ public class BlockInteractListener implements Listener {
 
             final BlockActionLog action = new BlockActionLog(LoggingType.blockinteract, player.getName(), player.getUniqueId(), location.getWorld(),
                     location.toVector(), typeId, data, typeId, data, null);
+
             BlockActivity.sendActionLog(action);
         }
     }
@@ -56,6 +58,7 @@ public class BlockInteractListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerTrampleFarmland(PlayerInteractEvent event) {
         final WorldConfig config = BlockActivity.getWorldConfig(event.getPlayer().getWorld().getName());
+
         if (config == null || !config.isLogging(LoggingType.tramplefarmland)) {
             return;
         }
@@ -78,6 +81,7 @@ public class BlockInteractListener implements Listener {
         if (typeId == 60) {
             final BlockActionLog action = new BlockActionLog(LoggingType.tramplefarmland, player.getName(), player.getUniqueId(),
                     location.getWorld(), location.toVector(), typeId, data, 3, (byte) 0, null);
+
             BlockActivity.sendActionLog(action);
         }
     }
@@ -85,6 +89,7 @@ public class BlockInteractListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onEntityTrampleFarmland(EntityInteractEvent event) {
         final WorldConfig config = BlockActivity.getWorldConfig(event.getEntity().getWorld().getName());
+
         if (config == null || !config.isLogging(LoggingType.tramplefarmland)) {
             return;
         }
@@ -104,6 +109,7 @@ public class BlockInteractListener implements Listener {
         if (typeId == 60) {
             final BlockActionLog action = new BlockActionLog(LoggingType.tramplefarmland, entityName, entity.getUniqueId(), location.getWorld(),
                     location.toVector(), typeId, data, 3, (byte) 0, null);
+
             BlockActivity.sendActionLog(action);
         }
     }

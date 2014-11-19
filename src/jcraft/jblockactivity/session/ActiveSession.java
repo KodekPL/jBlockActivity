@@ -54,10 +54,12 @@ public class ActiveSession {
 
     public static ActiveSession getSession(String playerName) {
         ActiveSession session = sessions.get(playerName);
+
         if (session == null) {
             session = new ActiveSession();
             sessions.put(playerName, session);
         }
+
         return session;
     }
 

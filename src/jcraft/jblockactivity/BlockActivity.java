@@ -46,14 +46,14 @@ import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 
 public class BlockActivity extends JavaPlugin {
 
+    public final static String PREFIX = ChatColor.GOLD + "[" + ChatColor.WHITE + "jBlockActivity" + ChatColor.GOLD + "] " + ChatColor.WHITE;
+
+    private static BlockActivity plugin;
+
     public final static int LATEST_VERSION = 3;
     public final static int MIN_WE_BUILD = 3282;
 
-    public static File dataFolder;
-    public final static String prefix = ChatColor.GOLD + "[" + ChatColor.WHITE + "jBlockActivity" + ChatColor.GOLD + "] " + ChatColor.WHITE;
-
-    private static BlockActivity blockActivity;
-    private static CommandHandler cmdHandler;
+    public static File DATA_FOLDER;
 
     public static ActivityConfig config;
 
@@ -61,8 +61,11 @@ public class BlockActivity extends JavaPlugin {
     private static SQLConnectionPool connectionPool;
     private static boolean errorAtLoading = false, connected = true;
 
+    private static CommandHandler cmdHandler;
+
     private static Thread logExecuteThread;
     private static LogExecuteThread logExecuteRunnable;
+
     private static Thread actionExecuteThread;
     private static ActionExecuteThread actionExecuteRunnable;
 
@@ -73,28 +76,23 @@ public class BlockActivity extends JavaPlugin {
     public static LogTool logBlockTool;
     public final static Map<String, Long> lastToolUse = new HashMap<String, Long>();
 
-    public static BlockActivity getBlockActivity() {
-        return blockActivity;
-    }
-
-    public static CommandHandler getCommandHandler() {
-        return cmdHandler;
-    }
-
     public void onLoad() {
-        dataFolder = getDataFolder();
-        blockActivity = this;
+        DATA_FOLDER = getDataFolder();
+        plugin = this;
 
         config = new ActivityConfig();
         config.loadConfig();
 
         try {
             connectionPool = new SQLConnectionPool(sqlProfile);
+
             final Connection connection = getConnection();
+
             if (connection == null) {
                 errorAtLoading = true;
                 return;
             }
+
             createGlobalTables();
             connection.close();
         } catch (final NullPointerException ex) {
@@ -133,31 +131,40 @@ public class BlockActivity extends JavaPlugin {
         if (config.isWorldsLogging(LoggingType.blockplace)) {
             manager.registerEvents(new BlockPlaceListener(), this);
         }
+
         if (config.isWorldsLogging(LoggingType.blockbreak)) {
             manager.registerEvents(new BlockBreakListener(), this);
         }
+
         if (config.isWorldsLogging(LoggingType.inventoryaccess)) {
             manager.registerEvents(new InventoryAccessListener(), this);
         }
+
         if (config.isWorldsLogging(LoggingType.blockinteract) || config.isWorldsLogging(LoggingType.tramplefarmland)) {
             manager.registerEvents(new BlockInteractListener(), this);
         }
+
         if (config.isWorldsLogging(LoggingType.hangingbreak) || config.isWorldsLogging(LoggingType.hangingplace)
                 || config.isWorldsLogging(LoggingType.hanginginteract)) {
             manager.registerEvents(new HangingListener(), this);
         }
+
         if (config.isWorldsLogging(LoggingType.creaturekill)) {
             manager.registerEvents(new CreatureKillListener(), this);
         }
+
         if (config.isWorldsLogging(LoggingType.explosions)) {
             manager.registerEvents(new ExplosionListener(), this);
         }
+
         if (config.isWorldsLogging(LoggingType.blockburn)) {
             manager.registerEvents(new BlockBurnListener(), this);
         }
+
         if (config.isWorldsLogging(LoggingType.worldedit)) {
             hookWorldEditPlugin();
         }
+
         manager.registerEvents(new LogToolListener(), this);
     }
 
@@ -171,18 +178,29 @@ public class BlockActivity extends JavaPlugin {
                 e.printStackTrace();
             }
         }
+
         if (connectionPool != null) {
             connectionPool.close();
         }
     }
 
+    public static BlockActivity getBlockActivity() {
+        return plugin;
+    }
+
+    public static CommandHandler getCommandHandler() {
+        return cmdHandler;
+    }
+
     public Connection getConnection() {
         try {
             final Connection connection = connectionPool.getConnection();
+
             if (!connected) {
                 getLogger().info("MySQL connection rebuild...");
                 connected = true;
             }
+
             return connection;
         } catch (final Exception ex) {
             if (connected) {
@@ -197,12 +215,14 @@ public class BlockActivity extends JavaPlugin {
 
     public void hookWorldEditPlugin() {
         final Plugin worldEdit = getServer().getPluginManager().getPlugin("WorldEdit");
+
         if (worldEdit != null) {
             final String bukkitVersion = worldEdit.getDescription().getVersion();
             final Pattern pattern = Pattern.compile("[\\*.-]");
 
             if (!config.forceWorldEditPlugin) {
                 int build = -1;
+
                 try {
                     build = Integer.parseInt(pattern.split(bukkitVersion)[4]);
                 } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
@@ -229,6 +249,7 @@ public class BlockActivity extends JavaPlugin {
             }
 
             final WorldEditPlugin worldEditPlugin = (WorldEditPlugin) worldEdit;
+
             worldEditPlugin.getWorldEdit().getEventBus().register(new WorldEditListener());
             getLogger().log(Level.INFO, "Plugin WorldEdit was hooked correctly to jBlockActivity.");
         } else {
@@ -239,11 +260,14 @@ public class BlockActivity extends JavaPlugin {
 
     private void createGlobalTables() throws SQLException {
         final Connection connection = getConnection();
+
         if (connection == null) {
             throw new SQLException("No connection!");
         }
+
         final Statement state = connection.createStatement();
-        state.executeUpdate("CREATE TABLE IF NOT EXISTS `ba-players` (playerid MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT, playername varchar(32) NOT NULL, uuid varchar(32), primary key (playerid), UNIQUE (playername), UNIQUE (uuid));");
+
+        state.executeUpdate("CREATE TABLE IF NOT EXISTS `ba-players` (playerid MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT, playername varchar(32) NOT NULL, uuid varchar(32), primary key (playerid), KEY playername (playername), UNIQUE (uuid));");
         state.close();
         connection.close();
     }
@@ -252,13 +276,16 @@ public class BlockActivity extends JavaPlugin {
         if (actions == null) {
             return;
         }
+
         for (ActionLog action : actions) {
             if (action == null) {
                 continue;
             }
+
             if (config.callActionLogQueueEvent) {
                 ActionLogQueueEvent event = new ActionLogQueueEvent(action);
                 Bukkit.getPluginManager().callEvent(event);
+
                 if (!event.isCancelled()) {
                     logExecuteRunnable.queue.add(event.getActionLog());
                 }
@@ -277,11 +304,14 @@ public class BlockActivity extends JavaPlugin {
         Connection connection = null;
         Statement state = null;
         ResultSet result = null;
+
         try {
             connection = BlockActivity.getBlockActivity().getConnection();
+
             if (connection == null) {
                 return lookupLogs;
             }
+
             state = connection.createStatement();
             result = state.executeQuery(params.getQuery());
 
@@ -292,6 +322,7 @@ public class BlockActivity extends JavaPlugin {
                 while (result.next()) {
                     lookupLogs.add(logsFactory.getLookupCache(result).getActionLog());
                 }
+
                 return lookupLogs;
             } else {
                 return lookupLogs;
@@ -306,15 +337,18 @@ public class BlockActivity extends JavaPlugin {
                 if (result != null) {
                     result.close();
                 }
+
                 if (state != null) {
                     state.close();
                 }
+
                 if (connection != null) {
                     connection.close();
                 }
             } catch (SQLException e) {
             }
         }
+
         return lookupLogs;
     }
 
@@ -322,14 +356,17 @@ public class BlockActivity extends JavaPlugin {
         if (worldConfigs.containsKey(name)) {
             return worldConfigs.get(name);
         }
+
         return null;
     }
 
     public static String getWorldTableName(String name) {
         final WorldConfig config = getWorldConfig(name);
+
         if (config != null) {
             return config.tableName;
         }
+
         return null;
     }
 
@@ -337,22 +374,27 @@ public class BlockActivity extends JavaPlugin {
         if (worldConfigs.containsKey(name)) {
             return true;
         }
+
         return false;
     }
 
     public static LogTool getLogItem(MaterialData data) {
         if (logItemTool != null) {
             final MaterialData material = logItemTool.getItemMaterial();
+
             if (material.getItemTypeId() == data.getItemTypeId() && material.getData() == data.getData()) {
                 return logItemTool;
             }
         }
+
         if (logBlockTool != null) {
             final MaterialData material = logBlockTool.getItemMaterial();
+
             if (material.getItemTypeId() == data.getItemTypeId() && material.getData() == data.getData()) {
                 return logBlockTool;
             }
         }
+
         return null;
     }
 
@@ -369,6 +411,7 @@ public class BlockActivity extends JavaPlugin {
             config.hiddenPlayers.remove(name);
             return false;
         }
+
         config.hiddenPlayers.add(name);
         return true;
     }
@@ -377,10 +420,13 @@ public class BlockActivity extends JavaPlugin {
         if (identifier == null) {
             return "NULL";
         }
+
         final Integer id = BlockActivity.playerIds.get(identifier);
+
         if (id != null) {
             return id.toString();
         }
+
         return "(SELECT playerid FROM `ba-players` WHERE uuid = '" + identifier + "')";
     }
 

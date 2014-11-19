@@ -20,7 +20,7 @@ public class MaterialAliases {
     private static Map<MaterialData, String[]> MATERIAL_ALIASES = new LinkedHashMap<MaterialData, String[]>();
 
     public static void loadMaterialAliases() {
-        final File aliasesFile = new File(BlockActivity.dataFolder, "aliases.yml");
+        final File aliasesFile = new File(BlockActivity.DATA_FOLDER, "aliases.yml");
 
         if (!aliasesFile.exists()) {
             MATERIAL_ALIASES = new LinkedHashMap<MaterialData, String[]>();
@@ -35,6 +35,7 @@ public class MaterialAliases {
 
         for (String key : materials) {
             int id, data;
+
             try {
                 id = Integer.parseInt(key.split(";")[0]);
                 data = Integer.parseInt(key.split(";")[1]);
@@ -49,7 +50,7 @@ public class MaterialAliases {
     }
 
     public static void saveMaterialAliases() {
-        final File aliasesFile = new File(BlockActivity.dataFolder, "aliases.yml");
+        final File aliasesFile = new File(BlockActivity.DATA_FOLDER, "aliases.yml");
         final YamlConfiguration yml = YamlConfiguration.loadConfiguration(aliasesFile);
 
         addMaterialName(Material.WOOD, 1, "sprucewoodplanks", "sprucewood");

@@ -28,9 +28,11 @@ public class ImportQueryGen {
 
     private static boolean createLogBlockImport(String oldTable, String worldName) {
         final WorldConfig config = BlockActivity.getWorldConfig(worldName);
+
         if (config == null) {
             return false;
         }
+
         final List<String> query1 = new ArrayList<String>();
         final List<String> query2 = new ArrayList<String>();
 
@@ -74,9 +76,11 @@ public class ImportQueryGen {
 
     private static void saveFile(List<String> list, String fileName) {
         final FileWriter writer;
-        final File file = new File(BlockActivity.dataFolder, fileName + ".sql");
+        final File file = new File(BlockActivity.DATA_FOLDER, fileName + ".sql");
+
         try {
             writer = new FileWriter(file);
+
             for (String str : list) {
                 writer.write(str);
             }

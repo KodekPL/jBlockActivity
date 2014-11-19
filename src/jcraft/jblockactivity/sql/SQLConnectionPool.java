@@ -37,7 +37,9 @@ public class SQLConnectionPool implements Closeable {
     public SQLConnectionPool(SQLProfile profile) throws ClassNotFoundException {
         Class.forName("com.mysql.jdbc.Driver");
         this.profile = profile;
+
         connections = new Vector<JDCConnection>(BlockActivity.config.connectionsPoolSize);
+
         final ConnectionReaper reaper = new ConnectionReaper();
         new Thread(reaper, "jBlockLogSQLConnection").start();
     }
@@ -45,34 +47,46 @@ public class SQLConnectionPool implements Closeable {
     @Override
     public void close() {
         lock.lock();
+
         final Enumeration<JDCConnection> conns = connections.elements();
+
         while (conns.hasMoreElements()) {
             final JDCConnection conn = conns.nextElement();
             connections.remove(conn);
             conn.terminate();
         }
+
         lock.unlock();
     }
 
     public Connection getConnection() throws SQLException {
         lock.lock();
+
         try {
             final Enumeration<JDCConnection> conns = connections.elements();
+
             while (conns.hasMoreElements()) {
                 final JDCConnection conn = conns.nextElement();
+
                 if (conn.lease()) {
-                    if (conn.isValid()) return conn;
+                    if (conn.isValid()) {
+                        return conn;
+                    }
+
                     connections.remove(conn);
                     conn.terminate();
                 }
             }
             final JDCConnection connection = new JDCConnection(
                     DriverManager.getConnection(profile.getUrl(), profile.getUser(), profile.getPassword()));
+
             connection.lease();
+
             if (!connection.isValid()) {
                 connection.terminate();
                 throw new SQLException("Failed to validate a brand new connection.");
             }
+
             connections.add(connection);
             return connection;
         } finally {
@@ -82,14 +96,18 @@ public class SQLConnectionPool implements Closeable {
 
     private void reapConnections() {
         lock.lock();
+
         final long stale = System.currentTimeMillis() - BlockActivity.config.connectionLifeSpan;
         final Iterator<JDCConnection> itr = connections.iterator();
+
         while (itr.hasNext()) {
             final JDCConnection conn = itr.next();
+
             if (conn.inUse() && stale > conn.getLastUse() && !conn.isValid()) {
                 itr.remove();
             }
         }
+
         lock.unlock();
     }
 
@@ -101,6 +119,7 @@ public class SQLConnectionPool implements Closeable {
                     Thread.sleep(BlockActivity.config.connectionLifeSpan);
                 } catch (final InterruptedException e) {
                 }
+
                 reapConnections();
             }
         }
@@ -129,6 +148,7 @@ public class SQLConnectionPool implements Closeable {
         @Override
         public void close() {
             inUse = false;
+
             try {
                 if (!conn.getAutoCommit()) conn.setAutoCommit(true);
             } catch (final SQLException ex) {
@@ -410,7 +430,10 @@ public class SQLConnectionPool implements Closeable {
         }
 
         public synchronized boolean lease() {
-            if (inUse) return false;
+            if (inUse) {
+                return false;
+            }
+
             inUse = true;
             timestamp = System.currentTimeMillis();
             return true;

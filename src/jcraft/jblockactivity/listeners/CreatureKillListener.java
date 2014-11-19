@@ -23,6 +23,7 @@ public class CreatureKillListener implements Listener {
     public void onCreatureDeath(EntityDeathEvent event) {
         if (event.getEntity().getLastDamageCause() instanceof EntityDamageByEntityEvent) {
             final WorldConfig config = BlockActivity.getWorldConfig(event.getEntity().getWorld().getName());
+
             if (config == null || !config.isLogging(LoggingType.creaturekill)) {
                 return;
             }
@@ -52,6 +53,7 @@ public class CreatureKillListener implements Listener {
             final ExtraData extraData = EntityExtraData.getExtraData(event.getEntity());
             final EntityActionLog action = new EntityActionLog(LoggingType.creaturekill, killerName, killerUUID, location.getWorld(),
                     location.toVector(), entityType, 0, extraData);
+
             BlockActivity.sendActionLog(action);
         }
     }

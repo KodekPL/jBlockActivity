@@ -19,12 +19,15 @@ public class ExplosionListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockExplosion(EntityExplodeEvent event) {
         final WorldConfig config = BlockActivity.getWorldConfig(event.getLocation().getWorld().getName());
+
         if (config == null || !config.isLogging(LoggingType.explosions)) {
             return;
         }
 
         final String destroyerName = LoggingMaker.getLoggingMaker(event.getEntity(), true);
+
         UUID destroyerUUID;
+
         try {
             destroyerUUID = UUID.fromString(destroyerName);
         } catch (IllegalArgumentException e) {

@@ -27,6 +27,7 @@ public class LogToolListener implements Listener {
         }
 
         final Action action = event.getAction();
+
         if (action != Action.RIGHT_CLICK_BLOCK && action != Action.LEFT_CLICK_BLOCK) {
             return;
         }
@@ -40,6 +41,7 @@ public class LogToolListener implements Listener {
         }
 
         final ToolBehavior behavior = (action == Action.RIGHT_CLICK_BLOCK) ? tool.getRightClickBehavior() : tool.getLeftClickBehavior();
+
         if (behavior == ToolBehavior.NONE) {
             return;
         }
@@ -47,16 +49,17 @@ public class LogToolListener implements Listener {
         if (!player.hasPermission("ba.tool.nocooldown")) {
             if (BlockActivity.lastToolUse.containsKey(player.getName())) {
                 if (System.currentTimeMillis() - BlockActivity.lastToolUse.get(player.getName()) < BlockActivity.config.toolUseCooldown) {
-                    player.sendMessage(BlockActivity.prefix + ChatColor.RED + "You can't use lookup tool that often!");
+                    player.sendMessage(BlockActivity.PREFIX + ChatColor.RED + "You can't use lookup tool that often!");
                     event.setCancelled(true);
                     return;
                 }
             }
+
             BlockActivity.lastToolUse.put(player.getName(), System.currentTimeMillis());
         }
 
         if (!BlockActivity.isWorldLogged(player.getWorld().getName())) {
-            player.sendMessage(BlockActivity.prefix + ChatColor.RED + "This world is not currently logged.");
+            player.sendMessage(BlockActivity.PREFIX + ChatColor.RED + "This world is not currently logged.");
             event.setCancelled(true);
             return;
         }
@@ -69,6 +72,7 @@ public class LogToolListener implements Listener {
         } else {
             params.setLocation(block.getLocation());
         }
+
         BlockActivity.getCommandHandler().preExecuteCommand(new ActionRequest(ActionType.CMD_LOOKUP, player, params, false), true);
         event.setCancelled(true);
     }
@@ -77,6 +81,7 @@ public class LogToolListener implements Listener {
     public void onDropItem(ItemSpawnEvent event) {
         final MaterialData itemMaterial = event.getEntity().getItemStack().getData();
         final LogTool tool = BlockActivity.getLogItem(itemMaterial);
+
         if (tool != null) {
             event.getEntity().remove();
         }

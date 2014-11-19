@@ -17,6 +17,7 @@ public class BlockBurnListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockBurn(BlockBurnEvent event) {
         final WorldConfig config = BlockActivity.getWorldConfig(event.getBlock().getWorld().getName());
+
         if (config == null || !config.isLogging(LoggingType.blockburn)) {
             return;
         }

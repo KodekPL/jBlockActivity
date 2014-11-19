@@ -69,9 +69,11 @@ public class QueryParams {
         setParam(ParamType.NEED_PLAYER, true);
 
         final List<String> argsList = new ArrayList<String>(Arrays.asList(args));
+
         if (!isValidParam(argsList.get(0))) {
             argsList.remove(0);
         }
+
         this.prepareToolQuery = prepareToolQuery;
         parseArgs(sender, argsList.toArray(new String[argsList.size()]));
     }
@@ -94,9 +96,11 @@ public class QueryParams {
 
     public boolean getBoolean(ParamType type) {
         final Object object = getParam(type);
+
         if (object != null && object instanceof Boolean) {
             return (boolean) object;
         }
+
         return false;
     }
 
@@ -124,6 +128,7 @@ public class QueryParams {
     public String getLimit() {
         final Object limitObject = getParam(ParamType.LIMIT);
         final int limit = (limitObject == null) ? 0 : (int) limitObject;
+
         return (limit > 0) ? "LIMIT " + limit : "";
     }
 
@@ -137,31 +142,59 @@ public class QueryParams {
 
     public SummarizationMode getSumMode() {
         final Object object = getParam(ParamType.SUM_MODE);
+
         if (object == null) {
             return SummarizationMode.NONE;
         }
+
         return (SummarizationMode) object;
     }
 
     public String getQuery() {
         final StringBuilder builder = new StringBuilder();
+
         if (getSumMode() == SummarizationMode.NONE) {
             builder.append("SELECT ");
-            if (getBoolean(ParamType.NEED_TIME)) builder.append("time, ");
-            if (getBoolean(ParamType.NEED_LOG_TYPE)) builder.append("type, ");
-            if (getBoolean(ParamType.NEED_MATERIAL)) builder.append("old_id, new_id, ");
-            if (getBoolean(ParamType.NEED_DATA)) builder.append("old_data, new_data, ");
-            if (getBoolean(ParamType.NEED_PLAYER)) builder.append("playername, uuid, ");
-            if (getBoolean(ParamType.NEED_COORDS)) builder.append("x, y, z, ");
-            if (getBoolean(ParamType.NEED_EXTRA_DATA)) builder.append("data, ");
+
+            if (getBoolean(ParamType.NEED_TIME)) {
+                builder.append("time, ");
+            }
+
+            if (getBoolean(ParamType.NEED_LOG_TYPE)) {
+                builder.append("type, ");
+            }
+
+            if (getBoolean(ParamType.NEED_MATERIAL)) {
+                builder.append("old_id, new_id, ");
+            }
+
+            if (getBoolean(ParamType.NEED_DATA)) {
+                builder.append("old_data, new_data, ");
+            }
+
+            if (getBoolean(ParamType.NEED_PLAYER)) {
+                builder.append("playername, uuid, ");
+            }
+
+            if (getBoolean(ParamType.NEED_COORDS)) {
+                builder.append("x, y, z, ");
+            }
+
+            if (getBoolean(ParamType.NEED_EXTRA_DATA)) {
+                builder.append("data, ");
+            }
+
             builder.delete(builder.length() - 2, builder.length());
             builder.append(" FROM ").append(getTable()).append(' ');
+
             if (getBoolean(ParamType.NEED_PLAYER) || containsParam(ParamType.PLAYERS) || containsParam(ParamType.EXCLUDED_PLAYERS)) {
                 builder.append("INNER JOIN `ba-players` USING (playerid) ");
             }
+
             if (getBoolean(ParamType.NEED_EXTRA_DATA)) {
                 builder.append("LEFT JOIN " + getTable("-extra") + " USING (id) ");
             }
+
             builder.append(getWhere(containsParam(ParamType.LOG_TYPE) ? (LoggingType) getParam(ParamType.LOG_TYPE) : LoggingType.bothblocks));
             builder.append("ORDER BY time ").append(getOrder()).append(", id ").append(getOrder()).append(' ').append(getLimit());
         } else if (getSumMode() == SummarizationMode.BLOCKS) {
@@ -196,49 +229,66 @@ public class QueryParams {
 
     public String getWhere(LoggingType logType) {
         final StringBuilder builder = new StringBuilder("WHERE ");
+
         if (logType == LoggingType.all) {
             final Object object = getParam(ParamType.BLOCK_TYPES);
+
             if (object != null) {
                 final Set<MaterialData> blockTypes = (HashSet<MaterialData>) object;
+
                 builder.append('(');
+
                 for (MaterialData block : blockTypes) {
                     builder.append("((new_id = ").append(block.getItemTypeId());
+
                     if (block.getData() != -1) {
                         builder.append(" AND new_data = ").append(block.getData()).append(')');
                     } else {
                         builder.append(')');
                     }
+
                     builder.append(" OR (old_id = ").append(block.getItemTypeId());
+
                     if (block.getData() != -1) {
                         builder.append(" AND old_data = ").append(block.getData()).append(')');
                     } else {
                         builder.append(')');
                     }
+
                     builder.append(") OR ");
                 }
+
                 builder.delete(builder.length() - 4, builder.length());
                 builder.append(") AND ");
             }
         } else if (logType == LoggingType.bothblocks) {
             final Object object = getParam(ParamType.BLOCK_TYPES);
+
             if (object != null) {
                 final Set<MaterialData> blockTypes = (HashSet<MaterialData>) object;
+
                 builder.append('(');
+
                 for (final MaterialData block : blockTypes) {
                     builder.append("((new_id = ").append(block.getItemTypeId());
+
                     if (block.getData() != -1) {
                         builder.append(" AND new_data = ").append(block.getData()).append(')');
                     } else {
                         builder.append(')');
                     }
+
                     builder.append(" OR (old_id = ").append(block.getItemTypeId());
+
                     if (block.getData() != -1) {
                         builder.append(" AND old_data = ").append(block.getData()).append(')');
                     } else {
                         builder.append(')');
                     }
+
                     builder.append(") OR ");
                 }
+
                 builder.delete(builder.length() - 4, builder.length());
                 builder.append(" AND ").append("(type = ").append(LoggingType.blockplace.getId()).append(" OR type = ")
                         .append(LoggingType.blockbreak.getId()).append(")) AND ");
@@ -248,18 +298,24 @@ public class QueryParams {
             }
         } else if (logType == LoggingType.blockplace) {
             final Object object = getParam(ParamType.BLOCK_TYPES);
+
             if (object != null) {
                 final Set<MaterialData> blockTypes = (HashSet<MaterialData>) object;
+
                 builder.append('(');
+
                 for (final MaterialData block : blockTypes) {
                     builder.append("((new_id = ").append(block.getItemTypeId());
+
                     if (block.getData() != -1) {
                         builder.append(") AND new_data = ").append(block.getData());
                     } else {
                         builder.append(')');
                     }
+
                     builder.append(") OR ");
                 }
+
                 builder.delete(builder.length() - 4, builder.length());
                 builder.append(" AND ").append("type = ").append(LoggingType.blockplace.getId()).append(") AND ");
             } else {
@@ -267,18 +323,24 @@ public class QueryParams {
             }
         } else if (logType == LoggingType.blockbreak) {
             final Object object = getParam(ParamType.BLOCK_TYPES);
+
             if (object != null) {
                 final Set<MaterialData> blockTypes = (HashSet<MaterialData>) object;
+
                 builder.append('(');
+
                 for (final MaterialData block : blockTypes) {
                     builder.append("((old_id = ").append(block.getItemTypeId());
+
                     if (block.getData() != -1) {
                         builder.append(") AND old_data = ").append(block.getData());
                     } else {
                         builder.append(')');
                     }
+
                     builder.append(") OR ");
                 }
+
                 builder.delete(builder.length() - 4, builder.length());
                 builder.append(" AND ").append("type = ").append(LoggingType.blockbreak.getId()).append(") AND ");
             } else {
@@ -286,12 +348,16 @@ public class QueryParams {
             }
         } else if (logType == LoggingType.creaturekill) {
             final Object object = getParam(ParamType.ENTITY_TYPES);
+
             if (object != null) {
                 final Set<EntityType> entityTypes = (HashSet<EntityType>) object;
+
                 builder.append('(');
+
                 for (final EntityType entity : entityTypes) {
                     builder.append("((old_id = ").append(entity.getTypeId()).append(')').append(") OR ");
                 }
+
                 builder.delete(builder.length() - 4, builder.length());
                 builder.append(" AND ").append("type = ").append(LoggingType.creaturekill.getId()).append(") AND ");
             } else {
@@ -303,10 +369,10 @@ public class QueryParams {
         if (object != null) {
             final Location location = (Location) object;
             final int radius = (getParam(ParamType.AREA_RADIUS) == null) ? 0 : (int) getParam(ParamType.AREA_RADIUS);
+
             if (radius == 0) {
                 compileLocationQuery(builder, location.getBlockX(), location.getBlockY(), location.getBlockZ(), location.getBlockX(),
                         location.getBlockY(), location.getBlockZ());
-
             } else if (radius > 0) {
                 compileLocationQuery(builder, location.getBlockX() - radius + 1, location.getBlockY() - radius + 1,
                         location.getBlockZ() - radius + 1, location.getBlockX() + radius - 1, location.getBlockY() + radius - 1, location.getBlockZ()
@@ -317,34 +383,45 @@ public class QueryParams {
         if (getSumMode() != SummarizationMode.PLAYERS) {
             final Object playersObject = getParam(ParamType.PLAYERS);
             final Object exPlayersObject = getParam(ParamType.EXCLUDED_PLAYERS);
+
             if (playersObject != null) {
                 final Set<String> players = (HashSet<String>) playersObject;
+
                 builder.append('(');
+
                 for (final String playerName : players) {
                     builder.append("playername = '").append(playerName).append("' OR ");
                 }
+
                 builder.delete(builder.length() - 4, builder.length());
                 builder.append(") AND ");
             }
             if (exPlayersObject != null) {
                 final Set<String> exPlayers = (HashSet<String>) exPlayersObject;
+
                 builder.append('(');
+
                 for (final String playerName : exPlayers) {
                     builder.append("playername != '").append(playerName).append("' OR ");
                 }
+
                 builder.delete(builder.length() - 4, builder.length());
                 builder.append(") AND ");
             }
         }
 
         final Object sinceObject = getParam(ParamType.SINCE);
+
         if (sinceObject != null && ((int) sinceObject) > 0) {
             builder.append("time > date_sub(now(), INTERVAL ").append(((int) sinceObject)).append(" MINUTE) AND ");
         }
+
         final Object beforeObject = getParam(ParamType.BEFORE);
+
         if (beforeObject != null && ((int) beforeObject) > 0) {
             builder.append("time < date_sub(now(), INTERVAL ").append(((int) beforeObject)).append(" MINUTE) AND ");
         }
+
         if (builder.length() > 6) {
             builder.delete(builder.length() - 4, builder.length());
         } else {
@@ -373,9 +450,11 @@ public class QueryParams {
             builder.append(locValue).append(" >= ").append(min).append(" AND ").append(locValue).append(" <= ").append(max);
         } else {
             builder.append(locValue).append(" in (");
+
             for (int c = min; c < max; c++) {
                 builder.append(c).append(',');
             }
+
             builder.append(max);
             builder.append(')');
         }
@@ -387,6 +466,7 @@ public class QueryParams {
         }
 
         final Player player = (sender instanceof Player) ? (Player) sender : null;
+
         if (player != null && getWorld() == null) {
             setParam(ParamType.WORLD, player.getWorld());
         }
@@ -445,6 +525,7 @@ public class QueryParams {
             if (getWorld() == null) {
                 throw new IllegalArgumentException("No world specified!");
             }
+
             if (!BlockActivity.isWorldLogged(getWorld().getName())) {
                 throw new IllegalArgumentException("This world ('" + getWorld().getName() + "') isn't logged!");
             }
@@ -453,15 +534,19 @@ public class QueryParams {
 
     private void locationParam(String param, String[] values) throws IllegalArgumentException {
         final String[] vectors = (values.length == 1) ? values[0].split(",") : values;
+
         if (vectors.length != 3) {
             throw new IllegalArgumentException("Wrong count arguments for '" + param + "'");
         }
+
         for (final String vec : vectors) {
             if (!ActivityUtil.isInt(vec)) {
                 throw new IllegalArgumentException("Not a number: '" + vec + "'");
             }
         }
+
         final Location location = new Location(null, Integer.valueOf(vectors[0]), Integer.valueOf(vectors[1]), Integer.valueOf(vectors[2]));
+
         setParam(ParamType.LOCATION, location);
         setParam(ParamType.AREA_RADIUS, 0);
     }
@@ -470,10 +555,13 @@ public class QueryParams {
         if (values.length != 1) {
             throw new IllegalArgumentException("Wrong count of arguments for '" + param + "'");
         }
+
         final World world = Bukkit.getWorld(values[0].replace("\"", ""));
+
         if (world == null) {
             throw new IllegalArgumentException("There is no world called '" + values[0] + "'");
         }
+
         setParam(ParamType.WORLD, world);
     }
 
@@ -481,9 +569,11 @@ public class QueryParams {
         if (values.length != 1) {
             throw new IllegalArgumentException("Wrong count of arguments for '" + param + "'");
         }
+
         if (!ActivityUtil.isInt(values[0])) {
             throw new IllegalArgumentException("Not a number: '" + values[0] + "'");
         }
+
         setParam(ParamType.LIMIT, Integer.parseInt(values[0]));
     }
 
@@ -491,6 +581,7 @@ public class QueryParams {
         if (values.length != 1) {
             throw new IllegalArgumentException("No or wrong count of arguments for '" + param + "'");
         }
+
         if (values[0].charAt(0) == 'p') {
             setParam(ParamType.SUM_MODE, SummarizationMode.PLAYERS);
             setParam(ParamType.NEED_TIME, false);
@@ -524,17 +615,21 @@ public class QueryParams {
 
     private void beforeParam(String param, String[] values) throws IllegalArgumentException {
         final int before = (values.length > 0) ? ActivityUtil.parseTime(values) : BlockActivity.config.defaultTime;
+
         if (before == -1) {
             throw new IllegalArgumentException("Failed to parse time spec for '" + param + "'");
         }
+
         setParam(ParamType.BEFORE, before);
     }
 
     private void sinceParam(String param, String[] values) throws IllegalArgumentException {
         final int since = (values.length > 0) ? ActivityUtil.parseTime(values) : BlockActivity.config.defaultTime;
+
         if (since == -1) {
             throw new IllegalArgumentException("Failed to parse time spec for '" + param + "'");
         }
+
         setParam(ParamType.SINCE, since);
     }
 
@@ -542,8 +637,10 @@ public class QueryParams {
         if (player == null && !prepareToolQuery) {
             throw new IllegalArgumentException("You have to ba a player to use area!");
         }
+
         if (values.length == 0) {
             setParam(ParamType.AREA_RADIUS, BlockActivity.config.defaultDistance);
+
             if (!prepareToolQuery) {
                 setParam(ParamType.LOCATION, player.getLocation());
             }
@@ -551,7 +648,9 @@ public class QueryParams {
             if (!ActivityUtil.isInt(values[0])) {
                 throw new IllegalArgumentException("Not a number: '" + values[0] + "'");
             }
+
             setParam(ParamType.AREA_RADIUS, Integer.parseInt(values[0]));
+
             if (!prepareToolQuery) {
                 setParam(ParamType.LOCATION, player.getLocation());
             }
@@ -562,14 +661,19 @@ public class QueryParams {
         if (values.length < 1) {
             throw new IllegalArgumentException("No or wrong count of arguments for '" + param + "'");
         }
+
         final Set<EntityType> entityTypes = new HashSet<EntityType>();
+
         for (final String entityName : values) {
             final EntityType ent = ActivityUtil.matchEntity(entityName);
+
             if (ent == null) {
                 throw new IllegalArgumentException("No entity matching: '" + entityName + "'");
             }
+
             entityTypes.add(ent);
         }
+
         if (!entityTypes.isEmpty()) {
             setParam(ParamType.NEED_EXTRA_DATA, true);
             setParam(ParamType.LOG_TYPE, LoggingType.creaturekill);
@@ -581,20 +685,25 @@ public class QueryParams {
         if (values.length < 1) {
             throw new IllegalArgumentException("No or wrong count of arguments for '" + param + "'");
         }
+
         final Set<MaterialData> blockTypes = new HashSet<MaterialData>();
+
         for (final String blockName : values) {
             if (blockName.contains(":")) {
                 String[] splitter = blockName.split(":");
+
                 if (splitter.length > 2) {
                     throw new IllegalArgumentException("No material matching: '" + blockName + "'");
                 }
 
                 final MaterialData mat = MaterialAliases.matchMaterial(splitter[0]);
+
                 if (mat == null) {
                     throw new IllegalArgumentException("No material matching: '" + blockName + "'");
                 }
 
                 final int data;
+
                 try {
                     data = Integer.parseInt(splitter[1]);
                 } catch (NumberFormatException e) {
@@ -609,18 +718,23 @@ public class QueryParams {
                 if (BlocksUtil.hasExtraData(mat.getItemType())) {
                     setParam(ParamType.NEED_EXTRA_DATA, true);
                 }
+
                 blockTypes.add(mat);
             } else {
                 final MaterialData mat = MaterialAliases.matchMaterial(blockName);
+
                 if (mat == null) {
                     throw new IllegalArgumentException("No material matching: '" + blockName + "'");
                 }
+
                 if (BlocksUtil.hasExtraData(mat.getItemType())) {
                     setParam(ParamType.NEED_EXTRA_DATA, true);
                 }
+
                 blockTypes.add(mat);
             }
         }
+
         if (!blockTypes.isEmpty()) {
             setParam(ParamType.BLOCK_TYPES, blockTypes);
         }
@@ -630,18 +744,23 @@ public class QueryParams {
         if (values.length < 1) {
             throw new IllegalArgumentException("No or wrong count of arguments for '" + param + "'");
         }
+
         final Set<String> players = new HashSet<String>();
         final Set<String> excludedPlayers = new HashSet<String>();
+
         for (String playerName : values) {
             if (playerName.length() > 0) {
                 String name;
+
                 if (playerName.charAt(0) == '"' && playerName.charAt(playerName.length() - 1) == '"') {
                     name = playerName.replaceAll("[^a-zA-Z0-9_]", "");
                 } else {
                     final List<Player> matches = Bukkit.matchPlayer(playerName);
+
                     if (matches.size() > 1) {
                         throw new IllegalArgumentException("Inaccurate playername '" + playerName + "'");
                     }
+
                     name = (matches.size() == 1) ? matches.get(0).getName() : playerName.replaceAll("[^a-zA-Z0-9_]", "");
                 }
 
@@ -652,10 +771,12 @@ public class QueryParams {
                 }
             }
         }
+
         if (!players.isEmpty()) {
             setParam(ParamType.PLAYERS, players);
             setParam(ParamType.NEED_PLAYER, true);
         }
+
         if (!excludedPlayers.isEmpty()) {
             setParam(ParamType.EXCLUDED_PLAYERS, excludedPlayers);
             setParam(ParamType.NEED_PLAYER, true);
@@ -664,16 +785,21 @@ public class QueryParams {
 
     private String[] getValues(String[] args, int offset) {
         int i;
+
         for (i = offset; i < args.length; i++) {
             if (isValidParam(args[i])) {
                 break;
             }
         }
+
         if (i == offset) {
             return new String[0];
         }
+
         final List<String> values = new ArrayList<String>();
+
         StringBuilder value = new StringBuilder();
+
         for (int j = offset; j < i; j++) {
             if (args[j].charAt(0) == '\"' || value.length() != 0) {
                 if (!args[j].endsWith("\"")) {
@@ -695,6 +821,7 @@ public class QueryParams {
                 values.add(args[j]);
             }
         }
+
         return values.toArray(new String[values.size()]);
     }
 

@@ -81,6 +81,7 @@ public abstract class ActionLog {
         if (playerName.startsWith("BA_")) {
             return playerName.replace("BA_", ChatColor.GREEN.toString());
         }
+
         return ChatColor.GOLD + getPlayerName();
     }
 
@@ -113,10 +114,13 @@ public abstract class ActionLog {
         if (location == null) {
             return null;
         }
+
         final World world = getWorld();
+
         if (world == null) {
             return null;
         }
+
         return location.toLocation(world);
     }
 

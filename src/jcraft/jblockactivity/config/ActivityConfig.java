@@ -30,7 +30,7 @@ public class ActivityConfig {
     public static YamlConfiguration CONFIG;
 
     public ActivityConfig() {
-        CONFIG_FILE = new File(BlockActivity.dataFolder, "config.yml");
+        CONFIG_FILE = new File(BlockActivity.DATA_FOLDER, "config.yml");
         CONFIG = YamlConfiguration.loadConfiguration(CONFIG_FILE);
     }
 
@@ -141,6 +141,7 @@ public class ActivityConfig {
         toolUseCooldown = CONFIG.getLong("tools.useCooldown");
 
         final int itemId = CONFIG.getInt("tools.itemtool.itemId");
+
         if (itemId != 0) {
             final byte itemData = (byte) CONFIG.getInt("tools.itemtool.itemData");
             final QueryParams params = new QueryParams(Bukkit.getConsoleSender(), CONFIG.getString("tools.itemtool.params").split(" "), true);
@@ -151,6 +152,7 @@ public class ActivityConfig {
         }
 
         final int blockId = CONFIG.getInt("tools.blocktool.itemId");
+
         if (blockId != 0) {
             final byte itemData = (byte) CONFIG.getInt("tools.blocktool.itemData");
             final QueryParams params = new QueryParams(Bukkit.getConsoleSender(), CONFIG.getString("tools.blocktool.params").split(" "), true);
@@ -161,6 +163,7 @@ public class ActivityConfig {
         }
 
         hiddenPlayers = new HashSet<String>();
+
         for (final String name : CONFIG.getStringList("logging.hiddenPlayers")) {
             hiddenPlayers.add(name.trim());
         }
@@ -183,14 +186,17 @@ public class ActivityConfig {
 
     public void loadWorldConfig() {
         final List<String> sWorlds = CONFIG.getStringList("loggedWorlds");
+
         for (String worldName : sWorlds) {
             WorldConfig worldConfig = new WorldConfig(worldName);
+
             if (worldConfig.loadConfig()) {
                 BlockActivity.worldConfigs.put(worldName, worldConfig);
             }
         }
 
         loggingTypes = new boolean[LoggingType.values().length];
+
         for (WorldConfig worldConfig : BlockActivity.worldConfigs.values()) {
             for (LoggingType type : LoggingType.values()) {
                 if (worldConfig.isLogging(type)) {
@@ -207,9 +213,11 @@ public class ActivityConfig {
 
     private String getStringIncludingInts(String key) {
         String str = CONFIG.getString(key);
+
         if (str == null) {
             str = String.valueOf(CONFIG.getInt(key));
         }
+
         return str;
     }
 

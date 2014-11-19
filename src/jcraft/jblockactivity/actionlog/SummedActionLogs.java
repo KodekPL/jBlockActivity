@@ -52,6 +52,7 @@ public class SummedActionLogs {
 
         public SummedEntityActionLogs(ResultSet result, QueryParams params, float spaceFactor) throws SQLException {
             final Object object = result.getObject(1);
+
             group = (object instanceof Integer) ? MaterialNames.entityName((int) object) : (String) object;
             kills = result.getInt(2);
             this.spaceFactor = spaceFactor;

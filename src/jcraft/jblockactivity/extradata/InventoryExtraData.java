@@ -38,10 +38,12 @@ public class InventoryExtraData implements ExtraData {
     public ItemStack[] getContent() {
         if (content == null && sInv != null) {
             content = new ItemStack[sInv.length];
+
             for (int i = 0; i < sInv.length; i++) {
                 content[i] = sInv[i].getItem();
             }
         }
+
         return content;
     }
 
@@ -49,7 +51,9 @@ public class InventoryExtraData implements ExtraData {
         if (sInv != null || content == null) {
             return;
         }
+
         this.sInv = new SimpleItemStack[content.length];
+
         for (int i = 0; i < content.length; i++) {
             sInv[i] = new SimpleItemStack(content[i], config);
         }
@@ -57,6 +61,7 @@ public class InventoryExtraData implements ExtraData {
 
     public SimpleItemStack[] getSimpleContent() {
         fillData();
+
         return sInv;
     }
 
@@ -67,8 +72,10 @@ public class InventoryExtraData implements ExtraData {
     @Override
     public String getData() {
         fillData();
+
         this.config = null;
         this.content = null;
+
         return ActivityUtil.toJson(this);
     }
 
@@ -83,20 +90,25 @@ public class InventoryExtraData implements ExtraData {
         final ItemStack[] newContent = invExtraData.getContent();
 
         final int l1 = content.length, l2 = newContent.length;
+
         int c1 = 0, c2 = 0;
+
         while (c1 < l1 || c2 < l2) {
             if (c1 >= l1) {
                 diff.add(newContent[c2]);
                 c2++;
                 continue;
             }
+
             if (c2 >= l2) {
                 content[c1].setAmount(content[c1].getAmount() * -1);
                 diff.add(content[c1]);
                 c1++;
                 continue;
             }
+
             final int comp = comperator.compare(content[c1], newContent[c2], config.isLoggingExtraItemMeta());
+
             if (comp < 0) {
                 content[c1].setAmount(content[c1].getAmount() * -1);
                 diff.add(content[c1]);
@@ -114,6 +126,7 @@ public class InventoryExtraData implements ExtraData {
                 c2++;
             }
         }
+
         if (diff.isEmpty()) {
             content = null;
         } else {
@@ -123,33 +136,52 @@ public class InventoryExtraData implements ExtraData {
 
     public class ItemStackComparator implements Comparator<ItemStack> {
 
-        public int compare(ItemStack a, ItemStack b) {
-            return compare(a, b, false);
+        public int compare(ItemStack item1, ItemStack item2) {
+            return compare(item1, item2, false);
         }
 
-        public int compare(ItemStack a, ItemStack b, boolean checkMeta) {
-            final int aType = a.getTypeId(), bType = b.getTypeId();
-            if (aType < bType) return -1;
-            if (aType > bType) return 1;
-            final short aData = a.getDurability(), bData = b.getDurability();
-            if (aData < bData) return -1;
-            if (aData > bData) return 1;
+        public int compare(ItemStack item1, ItemStack item2, boolean checkMeta) {
+            final int aType = item1.getTypeId(), bType = item2.getTypeId();
+
+            if (aType < bType) {
+                return -1;
+            }
+
+            if (aType > bType) {
+                return 1;
+            }
+
+            final short aData = item1.getDurability(), bData = item2.getDurability();
+
+            if (aData < bData) {
+                return -1;
+            }
+
+            if (aData > bData) {
+                return 1;
+            }
+
             if (checkMeta) {
-                final int aMeta = a.getItemMeta().hashCode(), bMeta = b.getItemMeta().hashCode();
+                final int aMeta = item1.getItemMeta().hashCode(), bMeta = item2.getItemMeta().hashCode();
+
                 if (aMeta < bMeta) return -1;
                 if (aMeta > bMeta) return 1;
             }
+
             return 0;
         }
     }
 
     private ItemStack[] compressInventory(ItemStack[] content) {
         final ArrayList<ItemStack> compressed = new ArrayList<ItemStack>();
+
         for (final ItemStack iItem : content) {
             if (iItem == null) {
                 continue;
             }
+
             boolean found = false;
+
             for (final ItemStack cItem : compressed) {
                 if (isSimilar(iItem, cItem, config.isLoggingExtraItemMeta())) {
                     cItem.setAmount(cItem.getAmount() + iItem.getAmount());
@@ -157,14 +189,18 @@ public class InventoryExtraData implements ExtraData {
                     break;
                 }
             }
+
             if (!found) {
                 ItemStack compressedItem = new ItemStack(iItem.getType(), iItem.getAmount(), iItem.getDurability());
+
                 if (iItem.hasItemMeta()) {
                     compressedItem.setItemMeta(iItem.getItemMeta());
                 }
+
                 compressed.add(compressedItem);
             }
         }
+
         Collections.sort(compressed, new ItemStackComparator());
         return compressed.toArray(new ItemStack[compressed.size()]);
     }

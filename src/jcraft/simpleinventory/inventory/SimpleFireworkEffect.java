@@ -14,13 +14,17 @@ public class SimpleFireworkEffect {
         F2 = effect.hasFlicker();
         T5 = effect.hasTrail();
         C2 = new Integer[effect.getColors().size()];
+
         for (int i = 0; i < effect.getColors().size(); i++) {
             C2[i] = effect.getColors().get(i).asRGB();
         }
+
         C3 = new Integer[effect.getFadeColors().size()];
+
         for (int i = 0; i < effect.getFadeColors().size(); i++) {
             C3[i] = effect.getFadeColors().get(i).asRGB();
         }
+
         T4 = effect.getType().name();
     }
 
@@ -42,9 +46,11 @@ public class SimpleFireworkEffect {
 
     public org.bukkit.Color[] getBukkitColors() {
         final org.bukkit.Color[] colors = new org.bukkit.Color[getColors().length];
+
         for (int i = 0; i < colors.length; i++) {
             colors[i] = org.bukkit.Color.fromRGB(this.C2[i]);
         }
+
         return colors;
     }
 
@@ -54,9 +60,11 @@ public class SimpleFireworkEffect {
 
     public org.bukkit.Color[] getBukkitFadeColors() {
         final org.bukkit.Color[] fadeColors = new org.bukkit.Color[getFadeColors().length];
+
         for (int i = 0; i < fadeColors.length; i++) {
             fadeColors[i] = org.bukkit.Color.fromRGB(this.C3[i]);
         }
+
         return fadeColors;
     }
 

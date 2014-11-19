@@ -1,6 +1,7 @@
 package jcraft.jblockactivity.editor;
 
 public enum BlockEditorResult {
+
     BLOCK_CREATED,
     BLOCK_REMOVED,
     BLOCK_BLACKLIST,
@@ -12,4 +13,5 @@ public enum BlockEditorResult {
     NO_ENTITY_ACTION,
     NO_HANGING_ACTION,
     NO_INVENTORY_ACTION;
+
 }
