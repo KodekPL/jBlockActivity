@@ -13,7 +13,6 @@ import jcraft.jblockactivity.LoggingType;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
@@ -590,7 +589,7 @@ public class QueryParams {
                     throw new IllegalArgumentException("No material matching: '" + blockName + "'");
                 }
 
-                final Material mat = Material.matchMaterial(splitter[0]);
+                final MaterialData mat = MaterialAliases.matchMaterial(splitter[0]);
                 if (mat == null) {
                     throw new IllegalArgumentException("No material matching: '" + blockName + "'");
                 }
@@ -605,19 +604,21 @@ public class QueryParams {
                     throw new IllegalArgumentException("Data type out of range (0-255): '" + data + "'");
                 }
 
-                if (BlocksUtil.hasExtraData(mat)) {
+                mat.setData((byte) data);
+
+                if (BlocksUtil.hasExtraData(mat.getItemType())) {
                     setParam(ParamType.NEED_EXTRA_DATA, true);
                 }
-                blockTypes.add(new MaterialData(mat, (byte) data));
+                blockTypes.add(mat);
             } else {
-                final Material mat = Material.matchMaterial(blockName);
+                final MaterialData mat = MaterialAliases.matchMaterial(blockName);
                 if (mat == null) {
                     throw new IllegalArgumentException("No material matching: '" + blockName + "'");
                 }
-                if (BlocksUtil.hasExtraData(mat)) {
+                if (BlocksUtil.hasExtraData(mat.getItemType())) {
                     setParam(ParamType.NEED_EXTRA_DATA, true);
                 }
-                blockTypes.add(new MaterialData(mat, (byte) -1));
+                blockTypes.add(mat);
             }
         }
         if (!blockTypes.isEmpty()) {

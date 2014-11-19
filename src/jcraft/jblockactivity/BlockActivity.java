@@ -31,6 +31,7 @@ import jcraft.jblockactivity.session.LookupCacheFactory;
 import jcraft.jblockactivity.sql.SQLConnectionPool;
 import jcraft.jblockactivity.sql.SQLProfile;
 import jcraft.jblockactivity.tool.LogTool;
+import jcraft.jblockactivity.utils.MaterialAliases;
 import jcraft.jblockactivity.utils.MaterialNames;
 import jcraft.jblockactivity.utils.QueryParams;
 
@@ -126,6 +127,7 @@ public class BlockActivity extends JavaPlugin {
         actionExecuteThread.start();
 
         MaterialNames.loadMaterialNames();
+        MaterialAliases.loadMaterialAliases();
 
         final PluginManager manager = getServer().getPluginManager();
         if (config.isWorldsLogging(LoggingType.blockplace)) {
