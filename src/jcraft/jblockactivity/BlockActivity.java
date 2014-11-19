@@ -31,6 +31,7 @@ import jcraft.jblockactivity.session.LookupCacheFactory;
 import jcraft.jblockactivity.sql.SQLConnectionPool;
 import jcraft.jblockactivity.sql.SQLProfile;
 import jcraft.jblockactivity.tool.LogTool;
+import jcraft.jblockactivity.utils.MaterialNames;
 import jcraft.jblockactivity.utils.QueryParams;
 
 import org.bukkit.Bukkit;
@@ -123,6 +124,8 @@ public class BlockActivity extends JavaPlugin {
         actionExecuteRunnable = new ActionExecuteThread(cmdHandler);
         actionExecuteThread = new Thread(actionExecuteRunnable, "jBlockActionExecutor");
         actionExecuteThread.start();
+
+        MaterialNames.loadMaterialNames();
 
         final PluginManager manager = getServer().getPluginManager();
         if (config.isWorldsLogging(LoggingType.blockplace)) {
