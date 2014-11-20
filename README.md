@@ -5,7 +5,7 @@ Simple and customizable plugin to log changes of:
 - Block breaking (with blocks nbt data)
 - Block placing
 - Block interaction (levers, buttons, etc.)
-- Block explosion (levers, buttons, etc.)
+- Block explosion
 - Trampling of farmland
 - Inventory access (opening containers)
 - Inventory items movement with item nbt data (taking items and putting items in containers)
